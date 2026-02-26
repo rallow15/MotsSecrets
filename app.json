@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Mots Secrets",
+    "slug": "mots-secrets",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0a0a0a"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.tonnom.motssecrets"
+    },
+    "android": {
+      "package": "com.tonnom.motssecrets"
+    },
+    "plugins": [
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "48733e48-da2e-4a1b-9992-d48be013b8e0"
+      }
+    }
+  }
+}
