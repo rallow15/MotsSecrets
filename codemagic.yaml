@@ -10,12 +10,28 @@ workflows:
         script: npm install
       - name: Expo prebuild
         script: npx expo prebuild --platform ios
-      - name: Build iOS
+      - name: Build IPA
         script: |
           xcodebuild -workspace ios/MotsSecrets.xcworkspace \
             -scheme MotsSecrets \
             -configuration Release \
-            -sdk iphonesimulator \
-            -derivedDataPath build
+            -sdk iphoneos \
+            -archivePath $CM_BUILD_DIR/MotsSecrets.xcarchive \
+            archive CODE_SIGNING_ALLOWED=NO
+          xcodebuild -exportArchive \
+            -archivePath $CM_BUILD_DIR/MotsSecrets.xcarchive \
+            -exportPath $CM_BUILD_DIR/ipa \
+            -exportOptionsPlist /dev/stdin <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>ad-hoc</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+          </dict>
+          </plist>
+          EOF
     artifacts:
-      - build/**/*.app
+      - $CM_BUILD_DIR/ipa/*.ipa
