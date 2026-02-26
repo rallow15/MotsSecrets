@@ -10,7 +10,10 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.tonnom.motssecrets"
+      "bundleIdentifier": "com.tonnom.motssecrets",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.tonnom.motssecrets"
