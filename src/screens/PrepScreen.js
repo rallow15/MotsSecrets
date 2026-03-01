@@ -5,8 +5,25 @@ import {
 import { colors } from '../theme';
 
 export default function PrepScreen({ navigation, route }) {
-  const { numPlayers, assignments, currentPlayer, takenNumbers, playerNumbers } = route.params;
+  const { numPlayers, misterWhite, misterMode, assignments, currentPlayer, takenNumbers, playerNumbers } = route.params;
   const pulseAnim = useRef(new Animated.Value(1)).current;
+function PrepScreenWrapper({ navigation, route }) {
+const { numPlayers, misterWhite, misterMode } = route.params;
+const assignments = route.params.assignments ?? generateAssignments(numPlayers, misterWhite, misterMode);
+const takenNumbers = route.params.takenNumbers ?? [];
+const playerNumbers = route.params.playerNumbers ?? new Array(numPlayers).fill(null);
+const currentPlayer = route.params.currentPlayer ?? 0;
+
+return (
+<PrepScreen
+navigation={navigation}
+route={{
+...route,
+params: { numPlayers, misterWhite, misterMode, assignments, takenNumbers, playerNumbers, currentPlayer },
+}}
+/>
+);
+}
 
   useEffect(() => {
     Animated.loop(
@@ -23,8 +40,8 @@ export default function PrepScreen({ navigation, route }) {
       activeOpacity={1}
       onPress={() =>
         navigation.navigate('Reveal', {
-          numPlayers, assignments, currentPlayer, takenNumbers, playerNumbers,
-        })
+numPlayers, misterWhite, misterMode, assignments, currentPlayer, takenNumbers, playerNumbers,
+})
       }
     >
       <Text style={styles.playerBadge}>JOUEUR {currentPlayer + 1}</Text>

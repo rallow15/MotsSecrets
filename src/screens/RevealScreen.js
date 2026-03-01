@@ -30,7 +30,9 @@ playerNumbers: newNumbers,
   return (
     <View style={styles.container}>
       <Text style={styles.playerBadge}>JOUEUR {currentPlayer + 1}</Text>
-      <Text style={styles.word}>{word}</Text>
+      <Text style={styles.word}>
+{assignments[currentPlayer].isMisterWhite ? 'MISTER WHITE' : assignments[currentPlayer].word}
+</Text>
       <Text style={styles.hint}>Mémorise ton mot</Text>
 
       <Text style={styles.pickLabel}>CHOISIS TON CHIFFRE SECRET</Text>
