@@ -15,7 +15,7 @@ newNumbers[currentPlayer] = n;
 
 const next = currentPlayer + 1;
 if (next >= numPlayers) {
-navigation.navigate('Result', { numPlayers, playerNumbers: newNumbers });
+navigation.navigate('Result', { numPlayers, playerNumbers: newNumbers, assignments });
 } else {
 navigation.navigate('Prep', {
 numPlayers,
