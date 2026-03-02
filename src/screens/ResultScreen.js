@@ -3,8 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Animated, ScrollView } from '
 import { colors } from '../theme';
 
 export default function ResultScreen({ navigation, route }) {
-const { numPlayers, playerNumbers, assignments } = route.params;
-const mystery = Math.floor(Math.random() * 10) + 1;
+const { numPlayers, playerNumbers, assignments, mystery } = route.params;
 const [showRecap, setShowRecap] = useState(false);
 const popAnim = useRef(new Animated.Value(0)).current;
 
@@ -131,6 +130,7 @@ color: colors.bg,
 letterSpacing: 2,
 },
 recapTitle: {
+  marginTop: 60,
 fontFamily: 'BebasNeue',
 fontSize: 42,
 color: colors.accent,

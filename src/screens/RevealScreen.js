@@ -15,7 +15,8 @@ newNumbers[currentPlayer] = n;
 
 const next = currentPlayer + 1;
 if (next >= numPlayers) {
-navigation.navigate('Result', { numPlayers, playerNumbers: newNumbers, assignments });
+const mysteryNumber = Math.floor(Math.random() * 10) + 1;
+navigation.navigate('Result', { numPlayers, playerNumbers: newNumbers, assignments, mystery: mysteryNumber });
 } else {
 navigation.navigate('Prep', {
 numPlayers,
