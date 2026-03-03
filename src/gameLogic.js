@@ -213,31 +213,33 @@ export const WORD_DB = [
 { a: "Intrus", b: "Majorité" },
 ];
 
-export function generateAssignments(numPlayers, misterWhite = false, misterMode = 'with_intrus') {
-console.log('>>> misterWhite:', misterWhite, '| misterMode:', misterMode);
-const pair = WORD_DB[Math.floor(Math.random() * WORD_DB.length)];
-const majorityWord = Math.random() < 0.5 ? pair.a : pair.b;
-const intrusWord = majorityWord === pair.a ? pair.b : pair.a;
+export function generateAssignments(numPlayers, misterWhite = false, misterMode = 'with_intrus', customDB = null) {
+  const db = customDB ?? WORD_DB;
+  
+  if (db.length === 0) {
+    return Array.from({ length: numPlayers }, () => ({
+      word: '???',
+      isMisterWhite: false,
+    }));
+  }
 
-// Index Mister White aléatoire
-const misterIndex = misterWhite ? Math.floor(Math.random() * numPlayers) : -1;
+  const pair = db[Math.floor(Math.random() * db.length)];
+  const majorityWord = Math.random() < 0.5 ? pair.a : pair.b;
+  const intrusWord = majorityWord === pair.a ? pair.b : pair.a;
 
-// Intrus seulement si mode with_intrus OU si misterWhite désactivé
-let intrusIndex = -1;
-if (misterMode === 'with_intrus' || !misterWhite) {
-do {
-intrusIndex = Math.floor(Math.random() * numPlayers);
-} while (intrusIndex === misterIndex);
-}
+  const misterIndex = misterWhite ? Math.floor(Math.random() * (numPlayers - 1)) + 1 : -1;
 
-return Array.from({ length: numPlayers }, (_, i) => ({
-word: i === misterIndex
-? null
-: i === intrusIndex
-? intrusWord
-: majorityWord,
-isMisterWhite: i === misterIndex,
-}));
+  let intrusIndex = -1;
+  if (misterMode === 'with_intrus' || !misterWhite) {
+    do {
+      intrusIndex = Math.floor(Math.random() * numPlayers);
+    } while (intrusIndex === misterIndex);
+  }
+
+  return Array.from({ length: numPlayers }, (_, i) => ({
+    word: i === misterIndex ? null : i === intrusIndex ? intrusWord : majorityWord,
+    isMisterWhite: i === misterIndex,
+  }));
 }
 
 export function findWinner(playerNumbers, mystery) {

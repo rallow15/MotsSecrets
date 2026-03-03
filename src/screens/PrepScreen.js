@@ -8,8 +8,16 @@ export default function PrepScreen({ navigation, route }) {
   const { numPlayers, misterWhite, misterMode, assignments, currentPlayer, takenNumbers, playerNumbers } = route.params;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 function PrepScreenWrapper({ navigation, route }) {
-const { numPlayers, misterWhite, misterMode } = route.params;
-const assignments = route.params.assignments ?? generateAssignments(numPlayers, misterWhite, misterMode);
+const { numPlayers, misterWhite, misterMode, wordMode } = route.params;
+
+const getDB = () => {
+  if (wordMode === 'custom') return customWords;
+  if (wordMode === 'both') return [...WORD_DB, ...customWords];
+  return null;
+};
+
+const assignments = route.params.assignments ?? 
+  generateAssignments(numPlayers, misterWhite === true, misterMode || 'with_intrus', getDB());
 const takenNumbers = route.params.takenNumbers ?? [];
 const playerNumbers = route.params.playerNumbers ?? new Array(numPlayers).fill(null);
 const currentPlayer = route.params.currentPlayer ?? 0;

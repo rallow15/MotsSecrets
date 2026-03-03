@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
-
+import CustomWordsScreen from './src/screens/CustomWordsScreen';
 import MenuScreen from './src/screens/MenuScreen';
 import PrepScreen from './src/screens/PrepScreen';
 import RevealScreen from './src/screens/RevealScreen';
@@ -13,7 +13,7 @@ import BlackScreen from './src/screens/BlackScreen';
 import ResultScreen from './src/screens/ResultScreen';
 import { generateAssignments } from './src/gameLogic';
 import { colors } from './src/theme';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const Stack = createNativeStackNavigator();
 
 const BANNER_TOP_ID = __DEV__
@@ -63,7 +63,17 @@ SpaceMono: require('./assets/fonts/SpaceMono-Regular.ttf'),
 });
 
 const [adKey, setAdKey] = useState(0);
+const [customWords, setCustomWords] = useState([]);
 
+useEffect(() => {
+  const loadCustomWords = async () => {
+    try {
+      const saved = await AsyncStorage.getItem('custom_words');
+      if (saved) setCustomWords(JSON.parse(saved));
+    } catch (e) {}
+  };
+  loadCustomWords();
+}, []);
 useEffect(() => {
 const interval = setInterval(() => {
 setAdKey(k => k + 1);
@@ -108,6 +118,7 @@ contentStyle: { backgroundColor: colors.bg },
 <Stack.Screen name="Reveal" component={RevealScreen} />
 <Stack.Screen name="Black" component={BlackScreen} />
 <Stack.Screen name="Result" component={ResultScreen} />
+<Stack.Screen name="CustomWords" component={CustomWordsScreen} />
 </Stack.Navigator>
 </NavigationContainer>
 </View>

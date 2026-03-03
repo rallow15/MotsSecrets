@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Switch } from 'react-native';
 import { colors } from '../theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+export default function MenuScreen({ navigation }) {const [wordMode, setWordMode] = useState('all'); // 'all', 'custom', 'both'
 
-export default function MenuScreen({ navigation }) {
+useEffect(() => {
+  // Vérifie si l'utilisateur a des mots perso
+}, []);
 const [numPlayers, setNumPlayers] = useState(4);
 const [misterWhite, setMisterWhite] = useState(false);
 const [misterMode, setMisterMode] = useState('with_intrus'); // 'solo' ou 'with_intrus'
 
 const handleStart = () => {
-navigation.navigate('Prep', { numPlayers, misterWhite, misterMode });
+navigation.navigate('Prep', { numPlayers, misterWhite, misterMode, wordMode });
 };
 
 return (
@@ -19,6 +23,49 @@ return (
 <View style={styles.selectorRow}>
 <Text style={styles.selectorLabel}>JOUEURS</Text>
 <View style={styles.counterRow}>
+<View style={styles.misterRow}>
+  <View style={styles.misterInfo}>
+    <Text style={styles.misterLabel}>MOTS UTILISÉS</Text>
+  </View>
+</View>
+
+<View style={styles.modeContainer}>
+  <TouchableOpacity
+    style={[styles.modeBtn, wordMode === 'all' && styles.modeBtnActive]}
+    onPress={() => setWordMode('all')}
+  >
+    <Text style={[styles.modeBtnTitle, wordMode === 'all' && styles.modeBtnTitleActive]}>
+      MOTS DU JEU
+    </Text>
+    <Text style={styles.modeBtnDesc}>Les 200+ mots inclus</Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={[styles.modeBtn, wordMode === 'custom' && styles.modeBtnActive]}
+    onPress={() => setWordMode('custom')}
+  >
+    <Text style={[styles.modeBtnTitle, wordMode === 'custom' && styles.modeBtnTitleActive]}>
+      MES MOTS
+    </Text>
+    <Text style={styles.modeBtnDesc}>Seulement tes mots perso</Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={[styles.modeBtn, wordMode === 'both' && styles.modeBtnActive]}
+    onPress={() => setWordMode('both')}
+  >
+    <Text style={[styles.modeBtnTitle, wordMode === 'both' && styles.modeBtnTitleActive]}>
+      LES DEUX
+    </Text>
+    <Text style={styles.modeBtnDesc}>Mélange tout</Text>
+  </TouchableOpacity>
+</View>
+<TouchableOpacity 
+  style={styles.myWordsBtn} 
+  onPress={() => navigation.navigate('CustomWords')}
+>
+  <Text style={styles.myWordsBtnText}>MES MOTS</Text>
+</TouchableOpacity>
 <TouchableOpacity
 style={styles.counterBtn}
 onPress={() => setNumPlayers(p => Math.max(3, p - 1))}
@@ -81,7 +128,20 @@ MISTER WHITE + INTRUS
 );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create({myWordsBtn: {
+  borderWidth: 1,
+  borderColor: colors.accent,
+  paddingHorizontal: 48,
+  paddingVertical: 14,
+  marginBottom: 12,
+},
+myWordsBtnText: {
+  fontFamily: 'BebasNeue',
+  fontSize: 22,
+  color: colors.accent,
+  letterSpacing: 2,
+  textAlign: 'center',
+},
 container: {
 flex: 1,
 backgroundColor: colors.bg,
