@@ -1,11 +1,13 @@
 export const colors = {
-  bg: '#0a0a0a',
+  bg: '#080808',
+  surface: '#0f0f0f',
   accent: '#e8ff47',
-  danger: '#ff4757',
-  text: '#f0f0f0',
-  dim: '#333333',
-  dimDark: '#1a1a1a',
-  gray: '#666666',
+  danger: '#ff4444',
+  text: '#ffffff',
+  dim: '#2a2a2a',
+  border: '#1e1e1e',
+  gray: '#aaaaaa',
+  muted: '#666666',
   black: '#000000',
 };
 

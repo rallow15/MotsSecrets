@@ -1,63 +1,80 @@
-import React, { useEffect, useRef } from 'react';
-import {
-  View, Text, TouchableOpacity, StyleSheet, Animated,
-} from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, TextInput, Keyboard } from 'react-native';
 import { colors } from '../theme';
+import { t } from '../i18n';
 
 export default function PrepScreen({ navigation, route }) {
-  const { numPlayers, misterWhite, misterMode, assignments, currentPlayer, takenNumbers, playerNumbers } = route.params;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-function PrepScreenWrapper({ navigation, route }) {
-const { numPlayers, misterWhite, misterMode } = route.params;
-const assignments = route.params.assignments ?? generateAssignments(numPlayers, misterWhite, misterMode);
-const takenNumbers = route.params.takenNumbers ?? [];
-const playerNumbers = route.params.playerNumbers ?? new Array(numPlayers).fill(null);
-const currentPlayer = route.params.currentPlayer ?? 0;
+  const { numPlayers, assignments, currentPlayer, takenNumbers, playerNumbers, playerNames } = route.params;
 
-return (
-<PrepScreen
-navigation={navigation}
-route={{
-...route,
-params: { numPlayers, misterWhite, misterMode, assignments, takenNumbers, playerNumbers, currentPlayer },
-}}
-/>
-);
-}
+  // Pré-remplir avec le nom existant s'il y en a un (cas rejouer)
+  const existingName = Array.isArray(playerNames) ? (playerNames[currentPlayer] || '') : '';
+
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const [name, setName] = useState(existingName);
+  const inputRef = useRef(null);
 
   useEffect(() => {
+    // Mettre le nom existant, pas vide
+    const n = Array.isArray(playerNames) ? (playerNames[currentPlayer] || '') : '';
+    setName(n);
+
     Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 0.4, duration: 750, useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 1, duration: 750, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 0.3, duration: 800, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1,   duration: 800, useNativeDriver: true }),
       ])
     ).start();
-  }, []);
+
+    // Focus seulement si pas de nom pré-rempli
+    if (!n) {
+      setTimeout(() => inputRef.current?.focus(), 200);
+    }
+  }, [currentPlayer]);
+
+  const handleTap = () => {
+    Keyboard.dismiss();
+    const newNames = Array.isArray(playerNames)
+      ? [...playerNames]
+      : new Array(numPlayers).fill('');
+    // Garder le nom tapé ou l'existant si l'input est vide
+    newNames[currentPlayer] = name.trim().toUpperCase() || existingName;
+
+    navigation.navigate('Reveal', {
+      numPlayers, assignments, currentPlayer,
+      takenNumbers, playerNumbers,
+      playerNames: newNames,
+    });
+  };
 
   return (
-    <TouchableOpacity
-      style={styles.container}
-      activeOpacity={1}
-      onPress={() =>
-        navigation.navigate('Reveal', {
-numPlayers, misterWhite, misterMode, assignments, currentPlayer, takenNumbers, playerNumbers,
-})
-      }
-    >
-      <Text style={styles.playerBadge}>JOUEUR {currentPlayer + 1}</Text>
-      <Text style={styles.prompt}>Touche{'\n'}l'écran</Text>
+    <TouchableOpacity style={styles.container} activeOpacity={1} onPress={handleTap}>
+      <Text style={styles.playerBadge}>{t('playerLabel', currentPlayer + 1)}</Text>
 
-      {/* Progress dots */}
+      <View style={styles.nameWrap} onStartShouldSetResponder={() => true}>
+        <TextInput
+          ref={inputRef}
+          style={styles.nameInput}
+          value={name}
+          onChangeText={setName}
+          onSubmitEditing={handleTap}
+          placeholder={t('namePlaceholder')}
+          placeholderTextColor="#333"
+          maxLength={14}
+          autoCorrect={false}
+          returnKeyType="done"
+        />
+        <Text style={styles.nameHint}>{t('nameHint')}</Text>
+      </View>
+
+      <Text style={styles.prompt}>{t('touchScreen')}</Text>
+
       <View style={styles.dotsRow}>
         {Array.from({ length: numPlayers }, (_, i) => (
-          <View
-            key={i}
-            style={[
-              styles.dot,
-              i < currentPlayer && styles.dotDone,
-              i === currentPlayer && styles.dotCurrent,
-            ]}
-          />
+          <View key={i} style={[
+            styles.dot,
+            i < currentPlayer  && styles.dotDone,
+            i === currentPlayer && styles.dotCurrent,
+          ]} />
         ))}
       </View>
 
@@ -67,42 +84,15 @@ numPlayers, misterWhite, misterMode, assignments, currentPlayer, takenNumbers, p
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-  },
-  playerBadge: {
-    fontFamily: 'BebasNeue',
-    fontSize: 28,
-    color: colors.gray,
-    letterSpacing: 6,
-    marginBottom: 16,
-  },
-  prompt: {
-    fontFamily: 'BebasNeue',
-    fontSize: 58,
-    color: colors.text,
-    textAlign: 'center',
-    lineHeight: 60,
-    marginBottom: 32,
-  },
-  dotsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 32,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.dim,
-  },
-  dotDone: { backgroundColor: colors.accent },
+  container:  { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, gap: 12 },
+  playerBadge:{ fontFamily: 'SpaceMono', fontSize: 11, color: colors.gray, letterSpacing: 5 },
+  nameWrap:   { width: '100%', alignItems: 'center', gap: 6 },
+  nameInput:  { fontFamily: 'BebasNeue', fontSize: 44, color: colors.text, borderBottomWidth: 2, borderBottomColor: '#444', textAlign: 'center', width: '80%', paddingVertical: 4, letterSpacing: 2 },
+  nameHint:   { fontFamily: 'SpaceMono', fontSize: 8, color: colors.muted, letterSpacing: 2 },
+  prompt:     { fontFamily: 'BebasNeue', fontSize: 72, color: colors.text, textAlign: 'center', lineHeight: 66 },
+  dotsRow:    { flexDirection: 'row', gap: 8 },
+  dot:        { width: 8, height: 8, borderRadius: 4, backgroundColor: '#222' },
+  dotDone:    { backgroundColor: colors.accent },
   dotCurrent: { backgroundColor: colors.text },
-  tapIcon: {
-    fontSize: 48,
-  },
+  tapIcon:    { fontSize: 48 },
 });

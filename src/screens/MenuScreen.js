@@ -1,215 +1,216 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Switch } from 'react-native';
+import {
+  View, Text, TouchableOpacity, StyleSheet, StatusBar,
+  ScrollView, Modal,
+} from 'react-native';
 import { colors } from '../theme';
+import { t, getLang, setLang } from '../i18n';
 
-export default function MenuScreen({ navigation }) {
-const [numPlayers, setNumPlayers] = useState(4);
-const [misterWhite, setMisterWhite] = useState(false);
-const [misterMode, setMisterMode] = useState('with_intrus'); // 'solo' ou 'with_intrus'
-
-const handleStart = () => {
-navigation.navigate('Prep', { numPlayers, misterWhite, misterMode });
+const RULES = {
+  fr: [
+    {
+      mode: 'NORMAL',
+      desc: '1 intrus parmi tous les joueurs.',
+      steps: [
+        'Chaque joueur voit un mot secret. Un seul joueur voit un mot différent : c\'est l\'intrus.',
+        'Tout le monde discute sans révéler son mot.',
+        'À la fin, les joueurs votent pour désigner l\'intrus.',
+        'Si l\'intrus est trouvé, les autres gagnent. Sinon, l\'intrus gagne.',
+      ],
+    },
+    {
+      mode: 'MISTER WHITE',
+      desc: '1 joueur n\'a aucun mot.',
+      steps: [
+        'Un joueur (Mister White) ne voit rien. Les autres voient le même mot.',
+        'Mister White doit bluffer pour ne pas être découvert.',
+        'Si Mister White est voté, il peut tenter de deviner le mot secret.',
+        'S\'il devine, il gagne quand même !',
+      ],
+    },
+    {
+      mode: 'MISTER WHITE + INTRUS',
+      desc: '1 sans mot + 1 intrus + les autres.',
+      steps: [
+        'Mister White n\'a pas de mot. L\'intrus a un mot différent. Les autres ont le même mot.',
+        'Trois camps : les innocents, l\'intrus, Mister White.',
+        'Les innocents doivent trouver les deux imposteurs.',
+        'L\'intrus et Mister White peuvent s\'allier ou se trahir.',
+      ],
+    },
+  ],
+  en: [
+    {
+      mode: 'NORMAL',
+      desc: '1 impostor among all players.',
+      steps: [
+        'Each player sees a secret word. One player sees a different word: the impostor.',
+        'Everyone discusses without revealing their word.',
+        'Players vote to identify the impostor.',
+        'If the impostor is found, the others win. Otherwise the impostor wins.',
+      ],
+    },
+    {
+      mode: 'MISTER WHITE',
+      desc: '1 player has no word.',
+      steps: [
+        'One player (Mister White) sees nothing. The others see the same word.',
+        'Mister White must bluff to avoid being caught.',
+        'If Mister White is voted out, they can try to guess the secret word.',
+        'If they guess correctly, they still win!',
+      ],
+    },
+    {
+      mode: 'MISTER WHITE + IMPOSTOR',
+      desc: '1 no word + 1 impostor + others.',
+      steps: [
+        'Mister White has no word. The impostor has a different word. Others share the same word.',
+        'Three sides: innocents, impostor, Mister White.',
+        'Innocents must find both impostors.',
+        'The impostor and Mister White can ally or betray each other.',
+      ],
+    },
+  ],
 };
 
-return (
-<View style={styles.container}>
-<Text style={styles.title}>MOTS{'\n'}SECRETS</Text>
-<Text style={styles.subtitle}>TROUVEZ L'INTRUS PARMI VOUS</Text>
+export default function MenuScreen({ navigation }) {
+  const [numPlayers, setNumPlayers] = useState(4);
+  const [gameMode,   setGameMode]   = useState(0);
+  const [lang,       setLangState]  = useState(getLang());
+  const [showRules,  setShowRules]  = useState(false);
 
-<View style={styles.selectorRow}>
-<Text style={styles.selectorLabel}>JOUEURS</Text>
-<View style={styles.counterRow}>
-<TouchableOpacity
-style={styles.counterBtn}
-onPress={() => setNumPlayers(p => Math.max(3, p - 1))}
->
-<Text style={styles.counterBtnText}>−</Text>
-</TouchableOpacity>
-<Text style={styles.counterVal}>{numPlayers}</Text>
-<TouchableOpacity
-style={styles.counterBtn}
-onPress={() => setNumPlayers(p => Math.min(7, p + 1))}
->
-<Text style={styles.counterBtnText}>+</Text>
-</TouchableOpacity>
-</View>
-</View>
+  const toggleLang = () => {
+    const next = lang === 'fr' ? 'en' : 'fr';
+    setLang(next);
+    setLangState(next);
+  };
 
-{/* Bouton Mister White */}
-<View style={styles.misterRow}>
-<View style={styles.misterInfo}>
-<Text style={styles.misterLabel}>MISTER WHITE</Text>
-<Text style={styles.misterDesc}>Un joueur ne reçoit aucun mot</Text>
-</View>
-<Switch
-value={misterWhite}
-onValueChange={setMisterWhite}
-trackColor={{ false: '#333', true: colors.accent }}
-thumbColor={misterWhite ? '#0a0a0a' : '#888'}
-/>
-</View>
+  const MODES = [
+    { id: 0, titleKey: 'mode0title', descKey: 'mode0desc' },
+    { id: 1, titleKey: 'mode1title', descKey: 'mode1desc' },
+    { id: 2, titleKey: 'mode2title', descKey: 'mode2desc' },
+  ];
 
-{/* Choix du mode Mister White */}
-{misterWhite && (
-<View style={styles.modeContainer}>
-<TouchableOpacity
-style={[styles.modeBtn, misterMode === 'solo' && styles.modeBtnActive]}
-onPress={() => setMisterMode('solo')}
->
-<Text style={[styles.modeBtnTitle, misterMode === 'solo' && styles.modeBtnTitleActive]}>
-MISTER WHITE SEUL
-</Text>
-<Text style={styles.modeBtnDesc}>1 sans mot vs tous avec le même mot</Text>
-</TouchableOpacity>
+  const handleStart = () => {
+    navigation.navigate('Prep', { numPlayers, gameMode });
+  };
 
-<TouchableOpacity
-style={[styles.modeBtn, misterMode === 'with_intrus' && styles.modeBtnActive]}
-onPress={() => setMisterMode('with_intrus')}
->
-<Text style={[styles.modeBtnTitle, misterMode === 'with_intrus' && styles.modeBtnTitleActive]}>
-MISTER WHITE + INTRUS
-</Text>
-<Text style={styles.modeBtnDesc}>1 sans mot + 1 intrus + les autres</Text>
-</TouchableOpacity>
-</View>
-)}
+  const rules = RULES[lang];
 
-<TouchableOpacity style={styles.startBtn} onPress={handleStart}>
-<Text style={styles.startBtnText}>DÉMARRER</Text>
-</TouchableOpacity>
-</View>
-);
+  return (
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.bg }}
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+    >
+      <StatusBar barStyle="light-content" backgroundColor={colors.bg} />
+
+      {/* Ligne haut : règles + langue */}
+      <View style={styles.topRow}>
+        <TouchableOpacity style={styles.rulesBtn} onPress={() => setShowRules(true)}>
+          <Text style={styles.rulesBtnText}>{lang === 'fr' ? '📖 RÈGLES' : '📖 RULES'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.langBtn} onPress={toggleLang}>
+          <Text style={styles.langBtnText}>{lang === 'fr' ? '🇬🇧 EN' : '🇫🇷 FR'}</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Text style={styles.title}>MOTS{'\n'}SECRETS</Text>
+      <Text style={styles.subtitle}>{t('subtitle')}</Text>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>{t('players')}</Text>
+        <View style={styles.counterRow}>
+          <TouchableOpacity style={styles.counterBtn} onPress={() => setNumPlayers(p => Math.max(3, p - 1))}>
+            <Text style={styles.counterBtnText}>−</Text>
+          </TouchableOpacity>
+          <Text style={styles.counterVal}>{numPlayers}</Text>
+          <TouchableOpacity style={styles.counterBtn} onPress={() => setNumPlayers(p => Math.min(7, p + 1))}>
+            <Text style={styles.counterBtnText}>+</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>{t('gameMode')}</Text>
+        {MODES.map(mode => (
+          <TouchableOpacity
+            key={mode.id}
+            style={[styles.modeBtn, gameMode === mode.id && styles.modeBtnActive]}
+            onPress={() => setGameMode(mode.id)}
+          >
+            <Text style={[styles.modeTitle, gameMode === mode.id && styles.modeTitleActive]}>
+              {t(mode.titleKey)}
+            </Text>
+            <Text style={styles.modeDesc}>{t(mode.descKey)}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <TouchableOpacity style={styles.startBtn} onPress={handleStart}>
+        <Text style={styles.startBtnText}>{t('start')}</Text>
+      </TouchableOpacity>
+
+      {/* ── MODAL RÈGLES ── */}
+      <Modal visible={showRules} animationType="slide" transparent={false} onRequestClose={() => setShowRules(false)}>
+        <ScrollView style={styles.modalBg} contentContainerStyle={styles.modalContent}>
+          <Text style={styles.modalTitle}>{lang === 'fr' ? 'RÈGLES DU JEU' : 'GAME RULES'}</Text>
+
+          {rules.map((r, i) => (
+            <View key={i} style={styles.ruleBlock}>
+              <Text style={styles.ruleMode}>{r.mode}</Text>
+              <Text style={styles.ruleDesc}>{r.desc}</Text>
+              {r.steps.map((s, j) => (
+                <View key={j} style={styles.ruleStepRow}>
+                  <Text style={styles.ruleNum}>{j + 1}.</Text>
+                  <Text style={styles.ruleStep}>{s}</Text>
+                </View>
+              ))}
+            </View>
+          ))}
+
+          <TouchableOpacity style={styles.closeBtn} onPress={() => setShowRules(false)}>
+            <Text style={styles.closeBtnText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </Modal>
+    </ScrollView>
+  );
 }
 
 const styles = StyleSheet.create({
-container: {
-flex: 1,
-backgroundColor: colors.bg,
-alignItems: 'center',
-justifyContent: 'center',
-paddingHorizontal: 32,
-},
-title: {
-fontFamily: 'BebasNeue',
-fontSize: 65,
-color: colors.accent,
-textAlign: 'center',
-lineHeight: 62,
-letterSpacing: 2,
-marginBottom: 8,
-},
-subtitle: {
-fontFamily: 'SpaceMono',
-fontSize: 10,
-color: colors.gray,
-letterSpacing: 4,
-marginBottom: 40,
-textAlign: 'center',
-},
-selectorRow: {
-flexDirection: 'row',
-alignItems: 'center',
-gap: 20,
-marginBottom: 28,
-},
-selectorLabel: {
-fontFamily: 'SpaceMono',
-fontSize: 11,
-color: '#888',
-letterSpacing: 3,
-},
-counterRow: {
-flexDirection: 'row',
-alignItems: 'center',
-gap: 16,
-},
-counterBtn: {
-width: 40,
-height: 40,
-borderWidth: 1,
-borderColor: colors.dim,
-alignItems: 'center',
-justifyContent: 'center',
-},
-counterBtnText: {
-color: colors.text,
-fontSize: 22,
-fontFamily: 'SpaceMono',
-lineHeight: 26,
-},
-counterVal: {
-fontFamily: 'BebasNeue',
-fontSize: 48,
-color: colors.accent,
-minWidth: 32,
-textAlign: 'center',
-},
-misterRow: {
-flexDirection: 'row',
-alignItems: 'center',
-justifyContent: 'space-between',
-width: '100%',
-borderWidth: 1,
-borderColor: colors.dim,
-padding: 16,
-marginBottom: 16,
-},
-misterInfo: {
-flex: 1,
-},
-misterLabel: {
-fontFamily: 'BebasNeue',
-fontSize: 22,
-color: colors.accent,
-letterSpacing: 2,
-},
-misterDesc: {
-fontFamily: 'SpaceMono',
-fontSize: 9,
-color: '#666',
-letterSpacing: 1,
-marginTop: 2,
-},
-modeContainer: {
-width: '100%',
-gap: 10,
-marginBottom: 16,
-},
-modeBtn: {
-borderWidth: 1,
-borderColor: '#333',
-padding: 14,
-width: '100%',
-},
-modeBtnActive: {
-borderColor: colors.accent,
-backgroundColor: '#1a1a00',
-},
-modeBtnTitle: {
-fontFamily: 'BebasNeue',
-fontSize: 18,
-color: '#666',
-letterSpacing: 2,
-},
-modeBtnTitleActive: {
-color: colors.accent,
-},
-modeBtnDesc: {
-fontFamily: 'SpaceMono',
-fontSize: 9,
-color: '#555',
-marginTop: 2,
-},
-startBtn: {
-backgroundColor: colors.accent,
-paddingHorizontal: 48,
-paddingVertical: 16,
-marginTop: 8,
-},
-startBtnText: {
-fontFamily: 'BebasNeue',
-fontSize: 26,
-color: colors.bg,
-letterSpacing: 2,
-},
+  container:      { backgroundColor: colors.bg, alignItems: 'center', paddingHorizontal: 28, paddingTop: 60, paddingBottom: 40 },
+  topRow:         { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginBottom: 16 },
+  rulesBtn:       { borderWidth: 1, borderColor: '#333', paddingHorizontal: 14, paddingVertical: 7 },
+  rulesBtnText:   { fontFamily: 'SpaceMono', fontSize: 11, color: colors.gray, letterSpacing: 2 },
+  langBtn:        { borderWidth: 1, borderColor: '#333', paddingHorizontal: 14, paddingVertical: 7 },
+  langBtnText:    { fontFamily: 'SpaceMono', fontSize: 11, color: colors.accent, letterSpacing: 2 },
+  title:          { fontFamily: 'BebasNeue', fontSize: 100, color: colors.accent, textAlign: 'center', lineHeight: 88, letterSpacing: 2, marginBottom: 6 },
+  subtitle:       { fontFamily: 'SpaceMono', fontSize: 9, color: colors.gray, letterSpacing: 4, marginBottom: 40, textAlign: 'center' },
+  section:        { width: '100%', marginBottom: 24 },
+  sectionLabel:   { fontFamily: 'SpaceMono', fontSize: 9, color: colors.gray, letterSpacing: 3, marginBottom: 10 },
+  counterRow:     { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  counterBtn:     { width: 46, height: 46, borderWidth: 1, borderColor: '#333', alignItems: 'center', justifyContent: 'center' },
+  counterBtnText: { color: colors.text, fontSize: 22, fontFamily: 'SpaceMono', lineHeight: 26 },
+  counterVal:     { fontFamily: 'BebasNeue', fontSize: 56, color: colors.text, minWidth: 40, textAlign: 'center' },
+  modeBtn:        { borderWidth: 1, borderColor: '#1e1e1e', padding: 14, marginBottom: 8 },
+  modeBtnActive:  { borderColor: colors.accent, backgroundColor: 'rgba(232,255,71,0.05)' },
+  modeTitle:      { fontFamily: 'BebasNeue', fontSize: 18, color: colors.muted, letterSpacing: 1, marginBottom: 2 },
+  modeTitleActive:{ color: colors.accent },
+  modeDesc:       { fontFamily: 'SpaceMono', fontSize: 9, color: colors.gray, letterSpacing: 1 },
+  startBtn:       { width: '100%', backgroundColor: colors.accent, paddingVertical: 18, alignItems: 'center', marginTop: 8 },
+  startBtnText:   { fontFamily: 'BebasNeue', fontSize: 26, color: colors.bg, letterSpacing: 3 },
+
+  // Modal règles
+  modalBg:        { flex: 1, backgroundColor: colors.bg },
+  modalContent:   { paddingHorizontal: 24, paddingTop: 60, paddingBottom: 50 },
+  modalTitle:     { fontFamily: 'BebasNeue', fontSize: 52, color: colors.accent, letterSpacing: 2, textAlign: 'center', marginBottom: 32 },
+  ruleBlock:      { marginBottom: 32, borderWidth: 1, borderColor: '#1e1e1e', padding: 18 },
+  ruleMode:       { fontFamily: 'BebasNeue', fontSize: 24, color: colors.accent, letterSpacing: 2, marginBottom: 4 },
+  ruleDesc:       { fontFamily: 'SpaceMono', fontSize: 9, color: colors.gray, letterSpacing: 1, marginBottom: 14 },
+  ruleStepRow:    { flexDirection: 'row', gap: 10, marginBottom: 8 },
+  ruleNum:        { fontFamily: 'BebasNeue', fontSize: 18, color: colors.accent, width: 20 },
+  ruleStep:       { fontFamily: 'SpaceMono', fontSize: 10, color: colors.text, letterSpacing: 1, flex: 1, lineHeight: 18 },
+  closeBtn:       { backgroundColor: colors.accent, paddingVertical: 18, alignItems: 'center', marginTop: 10 },
+  closeBtnText:   { fontFamily: 'BebasNeue', fontSize: 24, color: colors.bg, letterSpacing: 3 },
 });

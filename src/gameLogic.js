@@ -1,256 +1,47 @@
-export const WORD_DB = [
-{ a: "McDonald's", b: "Burger King" },
-{ a: "Football", b: "Basketball" },
-{ a: "Snapchat", b: "Instagram" },
-{ a: "TikTok", b: "YouTube" },
-{ a: "iPhone", b: "Android" },
-{ a: "Netflix", b: "Amazon Prime" },
-{ a: "PlayStation", b: "Xbox" },
-{ a: "Coca-Cola", b: "Pepsi" },
-{ a: "Nike", b: "Adidas" },
-{ a: "Marvel", b: "DC Comics" },
-{ a: "Harry Potter", b: "Star Wars" },
-{ a: "Uber", b: "Taxi" },
-{ a: "KFC", b: "Domino's Pizza" },
-{ a: "Spotify", b: "Apple Music" },
-{ a: "Pomme", b: "Poire" },
-{ a: "Chien", b: "Loup" },
-{ a: "Océan", b: "Mer" },
-{ a: "WhatsApp", b: "Telegram" },
-{ a: "Twitter/X", b: "Facebook" },
-{ a: "Google", b: "Bing" },
-{ a: "Windows", b: "Mac" },
-{ a: "Twitch", b: "YouTube Gaming" },
-{ a: "Discord", b: "Slack" },
-{ a: "Amazon", b: "eBay" },
-{ a: "Tesla", b: "Ferrari" },
-{ a: "GTA", b: "Minecraft" },
-{ a: "Fortnite", b: "PUBG" },
-{ a: "Call of Duty", b: "Battlefield" },
-{ a: "FIFA", b: "NBA 2K" },
-{ a: "Pizza", b: "Burger" },
-{ a: "Sushi", b: "Tacos" },
-{ a: "Nutella", b: "Peanut Butter" },
-{ a: "Café", b: "Thé" },
-{ a: "Bière", b: "Vin" },
-{ a: "Chocolat", b: "Bonbons" },
-{ a: "Glace", b: "Gâteau" },
-{ a: "Fanta", b: "Sprite" },
-{ a: "Red Bull", b: "Monster" },
-{ a: "Oreo", b: "Chips Ahoy" },
-{ a: "Pain", b: "Riz" },
-{ a: "Poulet", b: "Bœuf" },
-{ a: "Tennis", b: "Badminton" },
-{ a: "Natation", b: "Course à pied" },
-{ a: "Boxe", b: "MMA" },
-{ a: "Ski", b: "Snowboard" },
-{ a: "Vélo", b: "Trottinette" },
-{ a: "Rugby", b: "Foot américain" },
-{ a: "Golf", b: "Pétanque" },
-{ a: "Yoga", b: "Pilates" },
-{ a: "Chat", b: "Chien" },
-{ a: "Lion", b: "Tigre" },
-{ a: "Dauphin", b: "Requin" },
-{ a: "Aigle", b: "Faucon" },
-{ a: "Lapin", b: "Hamster" },
-{ a: "Serpent", b: "Lézard" },
-{ a: "Montagne", b: "Plage" },
-{ a: "Forêt", b: "Désert" },
-{ a: "Paris", b: "Londres" },
-{ a: "New York", b: "Los Angeles" },
-{ a: "Japon", b: "Corée du Sud" },
-{ a: "Espagne", b: "Italie" },
-{ a: "Cinéma", b: "Théâtre" },
-{ a: "Roman", b: "BD" },
-{ a: "Rap", b: "Rock" },
-{ a: "Jazz", b: "Classique" },
-{ a: "Astérix", b: "Tintin" },
-{ a: "Batman", b: "Spider-Man" },
-{ a: "Dracula", b: "Frankenstein" },
-{ a: "Goku", b: "Vegeta" },
-{ a: "Ace", b: "Sabo" },
-{ a: "Nami", b: "Robin" },
-{ a: "Ronaldo", b: "Messi" },
-{ a: "Ronaldinho", b: "Zidane" },
-{ a: "Benzema", b: "Lewandowski" },
-{ a: "Salah", b: "Mané" },
-{ a: "Real Madrid", b: "Barcelone" },
-{ a: "Maison", b: "Appartement" },
-{ a: "Cuisine", b: "Salon" },
-{ a: "Canapé", b: "Fauteuil" },
-{ a: "Baignoire", b: "Douche" },
-{ a: "Rideau", b: "Volet" },
-{ a: "Escalier", b: "Ascenseur" },
-{ a: "Jardin", b: "Terrasse" },
-{ a: "Garage", b: "Cave" },
-{ a: "Téléphone fixe", b: "Smartphone" },
-{ a: "SMS", b: "Appel" },
-{ a: "Chargeur", b: "Batterie" },
-{ a: "Écouteurs", b: "Casque" },
-{ a: "Tablette", b: "Ordinateur" },
-{ a: "Cristiano Ronaldo", b: "Lionel Messi" },
-{ a: "Michael Jordan", b: "LeBron James" },
-{ a: "Muhammad Ali", b: "Mike Tyson" },
-{ a: "Croissant", b: "Pain au chocolat" },
-{ a: "Crêpe", b: "Gaufre" },
-{ a: "Eau plate", b: "Eau gazeuse" },
-{ a: "Cheval", b: "Zèbre" },
-{ a: "Pokémon", b: "Digimon" },
-{ a: "Maroc", b: "Algérie" },
-{ a: "Miami", b: "New York" },
-{ a: "Booba", b: "Kaaris" },
-{ a: "Tupac", b: "Biggie" },
-{ a: "Fast & Furious", b: "Mission Impossible" },
-{ a: "Voiture", b: "Moto" },
-{ a: "Hôtel", b: "Airbnb" },
-{ a: "Médecin", b: "Infirmier" },
-{ a: "Avocat", b: "Juge" },
-{ a: "Roi", b: "Président" },
-{ a: "Luffy", b: "Blackbeard" },
-{ a: "Naruto", b: "Itachi" },
-{ a: "Kakashi", b: "Jiraiya" },
-{ a: "Sanji", b: "Usopp" },
-{ a: "Kaido", b: "Big Mom" },
-{ a: "Doflamingo", b: "Crocodile" },
-{ a: "Trafalgar Law", b: "Kid" },
-{ a: "GTA San Andreas", b: "GTA V" },
-{ a: "FIFA 23", b: "eFootball" },
-{ a: "Fortnite", b: "Warzone" },
-{ a: "Red Dead Redemption", b: "GTA" },
-{ a: "Cyberpunk", b: "GTA V" },
-{ a: "Valorant", b: "CS GO" },
-{ a: "Apex Legends", b: "Warzone" },
-{ a: "Street Fighter", b: "Mortal Kombat" },
-{ a: "Elon Musk", b: "Jeff Bezos" },
-{ a: "Bill Gates", b: "Steve Jobs" },
-{ a: "Obama", b: "Trump" },
-{ a: "Rihanna", b: "Beyoncé" },
-{ a: "Leonardo DiCaprio", b: "Brad Pitt" },
-{ a: "Tom Cruise", b: "Keanu Reeves" },
-{ a: "Jackie Chan", b: "Bruce Lee" },
-{ a: "Dwayne Johnson", b: "Vin Diesel" },
-{ a: "De Bruyne", b: "Modric" },
-{ a: "Pogba", b: "Kante" },
-{ a: "Neuer", b: "Courtois" },
-{ a: "Pelé", b: "Maradona" },
-{ a: "Zlatan", b: "Cantona" },
-{ a: "Conor McGregor", b: "Khabib" },
-{ a: "LeBron James", b: "Steph Curry" },
-{ a: "Shaquille O'Neal", b: "Kobe Bryant" },
-{ a: "Burger", b: "Hot Dog" },
-{ a: "Fromage", b: "Yaourt" },
-{ a: "Lait", b: "Jus de fruits" },
-{ a: "Chocolat noir", b: "Chocolat blanc" },
-{ a: "Fraise", b: "Framboise" },
-{ a: "Banane", b: "Mangue" },
-{ a: "Pastèque", b: "Melon" },
-{ a: "Tomate", b: "Concombre" },
-{ a: "Carotte", b: "Poivron" },
-{ a: "Poulet rôti", b: "Poulet frit" },
-{ a: "Saumon", b: "Thon" },
-{ a: "Ninho", b: "Niska" },
-{ a: "Lacrim", b: "Kaaris" },
-{ a: "Beyoncé", b: "Lady Gaga" },
-{ a: "Dragon Ball Z", b: "Naruto" },
-{ a: "Demon Slayer", b: "Jujutsu Kaisen" },
-{ a: "France", b: "Espagne" },
-{ a: "Italie", b: "Portugal" },
-{ a: "Allemagne", b: "Angleterre" },
-{ a: "Égypte", b: "Tunisie" },
-{ a: "Émirats", b: "Qatar" },
-{ a: "Chine", b: "Japon" },
-{ a: "Mexique", b: "Colombie" },
-{ a: "Brésil", b: "Argentine" },
-{ a: "Louis Vuitton", b: "Gucci" },
-{ a: "Air Jordan", b: "Yeezy" },
-{ a: "New Balance", b: "Asics" },
-{ a: "Lacoste", b: "Ralph Lauren" },
-{ a: "Rolex", b: "Cartier" },
-{ a: "Tesla", b: "BMW" },
-{ a: "Mercedes", b: "Audi" },
-{ a: "Lamborghini", b: "Bugatti" },
-{ a: "Porsche", b: "Maserati" },
-{ a: "Scooter", b: "Vélo électrique" },
-{ a: "Bus", b: "Tramway" },
-{ a: "Uber", b: "Bolt" },
-{ a: "Bateau", b: "Yacht" },
-{ a: "Hélicoptère", b: "Avion privé" },
-{ a: "Apple Watch", b: "Samsung Galaxy Watch" },
-{ a: "Snapchat", b: "TikTok" },
-{ a: "Tigre", b: "Léopard" },
-{ a: "Gorille", b: "Chimpanzé" },
-{ a: "Éléphant", b: "Rhinocéros" },
-{ a: "Girafe", b: "Autruche" },
-{ a: "Pieuvre", b: "Calmar" },
-{ a: "Mouton", b: "Chèvre" },
-{ a: "Policier", b: "Gendarme" },
-{ a: "Pompier", b: "Secouriste" },
-{ a: "Pilote", b: "Steward" },
-{ a: "Chef cuisinier", b: "Pâtissier" },
-{ a: "Architecte", b: "Ingénieur" },
-{ a: "Professeur", b: "Formateur" },
-{ a: "Journaliste", b: "Présentateur" },
-{ a: "Acteur", b: "Réalisateur" },
-{ a: "Chanteur", b: "Rappeur" },
-{ a: "Footballeur", b: "Basketteur" },
-{ a: "Soleil", b: "Lune" },
-{ a: "Étoile", b: "Planète" },
-{ a: "Mer", b: "Rivière" },
-{ a: "Arc-en-ciel", b: "Aurore boréale" },
-{ a: "Diamant", b: "Or" },
-{ a: "Château", b: "Palais" },
-{ a: "Pyramide", b: "Sphinx" },
-{ a: "Tour Eiffel", b: "Big Ben" },
-{ a: "Magie", b: "Illusion" },
-{ a: "Rêve", b: "Cauchemar" },
-{ a: "Passé", b: "Futur" },
-{ a: "Guerre", b: "Paix" },
-{ a: "Liberté", b: "Justice" },
-{ a: "Amour", b: "Amitié" },
-{ a: "Chance", b: "Destin" },
-{ a: "Secret", b: "Mensonge" },
-{ a: "Vérité", b: "Rumeur" },
-{ a: "Intrus", b: "Majorité" },
-];
+import { WORD_DB } from './data/words';
 
-export function generateAssignments(numPlayers, misterWhite = false, misterMode = 'with_intrus') {
-console.log('>>> misterWhite:', misterWhite, '| misterMode:', misterMode);
-const pair = WORD_DB[Math.floor(Math.random() * WORD_DB.length)];
-const majorityWord = Math.random() < 0.5 ? pair.a : pair.b;
-const intrusWord = majorityWord === pair.a ? pair.b : pair.a;
+/**
+ * gameMode: 0 = Normal (1 intrus), 1 = Mister White, 2 = MW + Intrus
+ * returns array of { word, role, category }
+ * role: 'normal' | 'intrus' | 'mister'
+ */
+export function generateAssignments(numPlayers, gameMode = 0) {
+  const pair = WORD_DB[Math.floor(Math.random() * WORD_DB.length)];
+  const [wordA, wordB] = Math.random() < 0.5 ? [pair.a, pair.b] : [pair.b, pair.a];
+  const category = pair.cat;
 
-// Index Mister White aléatoire
-const misterIndex = misterWhite ? Math.floor(Math.random() * numPlayers) : -1;
+  const roles = [];
+  if (gameMode === 0) {
+    roles.push('intrus');
+    while (roles.length < numPlayers) roles.push('normal');
+  } else if (gameMode === 1) {
+    roles.push('mister');
+    while (roles.length < numPlayers) roles.push('normal');
+  } else {
+    roles.push('mister');
+    roles.push('intrus');
+    while (roles.length < numPlayers) roles.push('normal');
+  }
 
-// Intrus seulement si mode with_intrus OU si misterWhite désactivé
-let intrusIndex = -1;
-if (misterMode === 'with_intrus' || !misterWhite) {
-do {
-intrusIndex = Math.floor(Math.random() * numPlayers);
-} while (intrusIndex === misterIndex);
-}
+  // Shuffle roles
+  for (let i = roles.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [roles[i], roles[j]] = [roles[j], roles[i]];
+  }
 
-return Array.from({ length: numPlayers }, (_, i) => ({
-word: i === misterIndex
-? null
-: i === intrusIndex
-? intrusWord
-: majorityWord,
-isMisterWhite: i === misterIndex,
-}));
+  return roles.map((role) => ({
+    word: role === 'intrus' ? wordB : role === 'mister' ? null : wordA,
+    role,
+    category,
+  }));
 }
 
 export function findWinner(playerNumbers, mystery) {
-let bestPlayer = 0;
-let bestDiff = Math.abs(playerNumbers[0] - mystery);
-for (let i = 1; i < playerNumbers.length; i++) {
-const diff = Math.abs(playerNumbers[i] - mystery);
-if (diff < bestDiff) {
-bestDiff = diff;
-bestPlayer = i;
+  let best = 0;
+  let bestDiff = Math.abs(playerNumbers[0] - mystery);
+  for (let i = 1; i < playerNumbers.length; i++) {
+    const diff = Math.abs(playerNumbers[i] - mystery);
+    if (diff < bestDiff) { bestDiff = diff; best = i; }
+  }
+  return best;
 }
-}
-return bestPlayer;
-}
-
-
