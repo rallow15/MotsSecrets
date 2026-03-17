@@ -15,7 +15,7 @@
 },
 "android": {
   "package": "com.tonnom.motssecrets",
-  "versionCode": 6,
+  "versionCode": 7,
   "adaptiveIcon": {
     "foregroundImage": "./assets/icon.png",
     "backgroundColor": "#0a0a0a"

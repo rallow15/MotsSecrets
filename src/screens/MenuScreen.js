@@ -3,6 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, StatusBar,
   ScrollView, Modal,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '../theme';
 import { t, getLang, setLang } from '../i18n';
 
@@ -74,6 +75,7 @@ const RULES = {
 };
 
 export default function MenuScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const [numPlayers, setNumPlayers] = useState(4);
   const [gameMode,   setGameMode]   = useState(0);
   const [lang,       setLangState]  = useState(getLang());
@@ -100,7 +102,7 @@ export default function MenuScreen({ navigation }) {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.bg }}
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[styles.container, { paddingTop: insets.top + 60 }]}
       keyboardShouldPersistTaps="handled"
     >
       <StatusBar barStyle="light-content" backgroundColor={colors.bg} />
@@ -179,26 +181,26 @@ export default function MenuScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container:      { backgroundColor: colors.bg, alignItems: 'center', paddingHorizontal: 28, paddingTop: 60, paddingBottom: 40 },
-  topRow:         { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginBottom: 16 },
+  container:      { backgroundColor: colors.bg, alignItems: 'center', paddingHorizontal: 28, paddingBottom: 24 },
+  topRow:         { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginBottom: 8 },
   rulesBtn:       { borderWidth: 1, borderColor: '#333', paddingHorizontal: 14, paddingVertical: 7 },
   rulesBtnText:   { fontFamily: 'SpaceMono', fontSize: 11, color: colors.gray, letterSpacing: 2 },
   langBtn:        { borderWidth: 1, borderColor: '#333', paddingHorizontal: 14, paddingVertical: 7 },
   langBtnText:    { fontFamily: 'SpaceMono', fontSize: 11, color: colors.accent, letterSpacing: 2 },
-  title:          { fontFamily: 'BebasNeue', fontSize: 100, color: colors.accent, textAlign: 'center', lineHeight: 88, letterSpacing: 2, marginBottom: 6 },
-  subtitle:       { fontFamily: 'SpaceMono', fontSize: 9, color: colors.gray, letterSpacing: 4, marginBottom: 40, textAlign: 'center' },
-  section:        { width: '100%', marginBottom: 24 },
-  sectionLabel:   { fontFamily: 'SpaceMono', fontSize: 9, color: colors.gray, letterSpacing: 3, marginBottom: 10 },
+  title:          { fontFamily: 'BebasNeue', fontSize: 78, color: colors.accent, textAlign: 'center', lineHeight: 68, letterSpacing: 2, marginBottom: 4 },
+  subtitle:       { fontFamily: 'SpaceMono', fontSize: 9, color: colors.gray, letterSpacing: 4, marginBottom: 20, textAlign: 'center' },
+  section:        { width: '100%', marginBottom: 14 },
+  sectionLabel:   { fontFamily: 'SpaceMono', fontSize: 9, color: colors.gray, letterSpacing: 3, marginBottom: 8 },
   counterRow:     { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  counterBtn:     { width: 46, height: 46, borderWidth: 1, borderColor: '#333', alignItems: 'center', justifyContent: 'center' },
+  counterBtn:     { width: 42, height: 42, borderWidth: 1, borderColor: '#333', alignItems: 'center', justifyContent: 'center' },
   counterBtnText: { color: colors.text, fontSize: 22, fontFamily: 'SpaceMono', lineHeight: 26 },
-  counterVal:     { fontFamily: 'BebasNeue', fontSize: 56, color: colors.text, minWidth: 40, textAlign: 'center' },
-  modeBtn:        { borderWidth: 1, borderColor: '#1e1e1e', padding: 14, marginBottom: 8 },
+  counterVal:     { fontFamily: 'BebasNeue', fontSize: 48, color: colors.text, minWidth: 40, textAlign: 'center' },
+  modeBtn:        { borderWidth: 1, borderColor: '#1e1e1e', padding: 10, marginBottom: 6 },
   modeBtnActive:  { borderColor: colors.accent, backgroundColor: 'rgba(232,255,71,0.05)' },
   modeTitle:      { fontFamily: 'BebasNeue', fontSize: 18, color: colors.muted, letterSpacing: 1, marginBottom: 2 },
   modeTitleActive:{ color: colors.accent },
   modeDesc:       { fontFamily: 'SpaceMono', fontSize: 9, color: colors.gray, letterSpacing: 1 },
-  startBtn:       { width: '100%', backgroundColor: colors.accent, paddingVertical: 18, alignItems: 'center', marginTop: 8 },
+  startBtn:       { width: '100%', backgroundColor: colors.accent, paddingVertical: 16, alignItems: 'center', marginTop: 6 },
   startBtnText:   { fontFamily: 'BebasNeue', fontSize: 26, color: colors.bg, letterSpacing: 3 },
 
   // Modal règles
