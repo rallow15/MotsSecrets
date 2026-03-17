@@ -26,6 +26,8 @@ workflows:
     environment:
       java: 17
       node: latest
+      android_signing:
+        - mots_secrets_keystore
     scripts:
       - name: Install dependencies
         script: npm install
@@ -34,10 +36,14 @@ workflows:
       - name: Build AAB
         script: |
           cd android
-          ./gradlew bundleRelease
+          ./gradlew bundleRelease \
+            -Pandroid.injected.signing.store.file=$CM_KEYSTORE_PATH \
+            -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
+            -Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS \
+            -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD
     artifacts:
       - android/app/build/outputs/bundle/release/app-release.aab
-
+      
   # ── iOS IPA (sans signature) ────────────────────────────────
   ios-workflow:
     name: iOS Build
