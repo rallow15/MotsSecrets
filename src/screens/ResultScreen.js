@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, ScrollView, Pressable } from 'react-native';
 import { colors } from '../theme';
 import { t } from '../i18n';
+import { playClick, playWin, playLose, playIntruderReveal, playInnocentReveal, playMisterWhite, vibrate, vibrateIntruderFound } from '../sound';
 
 let InterstitialAd;
 try {
@@ -80,10 +81,26 @@ export default function ResultScreen({ navigation, route }) {
           const name        = safeNames[i] || t('playerFallback', i + 1);
           const wordDisplay = a.role === 'mister' ? 'MISTER WHITE' : (a.word ?? '');
 
+          const handleReveal = () => {
+            if (!isRev) {
+              // Première révélation de cette carte
+              if (a.role === 'intrus') {
+                playIntruderReveal();
+                vibrateIntruderFound();
+              } else if (a.role === 'mister') {
+                playMisterWhite();
+                vibrate([50, 30, 50]);
+              } else {
+                playInnocentReveal();
+              }
+            }
+            setRevealed(prev => ({ ...prev, [i]: !prev[i] }));
+          };
+
           return (
             <Pressable
               key={i}
-              onPress={() => setRevealed(prev => ({ ...prev, [i]: !prev[i] }))}
+              onPress={() => { playClick(); handleReveal(); }}
               style={[
                 styles.card,
                 isRev && a.role === 'intrus' && styles.cardIntrus,

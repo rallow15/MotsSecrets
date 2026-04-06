@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, StatusBar,
   ScrollView, Modal,
@@ -6,6 +6,23 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '../theme';
 import { t, getLang, setLang } from '../i18n';
+import { CATEGORIES } from '../data/words';
+import { generateAssignments } from '../gameLogic';
+import { initSounds, playClick, playStart } from '../sound';
+
+const CATEGORY_EMOJIS = {
+  FOOTBALL: '⚽',
+  BASKETBALL: '🏀',
+  ACTEURS: '🎬',
+  ACTRICES: '🎬',
+  PAYS: '🌍',
+  ANIMAUX: '🦁',
+  JEUX_VIDEO: '🎮',
+  MUSIQUE: '🎵',
+  VOITURES: '🚗',
+  MARQUES: '👜',
+  FILMS_ANIMATION: '🎬',
+};
 
 const RULES = {
   fr: [
@@ -77,9 +94,15 @@ const RULES = {
 export default function MenuScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const [numPlayers, setNumPlayers] = useState(4);
-  const [gameMode,   setGameMode]   = useState(0);
-  const [lang,       setLangState]  = useState(getLang());
-  const [showRules,  setShowRules]  = useState(false);
+  const [gameMode, setGameMode] = useState(0);
+  const [lang, setLangState] = useState(getLang());
+  const [showRules, setShowRules] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  useEffect(() => {
+    initSounds();
+  }, []);
 
   const toggleLang = () => {
     const next = lang === 'fr' ? 'en' : 'fr';
@@ -94,10 +117,28 @@ export default function MenuScreen({ navigation }) {
   ];
 
   const handleStart = () => {
-    navigation.navigate('Prep', { numPlayers, gameMode });
+    // Générer les assignments avec la catégorie sélectionnée
+    const assignments = generateAssignments(numPlayers, gameMode, selectedCategory);
+
+    navigation.navigate('Prep', {
+      numPlayers,
+      gameMode,
+      selectedCategory,
+      assignments,
+    });
+  };
+
+  const handleCategorySelect = (cat) => {
+    if (selectedCategory === cat) {
+      setSelectedCategory(null);
+    } else {
+      setSelectedCategory(cat);
+    }
+    setShowCategories(false);
   };
 
   const rules = RULES[lang];
+  const categoryKeys = Object.keys(CATEGORIES);
 
   return (
     <ScrollView
@@ -133,6 +174,22 @@ export default function MenuScreen({ navigation }) {
         </View>
       </View>
 
+      {/* Section Catégorie */}
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>📚 CATÉGORIE</Text>
+        <TouchableOpacity
+          style={styles.categoryBtn}
+          onPress={() => setShowCategories(true)}
+        >
+          <Text style={styles.categoryBtnText}>
+            {selectedCategory
+              ? `${CATEGORY_EMOJIS[selectedCategory] || '🎯'} ${selectedCategory.replace('_', ' ')}`
+              : 'Toutes les catégories (aléatoire)'}
+          </Text>
+          <Text style={styles.categoryArrow}>→</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>{t('gameMode')}</Text>
         {MODES.map(mode => (
@@ -149,9 +206,53 @@ export default function MenuScreen({ navigation }) {
         ))}
       </View>
 
-      <TouchableOpacity style={styles.startBtn} onPress={handleStart}>
+      <TouchableOpacity style={styles.startBtn} onPress={() => handleStart()}>
         <Text style={styles.startBtnText}>{t('start')}</Text>
       </TouchableOpacity>
+
+      {/* ── MODAL CATÉGORIES ── */}
+      <Modal
+        visible={showCategories}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowCategories(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCategoryContent}>
+            <Text style={styles.modalCategoryTitle}>CHOISIR UNE CATÉGORIE</Text>
+
+            <ScrollView style={styles.categoryScrollView} showsVerticalScrollIndicator={true}>
+              <TouchableOpacity
+                style={[styles.categoryOption, selectedCategory === null && styles.categoryOptionActive]}
+                onPress={() => handleCategorySelect(null)}
+              >
+                <Text style={[styles.categoryOptionText, selectedCategory === null && styles.categoryOptionTextActive]}>
+                  🎲 Aléatoire (toutes)
+                </Text>
+              </TouchableOpacity>
+
+              {categoryKeys.map((cat) => (
+                <TouchableOpacity
+                  key={cat}
+                  style={[styles.categoryOption, selectedCategory === cat && styles.categoryOptionActive]}
+                  onPress={() => handleCategorySelect(cat)}
+                >
+                  <Text style={[styles.categoryOptionText, selectedCategory === cat && styles.categoryOptionTextActive]}>
+                    {CATEGORY_EMOJIS[cat] || '🎯'} {cat.replace('_', ' ')}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <TouchableOpacity
+              style={styles.closeCategoryBtn}
+              onPress={() => setShowCategories(false)}
+            >
+              <Text style={styles.closeCategoryBtnText}>FERMER</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {/* ── MODAL RÈGLES ── */}
       <Modal visible={showRules} animationType="slide" transparent={false} onRequestClose={() => setShowRules(false)}>
@@ -187,7 +288,7 @@ const styles = StyleSheet.create({
   rulesBtnText:   { fontFamily: 'SpaceMono', fontSize: 11, color: colors.gray, letterSpacing: 2 },
   langBtn:        { borderWidth: 1, borderColor: '#333', paddingHorizontal: 14, paddingVertical: 7 },
   langBtnText:    { fontFamily: 'SpaceMono', fontSize: 11, color: colors.accent, letterSpacing: 2 },
-  title:          { fontFamily: 'BebasNeue', fontSize: 78, color: colors.accent, textAlign: 'center', lineHeight: 68, letterSpacing: 2, marginBottom: 4 },
+  title:          { fontFamily: 'BebasNeue', fontSize: 78, color: colors.accent, textAlign: 'center', lineHeight: 78, letterSpacing: 2, marginBottom: 4 },
   subtitle:       { fontFamily: 'SpaceMono', fontSize: 9, color: colors.gray, letterSpacing: 4, marginBottom: 20, textAlign: 'center' },
   section:        { width: '100%', marginBottom: 14 },
   sectionLabel:   { fontFamily: 'SpaceMono', fontSize: 9, color: colors.gray, letterSpacing: 3, marginBottom: 8 },
@@ -195,6 +296,30 @@ const styles = StyleSheet.create({
   counterBtn:     { width: 42, height: 42, borderWidth: 1, borderColor: '#333', alignItems: 'center', justifyContent: 'center' },
   counterBtnText: { color: colors.text, fontSize: 22, fontFamily: 'SpaceMono', lineHeight: 26 },
   counterVal:     { fontFamily: 'BebasNeue', fontSize: 48, color: colors.text, minWidth: 40, textAlign: 'center' },
+
+  // Bouton catégorie
+  categoryBtn: {
+    borderWidth: 1,
+    borderColor: '#1e1e1e',
+    padding: 12,
+    marginBottom: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(232,255,71,0.02)',
+  },
+  categoryBtnText: {
+    fontFamily: 'BebasNeue',
+    fontSize: 18,
+    color: colors.text,
+    letterSpacing: 1,
+  },
+  categoryArrow: {
+    fontFamily: 'BebasNeue',
+    fontSize: 24,
+    color: colors.accent,
+  },
+
   modeBtn:        { borderWidth: 1, borderColor: '#1e1e1e', padding: 10, marginBottom: 6 },
   modeBtnActive:  { borderColor: colors.accent, backgroundColor: 'rgba(232,255,71,0.05)' },
   modeTitle:      { fontFamily: 'BebasNeue', fontSize: 18, color: colors.muted, letterSpacing: 1, marginBottom: 2 },
@@ -202,6 +327,66 @@ const styles = StyleSheet.create({
   modeDesc:       { fontFamily: 'SpaceMono', fontSize: 9, color: colors.gray, letterSpacing: 1 },
   startBtn:       { width: '100%', backgroundColor: colors.accent, paddingVertical: 16, alignItems: 'center', marginTop: 6 },
   startBtnText:   { fontFamily: 'BebasNeue', fontSize: 26, color: colors.bg, letterSpacing: 3 },
+
+  // Modal overlay
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalCategoryContent: {
+    backgroundColor: colors.bg,
+    borderRadius: 16,
+    padding: 24,
+    width: '90%',
+    maxHeight: '75%',
+    borderWidth: 1,
+    borderColor: colors.accent,
+  },
+  categoryScrollView: {
+    maxHeight: 400,
+  },
+  modalCategoryTitle: {
+    fontFamily: 'BebasNeue',
+    fontSize: 32,
+    color: colors.accent,
+    letterSpacing: 2,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  categoryOption: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#222',
+  },
+  categoryOptionActive: {
+    backgroundColor: 'rgba(232,255,71,0.1)',
+    borderRadius: 8,
+  },
+  categoryOptionText: {
+    fontFamily: 'BebasNeue',
+    fontSize: 20,
+    color: colors.text,
+    letterSpacing: 1,
+  },
+  categoryOptionTextActive: {
+    color: colors.accent,
+  },
+  closeCategoryBtn: {
+    backgroundColor: colors.accent,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 16,
+    borderRadius: 8,
+  },
+  closeCategoryBtnText: {
+    fontFamily: 'BebasNeue',
+    fontSize: 20,
+    color: colors.bg,
+    letterSpacing: 2,
+  },
 
   // Modal règles
   modalBg:        { flex: 1, backgroundColor: colors.bg },

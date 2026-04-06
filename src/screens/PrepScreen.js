@@ -4,7 +4,7 @@ import { colors } from '../theme';
 import { t } from '../i18n';
 
 export default function PrepScreen({ navigation, route }) {
-  const { numPlayers, assignments, currentPlayer, takenNumbers, playerNumbers, playerNames } = route.params;
+  const { numPlayers, assignments, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, gameMode } = route.params;
 
   // Pré-remplir avec le nom existant s'il y en a un (cas rejouer)
   const existingName = Array.isArray(playerNames) ? (playerNames[currentPlayer] || '') : '';
@@ -39,10 +39,14 @@ export default function PrepScreen({ navigation, route }) {
     // Garder le nom tapé ou l'existant si l'input est vide
     newNames[currentPlayer] = name.trim().toUpperCase() || existingName;
 
+    // Passer directement à l'écran de révélation du mot (wordVisible: true)
     navigation.navigate('Reveal', {
       numPlayers, assignments, currentPlayer,
       takenNumbers, playerNumbers,
       playerNames: newNames,
+      selectedCategory,
+      gameMode,
+      wordVisible: true,  // Afficher le mot directement
     });
   };
 

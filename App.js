@@ -5,20 +5,30 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 
-import MenuScreen   from './src/screens/MenuScreen';
-import PrepScreen   from './src/screens/PrepScreen';
-import RevealScreen from './src/screens/RevealScreen';
-import BlackScreen  from './src/screens/BlackScreen';
-import ResultScreen from './src/screens/ResultScreen';
+import MenuScreen     from './src/screens/MenuScreen';
+import PrepScreen     from './src/screens/PrepScreen';
+import RevealScreen   from './src/screens/RevealScreen';
+import BlackScreen    from './src/screens/BlackScreen';
+import ResultScreen   from './src/screens/ResultScreen';
 import { generateAssignments } from './src/gameLogic';
 import { colors } from './src/theme';
 
-// Bannières masquées en DEV (Expo Go)
-let BannerAd, BannerAdSize;
+// Bannières et consentement uniquement en production (build natif)
+let BannerAd, BannerAdSize, requestConsentInfoUpdate, getConsentStatus, showConsentForm, ConsentStatus, ConsentInfoOptions;
 if (!__DEV__) {
   const admob = require('react-native-google-mobile-ads');
   BannerAd     = admob.BannerAd;
   BannerAdSize = admob.BannerAdSize;
+  try {
+    const consent = require('@react-native-google-mobile-ads/consent');
+    requestConsentInfoUpdate = consent.requestConsentInfoUpdate;
+    getConsentStatus = consent.getConsentStatus;
+    showConsentForm = consent.showConsentForm;
+    ConsentStatus = consent.ConsentStatus;
+    ConsentInfoOptions = consent.ConsentInfoOptions;
+  } catch (e) {
+    console.log('SDK consentement non disponible');
+  }
 }
 
 const Stack = createNativeStackNavigator();
@@ -63,6 +73,7 @@ export default function App() {
     SpaceMono: require('./assets/fonts/SpaceMono-Regular.ttf'),
   });
   const [adKey, setAdKey] = useState(0);
+  const [consentLoaded, setConsentLoaded] = useState(false);
 
   useEffect(() => {
     if (__DEV__) return;
@@ -70,7 +81,37 @@ export default function App() {
     return () => clearInterval(id);
   }, []);
 
-  if (!fontsLoaded) {
+  useEffect(() => {
+    // Skip consentement en DEV ou si déjà chargé
+    if (__DEV__ || consentLoaded || !requestConsentInfoUpdate) {
+      setConsentLoaded(true);
+      return;
+    }
+
+    const checkConsent = async () => {
+      try {
+        const consentInfoOptions = {
+          debugGeography: ConsentInfoOptions?.DebugGeography?.DISABLED ?? 0,
+          tagForUnderAgeOfConsent: false,
+        };
+
+        await requestConsentInfoUpdate(consentInfoOptions);
+        const status = await getConsentStatus();
+
+        if (status === ConsentStatus?.REQUIRED) {
+          await showConsentForm();
+        }
+        setConsentLoaded(true);
+      } catch (error) {
+        console.log('Erreur consentement pub:', error);
+        setConsentLoaded(true);
+      }
+    };
+
+    checkConsent();
+  }, [consentLoaded]);
+
+  if (!fontsLoaded || !consentLoaded) {
     return <View style={styles.loading}><ActivityIndicator color={colors.accent} size="large" /></View>;
   }
 
