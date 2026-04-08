@@ -13,15 +13,17 @@ import { initSounds, playClick, playStart } from '../sound';
 const CATEGORY_EMOJIS = {
   FOOTBALL: '⚽',
   BASKETBALL: '🏀',
-  ACTEURS: '🎬',
-  ACTRICES: '🎬',
-  PAYS: '🌍',
+  ACTEURS: '🎭',
+  ACTRICES: '🎭',
+  PAYS: '🗺️',
   ANIMAUX: '🦁',
   JEUX_VIDEO: '🎮',
   MUSIQUE: '🎵',
   VOITURES: '🚗',
   MARQUES: '👜',
-  FILMS_ANIMATION: '🎬',
+  FILMS_SERIES: '🎬',
+  MANGA: '🍥',
+  OBJETS: '📦',
 };
 
 const RULES = {
@@ -93,7 +95,7 @@ const RULES = {
 
 export default function MenuScreen({ navigation }) {
   const insets = useSafeAreaInsets();
-  const [numPlayers, setNumPlayers] = useState(4);
+  const [numPlayers, setNumPlayers] = useState(3);
   const [gameMode, setGameMode] = useState(0);
   const [lang, setLangState] = useState(getLang());
   const [showRules, setShowRules] = useState(false);
@@ -103,6 +105,13 @@ export default function MenuScreen({ navigation }) {
   useEffect(() => {
     initSounds();
   }, []);
+
+  // Ajuster le nombre de joueurs selon le mode
+  useEffect(() => {
+    if (gameMode === 2 && numPlayers < 4) {
+      setNumPlayers(4);
+    }
+  }, [gameMode]);
 
   const toggleLang = () => {
     const next = lang === 'fr' ? 'en' : 'fr';
@@ -117,7 +126,12 @@ export default function MenuScreen({ navigation }) {
   ];
 
   const handleStart = () => {
-    // Générer les assignments avec la catégorie sélectionnée
+    // Mode 2 (INTRUS + MISTER WHITE) nécessite 4 joueurs minimum
+    if (gameMode === 2 && numPlayers < 4) {
+      setNumPlayers(4);
+      return;
+    }
+
     const assignments = generateAssignments(numPlayers, gameMode, selectedCategory);
 
     navigation.navigate('Prep', {
@@ -164,7 +178,7 @@ export default function MenuScreen({ navigation }) {
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>{t('players')}</Text>
         <View style={styles.counterRow}>
-          <TouchableOpacity style={styles.counterBtn} onPress={() => setNumPlayers(p => Math.max(3, p - 1))}>
+          <TouchableOpacity style={styles.counterBtn} onPress={() => setNumPlayers(p => Math.max(gameMode === 2 ? 4 : 3, p - 1))}>
             <Text style={styles.counterBtnText}>−</Text>
           </TouchableOpacity>
           <Text style={styles.counterVal}>{numPlayers}</Text>
@@ -172,6 +186,9 @@ export default function MenuScreen({ navigation }) {
             <Text style={styles.counterBtnText}>+</Text>
           </TouchableOpacity>
         </View>
+        {gameMode === 2 && numPlayers < 4 && (
+          <Text style={styles.warningText}>⚠️ 4 joueurs minimum pour ce mode</Text>
+        )}
       </View>
 
       {/* Section Catégorie */}
@@ -296,6 +313,7 @@ const styles = StyleSheet.create({
   counterBtn:     { width: 42, height: 42, borderWidth: 1, borderColor: '#333', alignItems: 'center', justifyContent: 'center' },
   counterBtnText: { color: colors.text, fontSize: 22, fontFamily: 'SpaceMono', lineHeight: 26 },
   counterVal:     { fontFamily: 'BebasNeue', fontSize: 48, color: colors.text, minWidth: 40, textAlign: 'center' },
+  warningText:    { fontFamily: 'SpaceMono', fontSize: 10, color: colors.danger, letterSpacing: 1, marginTop: 6 },
 
   // Bouton catégorie
   categoryBtn: {

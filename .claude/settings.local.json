@@ -3,7 +3,12 @@
     "allow": [
       "Bash(node:*)",
       "Bash(npm list:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npx eas:*)",
+      "mcp__ide__executeCode",
+      "Bash(python:*)",
+      "Bash(npm start:*)",
+      "Bash(npx expo:*)"
     ]
   }
 }

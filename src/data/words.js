@@ -25,6 +25,7 @@ export const CATEGORIES = {
     "Robben", "Ribery", "Lahm", "Boateng", "Hummels",
     "Van Dijk", "De Ligt", "Davies", "Alaba", "Aouar",
     "Benzema", "Vini Jr", "Rodrygo", "Valverde", "Tchouameni",
+    "Son Heung-min", "Kane", "Mbappe", "Neymar Jr", "Lamine Yamal",
   ],
 
   // ═══════════════════════════════════════════════════════════
@@ -208,17 +209,16 @@ export const CATEGORIES = {
     "Casque", "Écouteurs", "Enceinte", "Chargeur", "Batterie",
     "Lampe", "Bougie", "Allumette", "Briquet", "Couteau",
     "Fourchette", "Cuillère", "Assiette", "Verre", "Tasse",
-    "Bouteille", "Tasse", "Serviette", "Torchon", "Éponge",
+    "Bouteille", "Serviette", "Torchon", "Éponge",
     "Balai", "Aspirateur", "Seau", "Chiffon", "Produit ménager",
+    "Canapé", "Table", "Chaise", "Lit", "Armoire",
+    "Commode", "Bureau", "Étagère", "Miroir", "Rideau",
+    "Coussin", "Couverture", "Drap", "Oreiller", "Matelas",
+    "Tapis", "Vase", "Cadre", "Horloge", "Réveil",
+    "Télévision", "Radio", "Micro-ondes", "Grille-pain", "Cafetière",
+    "Bouilloire", "Mixeur", "Robot culinaire", "Poêle", "Casserole",
   ],
 
-  // ═══════════════════════════════════════════════════════════
-  // 🎵 MUSIQUE / CHANTEURS
-  // ═══════════════════════════════════════════════════════════
-  MUSIQUE: [
-    "Avatar", "Star Wars", "Jurassic World", "Mission: Impossible", "Fast & Furious",
-    "Game of Thrones", "Stranger Things", "The Last of Us", "Squid Game", "One Piece",
-  ],
 };
 
 // Export pour compatibilité avec gameLogic.js
