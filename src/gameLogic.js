@@ -1,4 +1,5 @@
-import { WORD_DB, generateBotClue, generateBotClues, botVote as botVoteLogic } from './data/words';
+import { WORD_DB, WORD_DB_EN, generateBotClue, generateBotClues, botVote as botVoteLogic } from './data/words';
+import { getLang } from './i18n';
 
 /**
  * gameMode: 0 = Normal (1 intrus), 1 = Mister White, 2 = MW + Intrus
@@ -7,15 +8,19 @@ import { WORD_DB, generateBotClue, generateBotClues, botVote as botVoteLogic } f
  * role: 'normal' | 'intrus' | 'mister'
  */
 export function generateAssignments(numPlayers, gameMode = 0, selectedCategory = null) {
+  // Utiliser la base de mots selon la langue
+  const lang = getLang();
+  const wordDb = lang === 'en' ? WORD_DB_EN : WORD_DB;
+
   // Choisir une catégorie (aléatoire ou sélectionnée)
   let categoryData;
   if (selectedCategory) {
-    categoryData = WORD_DB.find(d => d.cat === selectedCategory);
+    categoryData = wordDb.find(d => d.cat === selectedCategory);
     if (!categoryData) {
-      categoryData = WORD_DB[Math.floor(Math.random() * WORD_DB.length)];
+      categoryData = wordDb[Math.floor(Math.random() * wordDb.length)];
     }
   } else {
-    categoryData = WORD_DB[Math.floor(Math.random() * WORD_DB.length)];
+    categoryData = wordDb[Math.floor(Math.random() * wordDb.length)];
   }
   const category = categoryData.cat;
   const words = categoryData.words;
@@ -81,8 +86,10 @@ export function generateVsAIAssignments(numBots, humanName = '', botNames = []) 
     [roles[i], roles[j]] = [roles[j], roles[i]];
   }
 
-  // Choisir une catégorie aléatoire
-  const categoryData = WORD_DB[Math.floor(Math.random() * WORD_DB.length)];
+  // Choisir une catégorie aléatoire (utiliser la bonne DB selon la langue)
+  const lang = getLang();
+  const wordDb = lang === 'en' ? WORD_DB_EN : WORD_DB;
+  const categoryData = wordDb[Math.floor(Math.random() * wordDb.length)];
   const category = categoryData.cat;
   const words = categoryData.words;
 

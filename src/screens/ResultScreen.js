@@ -65,7 +65,7 @@ export default function ResultScreen({ navigation, route }) {
   const getRoleBadge = (role) => {
     if (role === 'intrus') return { label: t('roleIntrus'),   color: colors.danger, bg: 'rgba(255,68,68,0.12)' };
     if (role === 'mister') return { label: t('roleMister'),   color: colors.accent, bg: 'rgba(232,255,71,0.1)' };
-    return                        { label: t('roleInnocent'), color: colors.text,   bg: 'rgba(255,255,255,0.06)' };
+    return                        { label: t('roleInnocent'), color: '#000000',   bg: 'rgba(255,255,255,0.06)' };
   };
 
   // ── RECAP ──────────────────────────────────────────────────
@@ -114,7 +114,7 @@ export default function ResultScreen({ navigation, route }) {
                   styles.cardWord,
                   isRev && a.role === 'intrus' && { color: colors.danger },
                   isRev && a.role === 'mister' && { color: colors.accent },
-                  isRev && a.role === 'normal' && { color: colors.text },
+                  isRev && a.role === 'normal' && { color: '#000000' },
                 ]}>
                   {isRev ? wordDisplay : '● ● ● ● ●'}
                 </Text>
@@ -127,7 +127,7 @@ export default function ResultScreen({ navigation, route }) {
                   <View style={styles.badgesCol}>
                     {i === starterIdx && (
                       <View style={[styles.badge, { borderColor: '#666' }]}>
-                        <Text style={[styles.badgeText, { color: colors.text }]}>{t('roleStarts')}</Text>
+                        <Text style={[styles.badgeText, { color: '#000000' }]}>{t('roleStarts')}</Text>
                       </View>
                     )}
                     <View style={[styles.badge, { borderColor: badge.color, backgroundColor: badge.bg }]}>
@@ -167,29 +167,29 @@ export default function ResultScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container:     { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28, gap: 16 },
-  commenceLabel: { fontFamily: 'SpaceMono', fontSize: 10, color: colors.gray, letterSpacing: 3 },
-  winnerName:    { fontFamily: 'BebasNeue', fontSize: 88, color: colors.accent, textAlign: 'center', lineHeight: 84, letterSpacing: 2, textShadowColor: 'rgba(232,255,71,0.4)', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 30 },
-  revealBtn:     { width: '100%', backgroundColor: colors.accent, paddingVertical: 18, alignItems: 'center', marginTop: 8 },
-  revealBtnText: { fontFamily: 'BebasNeue', fontSize: 22, color: colors.bg, letterSpacing: 2 },
-  recapContainer:{ backgroundColor: colors.bg, paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40, gap: 8 },
-  recapTitle:    { fontFamily: 'BebasNeue', fontSize: 48, color: colors.accent, letterSpacing: 2, textAlign: 'center' },
-  recapSub:      { fontFamily: 'SpaceMono', fontSize: 9, color: colors.gray, letterSpacing: 3, textAlign: 'center', marginBottom: 10 },
-  card:          { borderWidth: 1, borderColor: '#1e1e1e', padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardIntrus:    { borderColor: 'rgba(255,68,68,0.5)',   backgroundColor: 'rgba(255,68,68,0.04)' },
-  cardMister:    { borderColor: 'rgba(232,255,71,0.4)',  backgroundColor: 'rgba(232,255,71,0.03)' },
-  cardNormal:    { borderColor: 'rgba(255,255,255,0.12)' },
+  container:     { flex: 1, backgroundColor: '#F5F5DC', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28, gap: 16 },
+  commenceLabel: { fontFamily: 'SpaceMono', fontSize: 10, color: '#666', letterSpacing: 3 },
+  winnerName:    { fontFamily: 'BebasNeue', fontSize: 88, color: '#1a1a1a', textAlign: 'center', lineHeight: 84, letterSpacing: 2 },
+  revealBtn:     { width: '100%', backgroundColor: '#1a1a1a', paddingVertical: 18, alignItems: 'center', marginTop: 8, borderRadius: 12 },
+  revealBtnText: { fontFamily: 'BebasNeue', fontSize: 22, color: '#F5F5DC', letterSpacing: 2 },
+  recapContainer:{ backgroundColor: '#F5F5DC', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40, gap: 8 },
+  recapTitle:    { fontFamily: 'BebasNeue', fontSize: 48, color: '#1a1a1a', letterSpacing: 2, textAlign: 'center' },
+  recapSub:      { fontFamily: 'SpaceMono', fontSize: 9, color: '#666', letterSpacing: 3, textAlign: 'center', marginBottom: 10 },
+  card:          { borderWidth: 1, borderColor: 'rgba(0,0,0,0.15)', padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: 10, backgroundColor: 'rgba(0,0,0,0.05)' },
+  cardIntrus:    { borderColor: 'rgba(255,68,68,0.4)',   backgroundColor: 'rgba(255,68,68,0.1)' },
+  cardMister:    { borderColor: 'rgba(0,0,0,0.3)',  backgroundColor: 'rgba(0,0,0,0.08)' },
+  cardNormal:    { borderColor: 'rgba(0,0,0,0.15)' },
   cardLeft:      { flex: 1, gap: 4 },
-  cardPlayer:    { fontFamily: 'SpaceMono', fontSize: 9, color: colors.gray, letterSpacing: 2 },
-  cardWord:      { fontFamily: 'BebasNeue', fontSize: 28, color: '#333', letterSpacing: 1 },
+  cardPlayer:    { fontFamily: 'SpaceMono', fontSize: 9, color: '#000000', letterSpacing: 2 },
+  cardWord:      { fontFamily: 'BebasNeue', fontSize: 28, color: '#000000', letterSpacing: 1 },
   cardRight:     { alignItems: 'flex-end', gap: 4 },
-  cardTap:       { fontFamily: 'SpaceMono', fontSize: 9, color: colors.muted, letterSpacing: 1 },
+  cardTap:       { fontFamily: 'SpaceMono', fontSize: 9, color: '#666', letterSpacing: 1 },
   badgesCol:     { alignItems: 'flex-end', gap: 4 },
-  badge:         { borderWidth: 1, paddingHorizontal: 8, paddingVertical: 3 },
+  badge:         { borderWidth: 1, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
   badgeText:     { fontFamily: 'SpaceMono', fontSize: 8, letterSpacing: 1 },
   recapBtns:     { gap: 10, marginTop: 20 },
-  replayBtn:     { backgroundColor: colors.accent, paddingVertical: 16, alignItems: 'center' },
-  replayBtnText: { fontFamily: 'BebasNeue', fontSize: 22, color: colors.bg, letterSpacing: 2 },
-  newBtn:        { borderWidth: 1, borderColor: colors.accent, paddingVertical: 16, alignItems: 'center' },
-  newBtnText:    { fontFamily: 'BebasNeue', fontSize: 22, color: colors.accent, letterSpacing: 2 },
+  replayBtn:     { backgroundColor: '#1a1a1a', paddingVertical: 16, alignItems: 'center', borderRadius: 12 },
+  replayBtnText: { fontFamily: 'BebasNeue', fontSize: 22, color: '#F5F5DC', letterSpacing: 2 },
+  newBtn:        { borderWidth: 1, borderColor: '#1a1a1a', paddingVertical: 16, alignItems: 'center', borderRadius: 12 },
+  newBtnText:    { fontFamily: 'BebasNeue', fontSize: 22, color: '#1a1a1a', letterSpacing: 2 },
 });

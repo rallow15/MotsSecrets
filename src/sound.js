@@ -1,15 +1,44 @@
 // ═════════════════════════════════════════════════════════════
-// GESTION DES SONS
+// GESTION DES SONS ET PUBS
 // ═════════════════════════════════════════════════════════════
 
 import { Audio } from 'expo-av';
+import { AppState, Platform } from 'react-native';
+
+// Gestion des pubs récompensées
+let RewardedAd = null;
+let rewardedAdInstance = null;
+
+try {
+  if (!__DEV__) {
+    const admob = require('react-native-google-mobile-ads');
+    RewardedAd = admob.RewardedAd;
+  }
+} catch (e) {
+  console.log('Rewarded Ad non disponible');
+}
+
+// ID de pub récompensée (test en DEV, production en prod)
+const REWARDED_AD_UNIT = __DEV__
+  ? 'ca-app-pub-3940256099942544/5224354917' // ID test rewarded
+  : 'ca-app-pub-2965679591230669/8849548689'; // Ton ID AdMob rewarded
 
 let isInitialized = false;
+
+// État des sons (peut être modifié depuis les paramètres)
+export let soundEnabled = true;
+export let musicEnabled = true;
+export let sfxEnabled = true; // Effets sonores (click, start, reveal)
+
+// Musique d'ambiance
+let backgroundMusic = null;
+let isMusicPlaying = false;
+let isMusicLoading = false; // Évite les chargements multiples
 
 // Sons avec require statique (obligatoire pour Metro/Expo)
 // Si un fichier manque, la valeur sera null et on utilisera le fallback
 let soundClick = null, soundStart = null, soundReveal = null, soundIntruder = null;
-let soundInnocent = null, soundMister = null, soundWin = null, soundLose = null;
+let soundInnocent = null, soundMister = null, soundWin = null, soundLose = null, soundAmbiance = null;
 
 try {
   soundClick = require('../assets/sounds/click.mp3');
@@ -35,6 +64,9 @@ try {
 try {
   soundLose = require('../assets/sounds/lose.mp3');
 } catch (e) {}
+try {
+  soundAmbiance = require('../assets/sounds/ambiance.mp3');
+} catch (e) {}
 
 const SOUND_ASSETS = {
   click: soundClick,
@@ -45,13 +77,40 @@ const SOUND_ASSETS = {
   mister: soundMister,
   win: soundWin,
   lose: soundLose,
+  ambiance: soundAmbiance,
 };
+
+// Vérifier si le téléphone est en mode silencieux
+function isSilentMode() {
+  if (Platform.OS === 'ios') {
+    // iOS gère automatiquement le mode silencieux avec playsInSilentModeIOS
+    return false;
+  }
+  if (Platform.OS === 'android') {
+    // Android - on vérifie via Audio API
+    return false; // Expo gère cela automatiquement
+  }
+  return false;
+}
+
+// Écouter les changements d'état de l'application
+if (AppState) {
+  AppState.addEventListener('change', (state) => {
+    if (state === 'background' && backgroundMusic) {
+      // Pause musique quand l'app est en arrière-plan
+      backgroundMusic.pauseAsync().catch(() => {});
+    } else if (state === 'active' && backgroundMusic && isMusicPlaying && musicEnabled && soundEnabled) {
+      // Reprendre musique quand l'app revient
+      backgroundMusic.playAsync().catch(() => {});
+    }
+  });
+}
 
 // Sons en cours de lecture (pour éviter de les couper)
 const playingSounds = {};
 
 // Jouer un fichier audio
-async function playAsset(soundKey) {
+async function playAsset(soundKey, isMusic = false) {
   const asset = SOUND_ASSETS[soundKey];
   if (!asset) return false;
   try {
@@ -59,12 +118,15 @@ async function playAsset(soundKey) {
     if (playingSounds[soundKey]) {
       await playingSounds[soundKey].unloadAsync();
     }
-    const { sound } = await Audio.Sound.createAsync(asset, { volume: 0.5 });
+    const { sound } = await Audio.Sound.createAsync(asset, {
+      volume: isMusic ? 0.3 : 0.5,
+      isLooping: isMusic,
+    });
     playingSounds[soundKey] = sound;
     await sound.playAsync();
     // Ne pas décharger - laisser le son finir
     sound.setOnPlaybackStatusUpdate((status) => {
-      if (status.isLoaded && status.didJustFinishPlaying) {
+      if (status.isLoaded && status.didJustFinishPlaying && !isMusic) {
         sound.unloadAsync();
         delete playingSounds[soundKey];
       }
@@ -125,21 +187,198 @@ async function playTone(frequency, duration, type = 'sine', volume = 0.5) {
 export async function initSounds() {
   if (isInitialized) return;
   try {
-    await Audio.setAudioModeAsync({ allowsRecordingIOS: false, playsInSilentModeIOS: true });
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: false, // Respecte le mode silencieux
+      staysActiveInBackground: true,
+    });
     isInitialized = true;
   } catch (error) {
     console.log('Erreur init sons:', error);
   }
 }
 
+// Démarrer la musique d'ambiance
+export async function startBackgroundMusic() {
+  if (!soundEnabled || !musicEnabled || isMusicLoading) return;
+  isMusicLoading = true;
+  try {
+    // Stopper l'ancienne musique si elle existe
+    if (backgroundMusic) {
+      try {
+        await backgroundMusic.stopAsync();
+        await backgroundMusic.unloadAsync();
+      } catch (e) {}
+      backgroundMusic = null;
+    }
+    isMusicPlaying = false;
+
+    if (soundAmbiance) {
+      const { sound } = await Audio.Sound.createAsync(soundAmbiance, {
+        volume: 0.3,
+        isLooping: true,
+      });
+      backgroundMusic = sound;
+      await sound.playAsync();
+      isMusicPlaying = true;
+    }
+  } catch (error) {
+    console.log('Erreur musique ambiance:', error);
+  } finally {
+    isMusicLoading = false;
+  }
+}
+
+// Stopper la musique d'ambiance
+export async function stopBackgroundMusic() {
+  if (!backgroundMusic && !isMusicPlaying) return;
+  try {
+    if (backgroundMusic) {
+      try {
+        await backgroundMusic.stopAsync();
+      } catch (e) {}
+      try {
+        await backgroundMusic.unloadAsync();
+      } catch (e) {}
+      backgroundMusic = null;
+    }
+    isMusicPlaying = false;
+  } catch (error) {
+    // Ignorer les erreurs de type "Seeking interrupted"
+    if (!error.message?.includes('interrupted')) {
+      console.log('Erreur stop musique:', error);
+    }
+  }
+}
+
+// Pause/Reprendre la musique
+export async function toggleMusic(play) {
+  if (!backgroundMusic) return;
+  try {
+    if (play) {
+      await backgroundMusic.playAsync();
+      isMusicPlaying = true;
+    } else {
+      await backgroundMusic.pauseAsync();
+      isMusicPlaying = false;
+    }
+  } catch (error) {
+    console.log('Erreur toggle musique:', error);
+  }
+}
+
+// Définir l'état des sons (depuis les paramètres)
+export function setSoundEnabled(enabled) {
+  soundEnabled = enabled;
+  if (!enabled) {
+    stopBackgroundMusic();
+  } else if (musicEnabled) {
+    startBackgroundMusic();
+  }
+}
+
+export function setMusicEnabled(enabled) {
+  musicEnabled = enabled;
+  if (!enabled) {
+    stopBackgroundMusic();
+  } else if (soundEnabled) {
+    startBackgroundMusic();
+  }
+}
+
+export function setSfxEnabled(enabled) {
+  sfxEnabled = enabled;
+}
+
+
+// Charger une pub récompensée
+export async function loadRewardedAd() {
+  if (!RewardedAd || !REWARDED_AD_UNIT) {
+    console.log('Rewarded Ad non disponible');
+    return null;
+  }
+
+  try {
+    rewardedAdInstance = RewardedAd.createForAdRequest(REWARDED_AD_UNIT, {
+      requestNonPersonalizedAdsOnly: false,
+    });
+
+    const unsubscribeLoaded = rewardedAdInstance.addAdEventListener(
+      RewardedAd.EventType.LOADED,
+      () => console.log('Pub récompensée chargée')
+    );
+
+    const unsubscribeEarned = rewardedAdInstance.addAdEventListener(
+      RewardedAd.EventType.EARNED_REWARD,
+      (reward) => {
+        console.log('Récompense gagnée:', reward);
+        if (onAdEarnedRewardCallback) {
+          onAdEarnedRewardCallback(reward);
+        }
+      }
+    );
+
+    const unsubscribeClosed = rewardedAdInstance.addAdEventListener(
+      RewardedAd.EventType.CLOSED,
+      () => {
+        unsubscribeLoaded();
+        unsubscribeEarned();
+        unsubscribeClosed();
+        rewardedAdInstance = null;
+      }
+    );
+
+    await rewardedAdInstance.load();
+    return rewardedAdInstance;
+  } catch (error) {
+    console.log('Erreur chargement pub récompensée:', error);
+    return null;
+  }
+}
+
+// Montrer une pub récompensée
+export async function showRewardedAd(onReward) {
+  if (!rewardedAdInstance) {
+    console.log('Pas de pub récompensée chargée');
+    return false;
+  }
+
+  try {
+    onAdEarnedRewardCallback = onReward;
+    await rewardedAdInstance.show();
+    return true;
+  } catch (error) {
+    console.log('Erreur affichage pub récompensée:', error);
+    return false;
+  }
+}
+
+// Charger et montrer une pub récompensée (tout-en-un)
+export async function loadAndShowRewardedAd(onReward) {
+  onAdEarnedRewardCallback = onReward;
+  const ad = await loadRewardedAd();
+  if (ad) {
+    return await showRewardedAd(onReward);
+  }
+  return false;
+}
+
+// Vérifier si une pub est prête
+export function isRewardedAdReady() {
+  return rewardedAdInstance !== null;
+}
+
 // Fallback synthétique si le fichier n'existe pas
 async function playSound(key, fallback) {
   if (!isInitialized) await initSounds();
+  // Vérifier si les sons sont activés
+  if (!soundEnabled || !sfxEnabled) return;
   const loaded = await playAsset(key);
   if (!loaded && fallback) fallback();
 }
 
 export async function playClick() {
+  if (!soundEnabled || !sfxEnabled) return;
   playSound('click', () => playTone(1200, 40, 'sine', 0.15));
 }
 
@@ -152,12 +391,14 @@ export function vibrateIntruderFound() {
 }
 
 export async function playStart() {
+  if (!soundEnabled || !sfxEnabled) return;
   playSound('start', () => {
     [523, 659, 784].forEach((f, i) => setTimeout(() => playTone(f, 120, 'sine', 0.4), i * 100));
   });
 }
 
 export async function playReveal() {
+  if (!soundEnabled || !sfxEnabled) return;
   playSound('reveal', () => {
     playTone(440, 100, 'sine', 0.3);
     setTimeout(() => playTone(554, 100, 'sine', 0.3), 100);
@@ -165,6 +406,7 @@ export async function playReveal() {
 }
 
 export async function playIntruderReveal() {
+  if (!soundEnabled || !sfxEnabled) return;
   playSound('intruder', () => {
     [180, 150, 120, 100, 80].forEach((f, i) => setTimeout(() => playTone(f, 300, 'sawtooth', 0.5), i * 100));
     setTimeout(() => playTone(60, 400, 'square', 0.4), 400);
@@ -173,12 +415,14 @@ export async function playIntruderReveal() {
 }
 
 export async function playInnocentReveal() {
+  if (!soundEnabled || !sfxEnabled) return;
   playSound('innocent', () => {
     [440, 554, 659, 784].forEach((f, i) => setTimeout(() => playTone(f, 150, 'sine', 0.35), i * 100));
   });
 }
 
 export async function playMisterWhite() {
+  if (!soundEnabled || !sfxEnabled) return;
   playSound('mister', () => {
     playTone(200, 300, 'square', 0.3);
     setTimeout(() => playTone(150, 400, 'square', 0.3), 250);
@@ -187,12 +431,14 @@ export async function playMisterWhite() {
 }
 
 export async function playWin() {
+  if (!soundEnabled || !sfxEnabled) return;
   playSound('win', () => {
     [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 200, 'sine', 0.4), i * 120));
   });
 }
 
 export async function playLose() {
+  if (!soundEnabled || !sfxEnabled) return;
   playSound('lose', () => {
     [400, 350, 300, 250].forEach((f, i) => setTimeout(() => playTone(f, 250, 'sawtooth', 0.35), i * 180));
   });

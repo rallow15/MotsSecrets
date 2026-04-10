@@ -4,17 +4,20 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import MenuScreen     from './src/screens/MenuScreen';
 import PrepScreen     from './src/screens/PrepScreen';
 import RevealScreen   from './src/screens/RevealScreen';
 import BlackScreen    from './src/screens/BlackScreen';
 import ResultScreen   from './src/screens/ResultScreen';
+import ConsentScreen  from './src/screens/ConsentScreen';
 import { generateAssignments } from './src/gameLogic';
 import { colors } from './src/theme';
 
 // Bannières et consentement uniquement en production (build natif)
 let BannerAd, BannerAdSize, requestConsentInfoUpdate, getConsentStatus, showConsentForm, ConsentStatus, ConsentInfoOptions;
+let UMPConsentInformation, UMPConsentForm, UMPDebugGeography, UMPConsentStatus;
 if (!__DEV__) {
   const admob = require('react-native-google-mobile-ads');
   BannerAd     = admob.BannerAd;
@@ -26,6 +29,10 @@ if (!__DEV__) {
     showConsentForm = consent.showConsentForm;
     ConsentStatus = consent.ConsentStatus;
     ConsentInfoOptions = consent.ConsentInfoOptions;
+    UMPConsentInformation = consent.UMPConsentInformation;
+    UMPConsentForm = consent.UMPConsentForm;
+    UMPDebugGeography = consent.UMPDebugGeography;
+    UMPConsentStatus = consent.UMPConsentStatus;
   } catch (e) {
     console.log('SDK consentement non disponible');
   }
@@ -73,45 +80,49 @@ export default function App() {
     SpaceMono: require('./assets/fonts/SpaceMono-Regular.ttf'),
   });
   const [adKey, setAdKey] = useState(0);
-  const [consentLoaded, setConsentLoaded] = useState(false);
+  const [consentReady, setConsentReady] = useState(false);
 
   useEffect(() => {
-    if (__DEV__) return;
+    if (__DEV__) {
+      setConsentReady(true);
+      return;
+    }
     const id = setInterval(() => setAdKey(k => k + 1), 30000);
     return () => clearInterval(id);
   }, []);
 
+  // Consentement Google UMP automatique
   useEffect(() => {
-    // Skip consentement en DEV ou si déjà chargé
-    if (__DEV__ || consentLoaded || !requestConsentInfoUpdate) {
-      setConsentLoaded(true);
+    if (__DEV__ || !requestConsentInfoUpdate) {
+      setConsentReady(true);
       return;
     }
 
     const checkConsent = async () => {
       try {
         const consentInfoOptions = {
-          debugGeography: ConsentInfoOptions?.DebugGeography?.DISABLED ?? 0,
+          debugGeography: UMPDebugGeography?.DISABLED ?? 0,
           tagForUnderAgeOfConsent: false,
         };
 
         await requestConsentInfoUpdate(consentInfoOptions);
         const status = await getConsentStatus();
 
-        if (status === ConsentStatus?.REQUIRED) {
+        // Si consentement requis, afficher le formulaire Google
+        if (status === UMPConsentStatus?.REQUIRED) {
           await showConsentForm();
         }
-        setConsentLoaded(true);
       } catch (error) {
-        console.log('Erreur consentement pub:', error);
-        setConsentLoaded(true);
+        console.log('Erreur consentement UMP:', error);
+      } finally {
+        setConsentReady(true);
       }
     };
 
     checkConsent();
-  }, [consentLoaded]);
+  }, []);
 
-  if (!fontsLoaded || !consentLoaded) {
+  if (!fontsLoaded || !consentReady) {
     return <View style={styles.loading}><ActivityIndicator color={colors.accent} size="large" /></View>;
   }
 
@@ -119,7 +130,14 @@ export default function App() {
     <View style={styles.root}>
       {!__DEV__ && BannerAd && (
         <View style={styles.banner}>
-          <BannerAd key={adKey} unitId={BANNER_TOP_ID} size={BannerAdSize.BANNER} requestOptions={{ requestNonPersonalizedAdsOnly: false }} />
+          <BannerAd
+            key={adKey}
+            unitId={BANNER_TOP_ID}
+            size={BannerAdSize.BANNER}
+            requestOptions={{
+              requestNonPersonalizedAdsOnly: consentGiven === 'refused'
+            }}
+          />
         </View>
       )}
       <View style={styles.nav}>
@@ -136,7 +154,14 @@ export default function App() {
       </View>
       {!__DEV__ && BannerAd && (
         <View style={styles.banner}>
-          <BannerAd key={adKey + 1} unitId={BANNER_BOTTOM_ID} size={BannerAdSize.BANNER} requestOptions={{ requestNonPersonalizedAdsOnly: false }} />
+          <BannerAd
+            key={adKey + 1}
+            unitId={BANNER_BOTTOM_ID}
+            size={BannerAdSize.BANNER}
+            requestOptions={{
+              requestNonPersonalizedAdsOnly: consentGiven === 'refused'
+            }}
+          />
         </View>
       )}
     </View>

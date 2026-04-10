@@ -52,6 +52,10 @@ export default function PrepScreen({ navigation, route }) {
 
   return (
     <TouchableOpacity style={styles.container} activeOpacity={1} onPress={handleTap}>
+      <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()} activeOpacity={0.7}>
+        <Text style={styles.backBtnText}>←</Text>
+      </TouchableOpacity>
+
       <Text style={styles.playerBadge}>{t('playerLabel', currentPlayer + 1)}</Text>
 
       <View style={styles.nameWrap} onStartShouldSetResponder={() => true}>
@@ -62,12 +66,12 @@ export default function PrepScreen({ navigation, route }) {
           onChangeText={setName}
           onSubmitEditing={handleTap}
           placeholder={t('namePlaceholder')}
-          placeholderTextColor="#333"
+          placeholderTextColor="#666"
           maxLength={14}
           autoCorrect={false}
           returnKeyType="done"
+          autoCapitalize="characters"
         />
-        <Text style={styles.nameHint}>{t('nameHint')}</Text>
       </View>
 
       <Text style={styles.prompt}>{t('touchScreen')}</Text>
@@ -88,15 +92,16 @@ export default function PrepScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container:  { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, gap: 12 },
-  playerBadge:{ fontFamily: 'SpaceMono', fontSize: 11, color: colors.gray, letterSpacing: 5 },
-  nameWrap:   { width: '100%', alignItems: 'center', gap: 6 },
-  nameInput:  { fontFamily: 'BebasNeue', fontSize: 44, color: colors.text, borderBottomWidth: 2, borderBottomColor: '#444', textAlign: 'center', width: '80%', paddingVertical: 4, letterSpacing: 2 },
-  nameHint:   { fontFamily: 'SpaceMono', fontSize: 8, color: colors.muted, letterSpacing: 2 },
-  prompt:     { fontFamily: 'BebasNeue', fontSize: 72, color: colors.text, textAlign: 'center', lineHeight: 66 },
+  container:  { flex: 1, backgroundColor: '#F5F5DC', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, gap: 8, paddingTop: 50 },
+  backBtn: { position: 'absolute', top: 50, left: 20, width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 2, borderColor: 'rgba(0,0,0,0.2)', alignItems: 'center', justifyContent: 'center' },
+  backBtnText: { fontSize: 24, color: '#1a1a1a' },
+  playerBadge:{ fontFamily: 'SpaceMono', fontSize: 11, color: '#333', letterSpacing: 5 },
+  nameWrap:   { width: '100%', alignItems: 'center', gap: 2 },
+  nameInput:  { fontFamily: 'BebasNeue', fontSize: 36, color: '#000000', borderBottomWidth: 2, borderBottomColor: 'rgba(0,0,0,0.3)', textAlign: 'center', width: '80%', paddingVertical: 4, letterSpacing: 2 },
+  prompt:     { fontFamily: 'BebasNeue', fontSize: 56, color: '#1a1a1a', textAlign: 'center', lineHeight: 52 },
   dotsRow:    { flexDirection: 'row', gap: 8 },
-  dot:        { width: 8, height: 8, borderRadius: 4, backgroundColor: '#222' },
-  dotDone:    { backgroundColor: colors.accent },
-  dotCurrent: { backgroundColor: colors.text },
-  tapIcon:    { fontSize: 48 },
+  dot:        { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(0,0,0,0.2)' },
+  dotDone:    { backgroundColor: '#1a1a1a' },
+  dotCurrent: { backgroundColor: '#4FC3F7' },
+  tapIcon:    { fontSize: 40, marginTop: 8 },
 });
