@@ -20,14 +20,18 @@ import { colors } from './src/theme';
 // Bannières et consentement
 let BannerAd, BannerAdSize;
 
-try {
-  console.log('🎯 Chargement AdMob...');
-  const admob = require('react-native-google-mobile-ads');
-  BannerAd     = admob.BannerAd;
-  BannerAdSize = admob.BannerAdSize;
-  console.log('✅ AdMob chargé avec succès');
-} catch (e) {
-  console.log('❌ AdMob non disponible:', e.message || e);
+// Ne charger AdMob que si on n'est pas dans Expo Go
+const isExpoGo = Constants.appOwnership === 'expo';
+if (!isExpoGo) {
+  try {
+    console.log('🎯 Chargement AdMob...');
+    const admob = require('react-native-google-mobile-ads');
+    BannerAd     = admob.BannerAd;
+    BannerAdSize = admob.BannerAdSize;
+    console.log('✅ AdMob chargé avec succès');
+  } catch (e) {
+    console.log('❌ AdMob non disponible:', e.message || e);
+  }
 }
 
 const Stack = createNativeStackNavigator();

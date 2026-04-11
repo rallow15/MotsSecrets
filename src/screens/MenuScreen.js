@@ -12,6 +12,10 @@ import { generateAssignments } from '../gameLogic';
 import { initSounds, playClick, playStart, startBackgroundMusic, stopBackgroundMusic, setMusicEnabled, setSfxEnabled, musicEnabled, sfxEnabled } from '../sound';
 import { loadAndShowRewardedAd } from '../ads';
 import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
+
+// Détecter si on est dans Expo Go
+const isExpoGo = Constants.appOwnership === 'expo';
 
 const CATEGORY_EMOJIS = {
   FOOTBALL: '⚽',
@@ -249,29 +253,37 @@ export default function MenuScreen({ navigation }) {
   const handleLaunchGame = async () => {
     playClick();
 
-    // Si OBJETS est sélectionné et pas encore débloqué, afficher la pub
+    // Si OBJETS est sélectionné et pas encore débloqué
     const isObjectsSelected = selectedCategory === 'OBJETS' || selectedCategory === 'OBJECTS';
     console.log('handleLaunchGame - selectedCategory:', selectedCategory);
     console.log('handleLaunchGame - objectsUnlocked:', objectsUnlocked);
     console.log('handleLaunchGame - isObjectsSelected:', isObjectsSelected);
+    console.log('handleLaunchGame - isExpoGo:', isExpoGo);
 
     if (isObjectsSelected && !objectsUnlocked) {
-      console.log('Tentative de chargement pub...');
-      try {
-        const rewarded = await loadAndShowRewardedAd(() => {
-          console.log('Callback récompense appelé');
-          setObjectsUnlocked(true);
-          SecureStore.setItemAsync('objects_category_unlocked', 'true');
-        });
-        console.log('Résultat pub:', rewarded);
+      // Dans Expo Go, on débloque directement sans pub
+      if (isExpoGo) {
+        console.log('Expo Go - déblocage automatique OBJETS');
+        setObjectsUnlocked(true);
+        SecureStore.setItemAsync('objects_category_unlocked', 'true');
+      } else {
+        console.log('Tentative de chargement pub...');
+        try {
+          const rewarded = await loadAndShowRewardedAd(() => {
+            console.log('Callback récompense appelé');
+            setObjectsUnlocked(true);
+            SecureStore.setItemAsync('objects_category_unlocked', 'true');
+          });
+          console.log('Résultat pub:', rewarded);
 
-        if (!rewarded) {
-          console.log('Pub fermée sans récompense');
+          if (!rewarded) {
+            console.log('Pub fermée sans récompense');
+            return;
+          }
+        } catch (e) {
+          console.log('Erreur pub:', e.message);
           return;
         }
-      } catch (e) {
-        console.log('Erreur pub:', e.message);
-        return;
       }
     }
 
