@@ -278,7 +278,7 @@ export function setSfxEnabled(enabled) {
 // ────────────────────────────────────────────────────────
 
 const REWARDED_AD_UNIT = __DEV__
-  ? TestAdIds.REWARDED_ADAPTIVE_BANNER
+  ? TestAdIds.REWARDED
   : 'ca-app-pub-2965679591230669/8849548689';
 
 let rewardedAdInstance = null;
