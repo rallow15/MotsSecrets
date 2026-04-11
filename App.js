@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as SecureStore from 'expo-secure-store';
 import { initAds } from './src/ads';
 import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
 import MenuScreen     from './src/screens/MenuScreen';
 import PrepScreen     from './src/screens/PrepScreen';
@@ -17,20 +18,26 @@ import ConsentScreen  from './src/screens/ConsentScreen';
 import { generateAssignments } from './src/gameLogic';
 import { colors } from './src/theme';
 
-// Bannières et consentement
-let BannerAd, BannerAdSize;
+// Bannières et consentement - initialisé à null
+let BannerAd = null;
+let BannerAdSize = null;
 
-// Ne charger AdMob que si on n'est pas dans Expo Go
-const isExpoGo = Constants.appOwnership === 'expo';
-if (!isExpoGo) {
+// Fonction pour charger AdMob dynamiquement (uniquement hors Expo Go)
+function loadAdMob() {
+  if (Constants.appOwnership === 'expo') {
+    console.log('📱 Expo Go détecté - AdMob ignoré');
+    return false;
+  }
   try {
     console.log('🎯 Chargement AdMob...');
     const admob = require('react-native-google-mobile-ads');
-    BannerAd     = admob.BannerAd;
+    BannerAd = admob.BannerAd;
     BannerAdSize = admob.BannerAdSize;
     console.log('✅ AdMob chargé avec succès');
+    return true;
   } catch (e) {
     console.log('❌ AdMob non disponible:', e.message || e);
+    return false;
   }
 }
 
@@ -79,9 +86,15 @@ export default function App() {
   const [showConsent, setShowConsent] = useState(!__DEV__); // En prod, on affiche par défaut
   const [consentGiven, setConsentGiven] = useState('pending');
   const [consentChecked, setConsentChecked] = useState(false);
+  const [adMobLoaded, setAdMobLoaded] = useState(false);
 
   // Détecter si on est dans Expo Go (appartenance à Expo)
   const isExpoGo = Constants.appOwnership === 'expo';
+
+  // Charger AdMob au démarrage (uniquement si pas Expo Go)
+  useEffect(() => {
+    setAdMobLoaded(loadAdMob());
+  }, []);
 
   // Vérifier le consentement IMMÉDIATEMENT (sans attendre AdMob)
   useEffect(() => {
@@ -107,12 +120,12 @@ export default function App() {
 
   // Initialiser AdMob (en parallèle, ne bloque pas le consentement)
   useEffect(() => {
-    if (!__DEV__ && !isExpoGo) {
+    if (!__DEV__ && !isExpoGo && adMobLoaded) {
       initAds();
     }
     const id = setInterval(() => setAdKey(k => k + 1), 30000);
     return () => clearInterval(id);
-  }, []);
+  }, [adMobLoaded, isExpoGo]);
 
   const handleConsentGiven = (status) => {
     setConsentGiven(status);
@@ -130,7 +143,7 @@ export default function App() {
 
   return (
     <View style={styles.root}>
-      {!__DEV__ && !isExpoGo && BannerAd && (
+      {!__DEV__ && !isExpoGo && adMobLoaded && BannerAd && (
         <View style={styles.banner}>
           <BannerAd
             key={adKey}
@@ -154,7 +167,7 @@ export default function App() {
           </Stack.Navigator>
         </NavigationContainer>
       </View>
-      {!__DEV__ && !isExpoGo && BannerAd && (
+      {!__DEV__ && !isExpoGo && adMobLoaded && BannerAd && (
         <View style={styles.banner}>
           <BannerAd
             key={adKey + 1}
