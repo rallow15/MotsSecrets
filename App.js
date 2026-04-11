@@ -92,9 +92,12 @@ export default function App() {
 
   // Initialiser AdMob
   useEffect(() => {
-    if (!__DEV__) {
-      initAds();
-    }
+    const init = async () => {
+      if (!__DEV__) {
+        await initAds();
+      }
+    };
+    init();
     const id = setInterval(() => setAdKey(k => k + 1), 30000);
     return () => clearInterval(id);
   }, []);
