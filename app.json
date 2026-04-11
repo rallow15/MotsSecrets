@@ -27,7 +27,8 @@
 "react-native-google-mobile-ads",
 {
 "androidAppId": "ca-app-pub-2965679591230669~9061495858",
-"iosAppId": "ca-app-pub-2965679591230669~9061495858"
+"iosAppId": "ca-app-pub-2965679591230669~9061495858",
+"userTrackingPermission": "Cette autorisation permet d'afficher des publicités personnalisées"
 }
 ]
 ],
