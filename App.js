@@ -6,6 +6,7 @@ import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import * as SecureStore from 'expo-secure-store';
 import { initAds } from './src/ads';
+import Constants from 'expo-constants';
 
 import MenuScreen     from './src/screens/MenuScreen';
 import PrepScreen     from './src/screens/PrepScreen';
@@ -75,6 +76,9 @@ export default function App() {
   const [consentGiven, setConsentGiven] = useState('pending');
   const [consentChecked, setConsentChecked] = useState(false);
 
+  // Détecter si on est dans Expo Go (pas de AdMob)
+  const isExpoGo = !Constants.expoConfig?.extra?.eas?.projectId;
+
   // Vérifier le consentement IMMÉDIATEMENT (sans attendre AdMob)
   useEffect(() => {
     const checkConsent = async () => {
@@ -99,7 +103,7 @@ export default function App() {
 
   // Initialiser AdMob (en parallèle, ne bloque pas le consentement)
   useEffect(() => {
-    if (!__DEV__) {
+    if (!__DEV__ && !isExpoGo) {
       initAds();
     }
     const id = setInterval(() => setAdKey(k => k + 1), 30000);
@@ -122,7 +126,7 @@ export default function App() {
 
   return (
     <View style={styles.root}>
-      {!__DEV__ && BannerAd && (
+      {!__DEV__ && !isExpoGo && BannerAd && (
         <View style={styles.banner}>
           <BannerAd
             key={adKey}
@@ -146,7 +150,7 @@ export default function App() {
           </Stack.Navigator>
         </NavigationContainer>
       </View>
-      {!__DEV__ && BannerAd && (
+      {!__DEV__ && !isExpoGo && BannerAd && (
         <View style={styles.banner}>
           <BannerAd
             key={adKey + 1}

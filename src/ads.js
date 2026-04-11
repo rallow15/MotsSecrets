@@ -3,6 +3,10 @@
 // ═════════════════════════════════════════════════════════════
 
 import { RewardedAd, TestAdIds, MobileAds, AdsConsent } from 'react-native-google-mobile-ads';
+import Constants from 'expo-constants';
+
+// Détecter si on est dans Expo Go (pas de AdMob)
+const isExpoGo = !Constants.expoConfig?.extra?.eas?.projectId;
 
 // Événements pour les pubs récompensées (v16+)
 const REWARDED_EVENT = {
@@ -14,6 +18,10 @@ const REWARDED_EVENT = {
 
 // Initialiser AdMob au démarrage
 export async function initAds() {
+  if (isExpoGo) {
+    console.log('📱 Expo Go détecté - AdMob désactivé');
+    return;
+  }
   try {
     console.log('🎯 Initialisation AdMob...');
     const adsInstance = MobileAds();
@@ -38,6 +46,10 @@ let isAdLoading = false;
 
 // Charger une pub récompensée
 export async function loadRewardedAd() {
+  if (isExpoGo) {
+    console.log('Expo Go - pub récompensée ignorée');
+    return null;
+  }
   if (!RewardedAd) {
     console.log('Rewarded Ad non disponible');
     return null;
