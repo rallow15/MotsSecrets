@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, TextInput, Keyboard } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { colors } from '../theme';
 import { t } from '../i18n';
 
@@ -53,7 +54,9 @@ export default function PrepScreen({ navigation, route }) {
   return (
     <TouchableOpacity style={styles.container} activeOpacity={1} onPress={handleTap}>
       <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()} activeOpacity={0.7}>
-        <Text style={styles.backBtnText}>‹</Text>
+        <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <Path d="M15 18l-6-6 6-6" />
+        </Svg>
       </TouchableOpacity>
 
       <Text style={styles.playerBadge}>{t('playerLabel', currentPlayer + 1)}</Text>
@@ -93,8 +96,7 @@ export default function PrepScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container:  { flex: 1, backgroundColor: '#F5F5DC', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, gap: 8, paddingTop: 50 },
-  backBtn: { position: 'absolute', top: 50, left: 20, width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 2, borderColor: 'rgba(0,0,0,0.2)', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
-  backBtnText: { fontSize: 32, color: '#1a1a1a', fontWeight: 'bold', padding: 0, margin: 0, textAlignVertical: 'center' },
+  backBtn: { position: 'absolute', top: 50, left: 20, width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 2, borderColor: 'rgba(0,0,0,0.2)', alignItems: 'center', justifyContent: 'center' },
   playerBadge:{ fontFamily: 'SpaceMono', fontSize: 11, color: '#333', letterSpacing: 5 },
   nameWrap:   { width: '100%', alignItems: 'center', gap: 2 },
   nameInput:  { fontFamily: 'BebasNeue', fontSize: 36, color: '#000000', borderBottomWidth: 2, borderBottomColor: 'rgba(0,0,0,0.3)', textAlign: 'center', width: '80%', paddingVertical: 4, letterSpacing: 2 },
