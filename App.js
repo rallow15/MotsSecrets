@@ -23,6 +23,7 @@ let consentFormAvailable = false;
 
 if (!__DEV__) {
   try {
+    console.log('🎯 Chargement AdMob...');
     const admob = require('react-native-google-mobile-ads');
     BannerAd     = admob.BannerAd;
     BannerAdSize = admob.BannerAdSize;
@@ -39,9 +40,10 @@ if (!__DEV__) {
     UMPConsentStatus = admob.UMPConsentStatus;
     consentFormAvailable = true;
 
-    console.log('AdMob chargé avec succès');
+    console.log('✅ AdMob chargé avec succès');
+    console.log('📋 consentFormAvailable:', consentFormAvailable);
   } catch (e) {
-    console.log('SDK AdMob/consentement non disponible:', e);
+    console.log('❌ SDK AdMob/consentement non disponible:', e.message || e);
   }
 }
 
@@ -104,7 +106,11 @@ export default function App() {
 
   // Consentement Google UMP automatique
   useEffect(() => {
+    console.log('📋 consentFormAvailable:', consentFormAvailable);
+    console.log('📋 __DEV__:', __DEV__);
+
     if (__DEV__ || !consentFormAvailable) {
+      console.log('⚠️ Mode dev ou consentement indisponible, skip UMP');
       setConsentReady(true);
       setConsentGiven('given');
       return;
@@ -117,22 +123,24 @@ export default function App() {
           tagForUnderAgeOfConsent: false,
         };
 
-        console.log('Demande info consentement...');
+        console.log('📋 Demande info consentement...');
         await requestConsentInfoUpdate(consentInfoOptions);
 
         const status = await getConsentStatus();
-        console.log('Statut consentement UMP:', status);
+        console.log('📋 Statut consentement UMP:', status);
+        console.log('📋 ConsentStatus.REQUIRED:', ConsentStatus?.REQUIRED);
+        console.log('📋 ConsentStatus.UNKNOWN:', ConsentStatus?.UNKNOWN);
 
         // Si consentement requis ou inconnu, afficher le formulaire Google
-        if (status === UMPConsentStatus?.REQUIRED || status === UMPConsentStatus?.UNKNOWN) {
-          console.log('Affichage formulaire consentement...');
+        if (status === ConsentStatus?.REQUIRED || status === ConsentStatus?.UNKNOWN) {
+          console.log('📋 Affichage formulaire consentement...');
           await showConsentForm();
 
           // Attendre que l'utilisateur complète le formulaire
           setTimeout(async () => {
             const newStatus = await getConsentStatus();
-            console.log('Nouveau statut après formulaire:', newStatus);
-            const consentValue = newStatus === UMPConsentStatus?.OBTAINED ? 'given' : 'refused';
+            console.log('📋 Nouveau statut après formulaire:', newStatus);
+            const consentValue = newStatus === ConsentStatus?.OBTAINED ? 'given' : 'refused';
             setConsentGiven(consentValue);
             await SecureStore.setItemAsync('ump_consent_status', consentValue);
             setConsentReady(true);
@@ -141,13 +149,13 @@ export default function App() {
         }
 
         // Consentement déjà obtenu ou non requis
-        const consentValue = status === UMPConsentStatus?.OBTAINED ? 'given' : 'refused';
-        console.log('Consentement existant:', consentValue);
+        const consentValue = status === ConsentStatus?.OBTAINED ? 'given' : 'refused';
+        console.log('📋 Consentement existant:', consentValue);
         setConsentGiven(consentValue);
         await SecureStore.setItemAsync('ump_consent_status', consentValue);
         setConsentReady(true);
       } catch (error) {
-        console.log('Erreur consentement UMP:', error);
+        console.log('❌ Erreur consentement UMP:', error.message || error);
         setConsentGiven('refused');
         setConsentReady(true);
       }

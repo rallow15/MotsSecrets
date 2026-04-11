@@ -7,11 +7,12 @@ import { RewardedAd, TestAdIds, MobileAds } from 'react-native-google-mobile-ads
 // Initialiser AdMob au démarrage
 export async function initAds() {
   try {
-    console.log('Initialisation AdMob...');
-    await MobileAds().initialize();
-    console.log('AdMob initialisé avec succès');
+    console.log('🎯 Initialisation AdMob...');
+    const adsInstance = MobileAds();
+    await adsInstance.initialize();
+    console.log('✅ AdMob initialisé avec succès');
   } catch (error) {
-    console.log('Erreur init AdMob:', error);
+    console.log('❌ Erreur init AdMob:', error.message || error);
   }
 }
 
