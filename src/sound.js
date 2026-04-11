@@ -1,27 +1,9 @@
 // ═════════════════════════════════════════════════════════════
-// GESTION DES SONS ET PUBS
+// GESTION DES SONS
 // ═════════════════════════════════════════════════════════════
 
 import { Audio } from 'expo-av';
 import { AppState, Platform } from 'react-native';
-
-// Gestion des pubs récompensées
-let RewardedAd = null;
-let rewardedAdInstance = null;
-
-try {
-  if (!__DEV__) {
-    const admob = require('react-native-google-mobile-ads');
-    RewardedAd = admob.RewardedAd;
-  }
-} catch (e) {
-  console.log('Rewarded Ad non disponible');
-}
-
-// ID de pub récompensée (test en DEV, production en prod)
-const REWARDED_AD_UNIT = __DEV__
-  ? 'ca-app-pub-3940256099942544/5224354917' // ID test rewarded
-  : 'ca-app-pub-2965679591230669/8849548689'; // Ton ID AdMob rewarded
 
 let isInitialized = false;
 
@@ -288,84 +270,6 @@ export function setMusicEnabled(enabled) {
 
 export function setSfxEnabled(enabled) {
   sfxEnabled = enabled;
-}
-
-
-// Charger une pub récompensée
-export async function loadRewardedAd() {
-  if (!RewardedAd || !REWARDED_AD_UNIT) {
-    console.log('Rewarded Ad non disponible');
-    return null;
-  }
-
-  try {
-    rewardedAdInstance = RewardedAd.createForAdRequest(REWARDED_AD_UNIT, {
-      requestNonPersonalizedAdsOnly: false,
-    });
-
-    const unsubscribeLoaded = rewardedAdInstance.addAdEventListener(
-      RewardedAd.EventType.LOADED,
-      () => console.log('Pub récompensée chargée')
-    );
-
-    const unsubscribeEarned = rewardedAdInstance.addAdEventListener(
-      RewardedAd.EventType.EARNED_REWARD,
-      (reward) => {
-        console.log('Récompense gagnée:', reward);
-        if (onAdEarnedRewardCallback) {
-          onAdEarnedRewardCallback(reward);
-        }
-      }
-    );
-
-    const unsubscribeClosed = rewardedAdInstance.addAdEventListener(
-      RewardedAd.EventType.CLOSED,
-      () => {
-        unsubscribeLoaded();
-        unsubscribeEarned();
-        unsubscribeClosed();
-        rewardedAdInstance = null;
-      }
-    );
-
-    await rewardedAdInstance.load();
-    return rewardedAdInstance;
-  } catch (error) {
-    console.log('Erreur chargement pub récompensée:', error);
-    return null;
-  }
-}
-
-// Montrer une pub récompensée
-export async function showRewardedAd(onReward) {
-  if (!rewardedAdInstance) {
-    console.log('Pas de pub récompensée chargée');
-    return false;
-  }
-
-  try {
-    onAdEarnedRewardCallback = onReward;
-    await rewardedAdInstance.show();
-    return true;
-  } catch (error) {
-    console.log('Erreur affichage pub récompensée:', error);
-    return false;
-  }
-}
-
-// Charger et montrer une pub récompensée (tout-en-un)
-export async function loadAndShowRewardedAd(onReward) {
-  onAdEarnedRewardCallback = onReward;
-  const ad = await loadRewardedAd();
-  if (ad) {
-    return await showRewardedAd(onReward);
-  }
-  return false;
-}
-
-// Vérifier si une pub est prête
-export function isRewardedAdReady() {
-  return rewardedAdInstance !== null;
 }
 
 // Fallback synthétique si le fichier n'existe pas
