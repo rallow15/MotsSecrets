@@ -276,10 +276,9 @@ export default function MenuScreen({ navigation }) {
       });
 
       if (!rewarded) {
-        // Pub non disponible (Expo Go), on sélectionne quand même
-        console.log('Pub non disponible, catégorie accessible');
-        setSelectedCategory(cat);
-        setShowCategories(false);
+        // Pub non disponible ou fermée sans récompense
+        console.log('Pub fermée sans récompense, catégorie toujours verrouillée');
+        // Ne PAS sélectionner la catégorie - elle reste verrouillée
       }
       return;
     }
