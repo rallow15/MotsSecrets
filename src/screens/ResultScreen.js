@@ -3,16 +3,28 @@ import { View, Text, TouchableOpacity, StyleSheet, Animated, ScrollView, Pressab
 import { colors } from '../theme';
 import { t } from '../i18n';
 import { playClick, playWin, playLose, playIntruderReveal, playInnocentReveal, playMisterWhite, vibrate, vibrateIntruderFound } from '../sound';
+import Constants from 'expo-constants';
 
-let InterstitialAd;
-try {
-  const admob = require('react-native-google-mobile-ads');
-  InterstitialAd = admob.InterstitialAd;
-} catch (e) {}
+// Détecter si on est dans Expo Go
+const isExpoGo = Constants.appOwnership === 'expo';
 
+// InterstitialAd - chargé dynamiquement uniquement si pas Expo Go
+let InterstitialAd = null;
 const AD_UNIT = __DEV__
   ? 'ca-app-pub-3940256099942544/1033173712'
   : 'REMPLACE_PAR_TON_AD_UNIT_ID';
+
+function loadInterstitialAd() {
+  if (isExpoGo) return false;
+  try {
+    const admob = require('react-native-google-mobile-ads');
+    InterstitialAd = admob.InterstitialAd;
+    return true;
+  } catch (e) {
+    console.log('❌ InterstitialAd non disponible:', e.message);
+    return false;
+  }
+}
 
 export default function ResultScreen({ navigation, route }) {
   const { numPlayers, assignments, playerNumbers, playerNames, gameMode } = route.params;
@@ -36,7 +48,7 @@ export default function ResultScreen({ navigation, route }) {
       Animated.spring(scaleAnim,   { toValue: 1, friction: 5, tension: 120, useNativeDriver: true }),
       Animated.timing(opacityAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
     ]).start();
-    if (InterstitialAd) {
+    if (!isExpoGo && loadInterstitialAd() && InterstitialAd) {
       try {
         const ad = InterstitialAd.createForAdRequest(AD_UNIT);
         adRef.current = ad;
