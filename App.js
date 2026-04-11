@@ -102,14 +102,6 @@ export default function App() {
 
     const checkConsent = async () => {
       try {
-        // Charger le consentement sauvegardé
-        const savedConsent = await SecureStore.getItemAsync('ump_consent_status');
-        if (savedConsent) {
-          setConsentGiven(savedConsent);
-          setConsentReady(true);
-          return;
-        }
-
         const consentInfoOptions = {
           debugGeography: UMPDebugGeography?.DISABLED ?? 0,
           tagForUnderAgeOfConsent: false,
@@ -118,17 +110,20 @@ export default function App() {
         await requestConsentInfoUpdate(consentInfoOptions);
         const status = await getConsentStatus();
 
-        // Si consentement requis, afficher le formulaire Google
+        console.log('Statut consentement UMP:', status);
+
+        // Si consentement requis ou inconnu, afficher le formulaire Google
         if (status === UMPConsentStatus?.REQUIRED || status === UMPConsentStatus?.UNKNOWN) {
           await showConsentForm();
           // Après affichage, re-vérifier le statut
           setTimeout(async () => {
             const newStatus = await getConsentStatus();
+            console.log('Nouveau statut après formulaire:', newStatus);
             const consentValue = newStatus === UMPConsentStatus?.OBTAINED ? 'given' : 'refused';
             setConsentGiven(consentValue);
             await SecureStore.setItemAsync('ump_consent_status', consentValue);
             setConsentReady(true);
-          }, 1000);
+          }, 1500);
           return;
         }
 
@@ -136,10 +131,10 @@ export default function App() {
         const consentValue = status === UMPConsentStatus?.OBTAINED ? 'given' : 'refused';
         setConsentGiven(consentValue);
         await SecureStore.setItemAsync('ump_consent_status', consentValue);
+        setConsentReady(true);
       } catch (error) {
         console.log('Erreur consentement UMP:', error);
         setConsentGiven('refused');
-      } finally {
         setConsentReady(true);
       }
     };
