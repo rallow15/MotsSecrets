@@ -6,9 +6,9 @@ import { RewardedAd, TestAdIds, MobileAds, AdsConsent } from 'react-native-googl
 
 // Événements pour les pubs récompensées (v16+)
 const REWARDED_EVENT = {
-  LOADED: 'loaded',
+  LOADED: 'rewarded_loaded',
   ERROR: 'error',
-  EARNED_REWARD: 'earned_reward',
+  EARNED_REWARD: 'rewarded_earned_reward',
   CLOSED: 'closed',
 };
 
