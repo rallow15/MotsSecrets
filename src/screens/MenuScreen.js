@@ -9,7 +9,8 @@ import { themes, colors } from '../theme';
 import { t, getLang, setLang } from '../i18n';
 import { CATEGORIES_FR, CATEGORIES_EN } from '../data/words';
 import { generateAssignments } from '../gameLogic';
-import { initSounds, playClick, playStart, startBackgroundMusic, stopBackgroundMusic, setMusicEnabled, setSfxEnabled, musicEnabled, sfxEnabled, loadAndShowRewardedAd } from '../sound';
+import { initSounds, playClick, playStart, startBackgroundMusic, stopBackgroundMusic, setMusicEnabled, setSfxEnabled, musicEnabled, sfxEnabled } from '../sound';
+import { loadAndShowRewardedAd } from '../ads';
 import * as SecureStore from 'expo-secure-store';
 
 const CATEGORY_EMOJIS = {

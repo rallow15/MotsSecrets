@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import * as SecureStore from 'expo-secure-store';
+import { initAds } from './src/ads';
 
 import MenuScreen     from './src/screens/MenuScreen';
 import PrepScreen     from './src/screens/PrepScreen';
@@ -18,11 +19,14 @@ import { colors } from './src/theme';
 // Bannières et consentement uniquement en production (build natif)
 let BannerAd, BannerAdSize, requestConsentInfoUpdate, getConsentStatus, showConsentForm, ConsentStatus, ConsentInfoOptions;
 let UMPConsentInformation, UMPConsentForm, UMPDebugGeography, UMPConsentStatus;
+let consentFormAvailable = false;
+
 if (!__DEV__) {
-  const admob = require('react-native-google-mobile-ads');
-  BannerAd     = admob.BannerAd;
-  BannerAdSize = admob.BannerAdSize;
   try {
+    const admob = require('react-native-google-mobile-ads');
+    BannerAd     = admob.BannerAd;
+    BannerAdSize = admob.BannerAdSize;
+
     const consent = require('@react-native-google-mobile-ads/consent');
     requestConsentInfoUpdate = consent.requestConsentInfoUpdate;
     getConsentStatus = consent.getConsentStatus;
@@ -33,8 +37,9 @@ if (!__DEV__) {
     UMPConsentForm = consent.UMPConsentForm;
     UMPDebugGeography = consent.UMPDebugGeography;
     UMPConsentStatus = consent.UMPConsentStatus;
+    consentFormAvailable = true;
   } catch (e) {
-    console.log('SDK consentement non disponible');
+    console.log('SDK consentement non disponible:', e);
   }
 }
 
@@ -83,10 +88,10 @@ export default function App() {
   const [consentReady, setConsentReady] = useState(false);
   const [consentGiven, setConsentGiven] = useState('pending');
 
+  // Initialiser AdMob
   useEffect(() => {
-    if (__DEV__) {
-      setConsentReady(true);
-      return;
+    if (!__DEV__) {
+      initAds();
     }
     const id = setInterval(() => setAdKey(k => k + 1), 30000);
     return () => clearInterval(id);
@@ -94,7 +99,7 @@ export default function App() {
 
   // Consentement Google UMP automatique
   useEffect(() => {
-    if (__DEV__ || !requestConsentInfoUpdate) {
+    if (__DEV__ || !consentFormAvailable) {
       setConsentReady(true);
       setConsentGiven('given');
       return;
@@ -107,15 +112,18 @@ export default function App() {
           tagForUnderAgeOfConsent: false,
         };
 
+        console.log('Demande info consentement...');
         await requestConsentInfoUpdate(consentInfoOptions);
-        const status = await getConsentStatus();
 
+        const status = await getConsentStatus();
         console.log('Statut consentement UMP:', status);
 
         // Si consentement requis ou inconnu, afficher le formulaire Google
         if (status === UMPConsentStatus?.REQUIRED || status === UMPConsentStatus?.UNKNOWN) {
+          console.log('Affichage formulaire consentement...');
           await showConsentForm();
-          // Après affichage, re-vérifier le statut
+
+          // Attendre que l'utilisateur complète le formulaire
           setTimeout(async () => {
             const newStatus = await getConsentStatus();
             console.log('Nouveau statut après formulaire:', newStatus);
@@ -123,12 +131,13 @@ export default function App() {
             setConsentGiven(consentValue);
             await SecureStore.setItemAsync('ump_consent_status', consentValue);
             setConsentReady(true);
-          }, 1500);
+          }, 2000);
           return;
         }
 
         // Consentement déjà obtenu ou non requis
         const consentValue = status === UMPConsentStatus?.OBTAINED ? 'given' : 'refused';
+        console.log('Consentement existant:', consentValue);
         setConsentGiven(consentValue);
         await SecureStore.setItemAsync('ump_consent_status', consentValue);
         setConsentReady(true);

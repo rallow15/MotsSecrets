@@ -8,7 +8,20 @@
       "mcp__ide__executeCode",
       "Bash(python:*)",
       "Bash(npm start:*)",
-      "Bash(npx expo:*)"
+      "Bash(npx expo:*)",
+      "WebSearch",
+      "WebFetch(domain:play.google.com)",
+      "WebFetch(domain:apps.apple.com)",
+      "WebFetch(domain:yanstarstudio.com)",
+      "Bash(cp \"C:\\\\Users\\\\salim\\\\Downloads\\\\Nouveau dossier\\\\play.svg\" \"C:\\\\Users\\\\salim\\\\Desktop\\\\MotsSecrets\\\\assets\\\\play.svg\")",
+      "Bash(cp \"C:\\\\Users\\\\salim\\\\Downloads\\\\Nouveau dossier\\\\regles.svg\" \"C:\\\\Users\\\\salim\\\\Desktop\\\\MotsSecrets\\\\assets\\\\regles.svg\")",
+      "Bash(cp \"C:\\\\Users\\\\salim\\\\Downloads\\\\Nouveau dossier\\\\reglage.svg\" \"C:\\\\Users\\\\salim\\\\Desktop\\\\MotsSecrets\\\\assets\\\\reglage.svg\")",
+      "Bash(cp \"C:\\\\Users\\\\salim\\\\Downloads\\\\Nouveau dossier\\\\quiz.svg\" \"C:\\\\Users\\\\salim\\\\Desktop\\\\MotsSecrets\\\\assets\\\\quiz.svg\")",
+      "Bash(cp \"C:\\\\Users\\\\salim\\\\Downloads\\\\Nouveau dossier\\\\publicite.svg\" \"C:\\\\Users\\\\salim\\\\Desktop\\\\MotsSecrets\\\\assets\\\\publicite.svg\")",
+      "Bash(npm uninstall:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
