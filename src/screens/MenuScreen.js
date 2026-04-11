@@ -461,7 +461,7 @@ export default function MenuScreen({ navigation }) {
                         selectedCategory === cat && styles.categoryChipActive,
                         isObjectsLocked && styles.categoryChipLocked
                       ]}
-                      onPress={() => setSelectedCategory(cat)}
+                      onPress={() => handleCategorySelect(cat)}
                       disabled={isObjectsLocked}
                     >
                       <Text style={[
