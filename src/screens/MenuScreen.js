@@ -246,8 +246,24 @@ export default function MenuScreen({ navigation }) {
     setShowGameSetup(true);
   };
 
-  const handleLaunchGame = () => {
+  const handleLaunchGame = async () => {
     playClick();
+
+    // Si OBJETS est sélectionné et pas encore débloqué, afficher la pub
+    const isObjectsSelected = selectedCategory === 'OBJETS' || selectedCategory === 'OBJECTS';
+    if (isObjectsSelected && !objectsUnlocked) {
+      const rewarded = await loadAndShowRewardedAd(() => {
+        setObjectsUnlocked(true);
+        SecureStore.setItemAsync('objects_category_unlocked', 'true');
+      });
+
+      if (!rewarded) {
+        // Pub fermée sans récompense, on retourne au menu
+        console.log('Pub fermée sans récompense');
+        return;
+      }
+    }
+
     let gameMode = 0; // NORMAL
     if (misterWhite && intrus) gameMode = 2; // MISTER WHITE + INTRUS
     else if (intrus) gameMode = 0; // NORMAL avec intrus (défaut)
@@ -260,29 +276,8 @@ export default function MenuScreen({ navigation }) {
     navigation.navigate('Prep', { numPlayers, gameMode, selectedCategory, assignments });
   };
 
-  const handleCategorySelect = async (cat) => {
+  const handleCategorySelect = (cat) => {
     playClick();
-
-    // Si c'est la catégorie OBJETS/OBJECTS et qu'elle n'est pas débloquée
-    const isObjectsCategory = cat === 'OBJETS' || cat === 'OBJECTS';
-    if (isObjectsCategory && !objectsUnlocked) {
-      // Afficher la pub récompensée
-      const rewarded = await loadAndShowRewardedAd(() => {
-        // Callback quand la récompense est gagnée
-        setObjectsUnlocked(true);
-        SecureStore.setItemAsync('objects_category_unlocked', 'true');
-        setSelectedCategory(cat);
-        setShowCategories(false);
-      });
-
-      if (!rewarded) {
-        // Pub non disponible ou fermée sans récompense
-        console.log('Pub fermée sans récompense, catégorie toujours verrouillée');
-        // Ne PAS sélectionner la catégorie - elle reste verrouillée
-      }
-      return;
-    }
-
     setSelectedCategory(cat);
     setShowCategories(false);
   };
@@ -451,29 +446,23 @@ export default function MenuScreen({ navigation }) {
                     🎲 {lang === 'fr' ? 'Aléatoire' : 'Random'}
                   </Text>
                 </TouchableOpacity>
-                {categoryKeys.map(cat => {
-                  const isObjectsLocked = cat === 'OBJECTS' && !objectsUnlocked;
-                  return (
-                    <TouchableOpacity
-                      key={cat}
-                      style={[
-                        styles.categoryChip,
-                        selectedCategory === cat && styles.categoryChipActive,
-                        isObjectsLocked && styles.categoryChipLocked
-                      ]}
-                      onPress={() => handleCategorySelect(cat)}
-                      disabled={isObjectsLocked}
-                    >
-                      <Text style={[
-                        styles.categoryChipText,
-                        selectedCategory === cat && styles.categoryChipTextActive,
-                        isObjectsLocked && styles.categoryChipTextLocked
-                      ]}>
-                        {isObjectsLocked ? '🔒' : (CATEGORY_EMOJIS[cat] || '🎯')} {CATEGORY_NAMES[lang][cat] || cat.replace('_', ' ')}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
+                {categoryKeys.map(cat => (
+                  <TouchableOpacity
+                    key={cat}
+                    style={[
+                      styles.categoryChip,
+                      selectedCategory === cat && styles.categoryChipActive
+                    ]}
+                    onPress={() => handleCategorySelect(cat)}
+                  >
+                    <Text style={[
+                      styles.categoryChipText,
+                      selectedCategory === cat && styles.categoryChipTextActive
+                    ]}>
+                      {CATEGORY_EMOJIS[cat] || '🎯'} {CATEGORY_NAMES[lang][cat] || cat.replace('_', ' ')}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </ScrollView>
             </View>
 
