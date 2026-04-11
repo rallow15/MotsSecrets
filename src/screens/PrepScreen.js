@@ -53,7 +53,7 @@ export default function PrepScreen({ navigation, route }) {
   return (
     <TouchableOpacity style={styles.container} activeOpacity={1} onPress={handleTap}>
       <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()} activeOpacity={0.7}>
-        <Text style={styles.backBtnText}>←</Text>
+        <Text style={styles.backBtnText}>‹</Text>
       </TouchableOpacity>
 
       <Text style={styles.playerBadge}>{t('playerLabel', currentPlayer + 1)}</Text>
@@ -93,8 +93,8 @@ export default function PrepScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container:  { flex: 1, backgroundColor: '#F5F5DC', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, gap: 8, paddingTop: 50 },
-  backBtn: { position: 'absolute', top: 50, left: 20, width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 2, borderColor: 'rgba(0,0,0,0.2)', alignItems: 'center', justifyContent: 'center' },
-  backBtnText: { fontSize: 28, color: '#1a1a1a', marginTop: -2 },
+  backBtn: { position: 'absolute', top: 50, left: 20, width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 2, borderColor: 'rgba(0,0,0,0.2)', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  backBtnText: { fontSize: 32, color: '#1a1a1a', fontWeight: 'bold', padding: 0, margin: 0, textAlignVertical: 'center' },
   playerBadge:{ fontFamily: 'SpaceMono', fontSize: 11, color: '#333', letterSpacing: 5 },
   nameWrap:   { width: '100%', alignItems: 'center', gap: 2 },
   nameInput:  { fontFamily: 'BebasNeue', fontSize: 36, color: '#000000', borderBottomWidth: 2, borderBottomColor: 'rgba(0,0,0,0.3)', textAlign: 'center', width: '80%', paddingVertical: 4, letterSpacing: 2 },
