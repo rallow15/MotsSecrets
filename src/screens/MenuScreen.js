@@ -251,15 +251,26 @@ export default function MenuScreen({ navigation }) {
 
     // Si OBJETS est sélectionné et pas encore débloqué, afficher la pub
     const isObjectsSelected = selectedCategory === 'OBJETS' || selectedCategory === 'OBJECTS';
-    if (isObjectsSelected && !objectsUnlocked) {
-      const rewarded = await loadAndShowRewardedAd(() => {
-        setObjectsUnlocked(true);
-        SecureStore.setItemAsync('objects_category_unlocked', 'true');
-      });
+    console.log('handleLaunchGame - selectedCategory:', selectedCategory);
+    console.log('handleLaunchGame - objectsUnlocked:', objectsUnlocked);
+    console.log('handleLaunchGame - isObjectsSelected:', isObjectsSelected);
 
-      if (!rewarded) {
-        // Pub fermée sans récompense, on retourne au menu
-        console.log('Pub fermée sans récompense');
+    if (isObjectsSelected && !objectsUnlocked) {
+      console.log('Tentative de chargement pub...');
+      try {
+        const rewarded = await loadAndShowRewardedAd(() => {
+          console.log('Callback récompense appelé');
+          setObjectsUnlocked(true);
+          SecureStore.setItemAsync('objects_category_unlocked', 'true');
+        });
+        console.log('Résultat pub:', rewarded);
+
+        if (!rewarded) {
+          console.log('Pub fermée sans récompense');
+          return;
+        }
+      } catch (e) {
+        console.log('Erreur pub:', e.message);
         return;
       }
     }
