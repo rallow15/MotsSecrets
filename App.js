@@ -71,27 +71,37 @@ export default function App() {
     SpaceMono: require('./assets/fonts/SpaceMono-Regular.ttf'),
   });
   const [adKey, setAdKey] = useState(0);
-  const [showConsent, setShowConsent] = useState(false);
+  const [showConsent, setShowConsent] = useState(!__DEV__); // En prod, on affiche par défaut
   const [consentGiven, setConsentGiven] = useState('pending');
+  const [consentChecked, setConsentChecked] = useState(false);
 
-  // Initialiser AdMob et vérifier le consentement
+  // Vérifier le consentement IMMÉDIATEMENT (sans attendre AdMob)
   useEffect(() => {
-    const init = async () => {
-      if (!__DEV__) {
-        await initAds();
+    const checkConsent = async () => {
+      if (__DEV__) {
+        setConsentGiven('given');
+        setConsentChecked(true);
+        return;
       }
 
-      // Vérifier si le consentement a déjà été donné
-      const savedConsent = await SecureStore.getItemAsync('ump_consent_status');
-      if (savedConsent) {
-        setConsentGiven(savedConsent);
-      } else {
-        // Premier lancement - afficher l'écran de consentement
-        setShowConsent(true);
-      }
+      try {
+        const savedConsent = await SecureStore.getItemAsync('ump_consent_status');
+        if (savedConsent) {
+          setConsentGiven(savedConsent);
+          setShowConsent(false);
+        }
+        // Sinon, on garde showConsent à true
+      } catch (e) {}
+      setConsentChecked(true);
     };
-    init();
+    checkConsent();
+  }, []);
 
+  // Initialiser AdMob (en parallèle, ne bloque pas le consentement)
+  useEffect(() => {
+    if (!__DEV__) {
+      initAds();
+    }
     const id = setInterval(() => setAdKey(k => k + 1), 30000);
     return () => clearInterval(id);
   }, []);
@@ -101,7 +111,7 @@ export default function App() {
     setShowConsent(false);
   };
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || !consentChecked) {
     return <View style={styles.loading}><ActivityIndicator color={colors.accent} size="large" /></View>;
   }
 
