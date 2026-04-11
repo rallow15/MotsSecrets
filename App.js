@@ -27,19 +27,21 @@ if (!__DEV__) {
     BannerAd     = admob.BannerAd;
     BannerAdSize = admob.BannerAdSize;
 
-    const consent = require('@react-native-google-mobile-ads/consent');
-    requestConsentInfoUpdate = consent.requestConsentInfoUpdate;
-    getConsentStatus = consent.getConsentStatus;
-    showConsentForm = consent.showConsentForm;
-    ConsentStatus = consent.ConsentStatus;
-    ConsentInfoOptions = consent.ConsentInfoOptions;
-    UMPConsentInformation = consent.UMPConsentInformation;
-    UMPConsentForm = consent.UMPConsentForm;
-    UMPDebugGeography = consent.UMPDebugGeography;
-    UMPConsentStatus = consent.UMPConsentStatus;
+    // Le consentement est dans le même package
+    requestConsentInfoUpdate = admob.requestConsentInfoUpdate;
+    getConsentStatus = admob.getConsentStatus;
+    showConsentForm = admob.showConsentForm;
+    ConsentStatus = admob.ConsentStatus;
+    ConsentInfoOptions = admob.ConsentInfoOptions;
+    UMPConsentInformation = admob.UMPConsentInformation;
+    UMPConsentForm = admob.UMPConsentForm;
+    UMPDebugGeography = admob.UMPDebugGeography;
+    UMPConsentStatus = admob.UMPConsentStatus;
     consentFormAvailable = true;
+
+    console.log('AdMob chargé avec succès');
   } catch (e) {
-    console.log('SDK consentement non disponible:', e);
+    console.log('SDK AdMob/consentement non disponible:', e);
   }
 }
 
