@@ -446,23 +446,28 @@ export default function MenuScreen({ navigation }) {
                     🎲 {lang === 'fr' ? 'Aléatoire' : 'Random'}
                   </Text>
                 </TouchableOpacity>
-                {categoryKeys.map(cat => (
-                  <TouchableOpacity
-                    key={cat}
-                    style={[
-                      styles.categoryChip,
-                      selectedCategory === cat && styles.categoryChipActive
-                    ]}
-                    onPress={() => handleCategorySelect(cat)}
-                  >
-                    <Text style={[
-                      styles.categoryChipText,
-                      selectedCategory === cat && styles.categoryChipTextActive
-                    ]}>
-                      {CATEGORY_EMOJIS[cat] || '🎯'} {CATEGORY_NAMES[lang][cat] || cat.replace('_', ' ')}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                {categoryKeys.map(cat => {
+                  const isObjects = cat === 'OBJECTS' || cat === 'OBJETS';
+                  const showAdIndicator = isObjects && !objectsUnlocked;
+                  return (
+                    <TouchableOpacity
+                      key={cat}
+                      style={[
+                        styles.categoryChip,
+                        selectedCategory === cat && styles.categoryChipActive
+                      ]}
+                      onPress={() => handleCategorySelect(cat)}
+                    >
+                      <Text style={[
+                        styles.categoryChipText,
+                        selectedCategory === cat && styles.categoryChipTextActive
+                      ]}>
+                        {CATEGORY_EMOJIS[cat] || '🎯'} {CATEGORY_NAMES[lang][cat] || cat.replace('_', ' ')}
+                        {showAdIndicator && <Text style={styles.adIndicator}> 📺</Text>}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </ScrollView>
             </View>
 
@@ -527,6 +532,7 @@ const styles = StyleSheet.create({
   categoryChipText: { fontFamily: 'BebasNeue', fontSize: 14, color: '#1a1a1a' },
   categoryChipTextActive: { color: '#F5F5DC' },
   categoryChipTextLocked: { color: '#666' },
+  adIndicator: { fontSize: 12, opacity: 0.7 },
   closeBtn: { backgroundColor: '#1a1a1a', paddingVertical: 10, alignItems: 'center', marginTop: 12, borderRadius: 10 },
   closeBtnText: { fontFamily: 'BebasNeue', fontSize: 16, color: '#F5F5DC', letterSpacing: 2 },
   ruleBlock: { marginBottom: 15, borderWidth: 1, borderColor: 'rgba(0,0,0,0.15)', padding: 12, borderRadius: 10, backgroundColor: 'rgba(0,0,0,0.05)' },
