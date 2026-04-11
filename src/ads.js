@@ -2,16 +2,7 @@
 // GESTION DES PUBLICITÉS (AdMob)
 // ═════════════════════════════════════════════════════════════
 
-import { RewardedAd, TestAdIds, MobileAds, AdsConsent } from 'react-native-google-mobile-ads';
-
-// Types d'événements pour les pubs récompensées (v16+)
-const AdEventType = {
-  LOADED: 'loaded',
-  ERROR: 'error',
-  EARNED_REWARD: 'earned_reward',
-  CLOSED: 'closed',
-  OPENED: 'opened',
-};
+import { RewardedAd, RewardedAdEventType, TestAdIds, MobileAds, AdsConsent } from 'react-native-google-mobile-ads';
 
 // Initialiser AdMob au démarrage
 export async function initAds() {
@@ -63,7 +54,7 @@ export async function loadRewardedAd() {
 
     return new Promise((resolve) => {
       const unsubscribeLoaded = rewardedAdInstance.addAdEventListener(
-        AdEventType.LOADED,
+        RewardedAdEventType.LOADED,
         () => {
           console.log('Pub récompensée chargée avec succès');
           unsubscribeLoaded();
@@ -72,7 +63,7 @@ export async function loadRewardedAd() {
       );
 
       const unsubscribeError = rewardedAdInstance.addAdEventListener(
-        AdEventType.ERROR,
+        RewardedAdEventType.ERROR,
         (error) => {
           console.log('Erreur chargement pub:', error);
           unsubscribeError();
@@ -113,7 +104,7 @@ export async function showRewardedAd(onReward) {
     onAdEarnedRewardCallback = onReward;
 
     const unsubscribeEarned = rewardedAdInstance.addAdEventListener(
-      AdEventType.EARNED_REWARD,
+      RewardedAdEventType.EARNED_REWARD,
       (reward) => {
         console.log('Récompense gagnée:', reward);
         if (onAdEarnedRewardCallback) {
@@ -125,7 +116,7 @@ export async function showRewardedAd(onReward) {
     );
 
     const unsubscribeClosed = rewardedAdInstance.addAdEventListener(
-      AdEventType.CLOSED,
+      RewardedAdEventType.CLOSED,
       () => {
         console.log('Pub fermée');
         unsubscribeClosed();
