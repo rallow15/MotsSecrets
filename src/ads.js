@@ -2,9 +2,7 @@
 // GESTION DES PUBLICITÉS (AdMob)
 // ═════════════════════════════════════════════════════════════
 
-import { RewardedAd, TestAdIds, MobileAds, AdsConsent } from 'react-native-google-mobile-ads';
 import Constants from 'expo-constants';
-import { Platform } from 'react-native';
 
 // Détecter si on est dans Expo Go (appartenance à Expo)
 const isExpoGo = Constants.appOwnership === 'expo';
@@ -17,10 +15,34 @@ const REWARDED_EVENT = {
   CLOSED: 'closed',
 };
 
+// Variables pour les modules AdMob (chargés dynamiquement)
+let RewardedAd = null;
+let TestAdIds = null;
+let MobileAds = null;
+
+// Charger les modules AdMob dynamiquement
+function loadAdMobModules() {
+  if (isExpoGo) return false;
+  try {
+    const admob = require('react-native-google-mobile-ads');
+    RewardedAd = admob.RewardedAd;
+    TestAdIds = admob.TestAdIds;
+    MobileAds = admob.MobileAds;
+    return true;
+  } catch (e) {
+    console.log('❌ AdMob modules non disponibles:', e.message);
+    return false;
+  }
+}
+
 // Initialiser AdMob au démarrage
 export async function initAds() {
   if (isExpoGo) {
     console.log('📱 Expo Go détecté - AdMob désactivé');
+    return;
+  }
+  if (!loadAdMobModules()) {
+    console.log('❌ Modules AdMob non chargés');
     return;
   }
   try {
@@ -37,9 +59,7 @@ export async function initAds() {
 // PUBLICITÉ RÉCOMPENSÉE (pour débloquer la catégorie OBJETS)
 // ────────────────────────────────────────────────────────
 
-const REWARDED_AD_UNIT = __DEV__
-  ? TestAdIds.REWARDED
-  : 'ca-app-pub-2965679591230669/8849548689';
+const REWARDED_AD_UNIT_PROD = 'ca-app-pub-2965679591230669/8849548689';
 
 let rewardedAdInstance = null;
 let onAdEarnedRewardCallback = null;
@@ -51,7 +71,7 @@ export async function loadRewardedAd() {
     console.log('Expo Go - pub récompensée ignorée');
     return null;
   }
-  if (!RewardedAd) {
+  if (!loadAdMobModules() || !RewardedAd) {
     console.log('Rewarded Ad non disponible');
     return null;
   }
@@ -63,10 +83,12 @@ export async function loadRewardedAd() {
 
   isAdLoading = true;
 
-  try {
-    console.log('Chargement pub récompensée:', REWARDED_AD_UNIT);
+  const adUnitId = __DEV__ ? TestAdIds.REWARDED : REWARDED_AD_UNIT_PROD;
 
-    rewardedAdInstance = RewardedAd.createForAdRequest(REWARDED_AD_UNIT, {
+  try {
+    console.log('Chargement pub récompensée:', adUnitId);
+
+    rewardedAdInstance = RewardedAd.createForAdRequest(adUnitId, {
       requestNonPersonalizedAdsOnly: false,
       networkExtras: {
         npa: '1'
