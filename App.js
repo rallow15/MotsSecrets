@@ -76,8 +76,8 @@ export default function App() {
   const [consentGiven, setConsentGiven] = useState('pending');
   const [consentChecked, setConsentChecked] = useState(false);
 
-  // Détecter si on est dans Expo Go (pas de AdMob)
-  const isExpoGo = !Constants.expoConfig?.extra?.eas?.projectId;
+  // Détecter si on est dans Expo Go (appartenance à Expo)
+  const isExpoGo = Constants.appOwnership === 'expo';
 
   // Vérifier le consentement IMMÉDIATEMENT (sans attendre AdMob)
   useEffect(() => {

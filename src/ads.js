@@ -4,9 +4,10 @@
 
 import { RewardedAd, TestAdIds, MobileAds, AdsConsent } from 'react-native-google-mobile-ads';
 import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
-// Détecter si on est dans Expo Go (pas de AdMob)
-const isExpoGo = !Constants.expoConfig?.extra?.eas?.projectId;
+// Détecter si on est dans Expo Go (appartenance à Expo)
+const isExpoGo = Constants.appOwnership === 'expo';
 
 // Événements pour les pubs récompensées (v16+)
 const REWARDED_EVENT = {
