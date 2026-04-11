@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import MenuScreen     from './src/screens/MenuScreen';
 import PrepScreen     from './src/screens/PrepScreen';
@@ -80,6 +81,7 @@ export default function App() {
   });
   const [adKey, setAdKey] = useState(0);
   const [consentReady, setConsentReady] = useState(false);
+  const [consentGiven, setConsentGiven] = useState('pending');
 
   useEffect(() => {
     if (__DEV__) {
@@ -94,11 +96,20 @@ export default function App() {
   useEffect(() => {
     if (__DEV__ || !requestConsentInfoUpdate) {
       setConsentReady(true);
+      setConsentGiven('given');
       return;
     }
 
     const checkConsent = async () => {
       try {
+        // Charger le consentement sauvegardé
+        const savedConsent = await AsyncStorage.getItem('ump_consent_status');
+        if (savedConsent) {
+          setConsentGiven(savedConsent);
+          setConsentReady(true);
+          return;
+        }
+
         const consentInfoOptions = {
           debugGeography: UMPDebugGeography?.DISABLED ?? 0,
           tagForUnderAgeOfConsent: false,
@@ -108,11 +119,26 @@ export default function App() {
         const status = await getConsentStatus();
 
         // Si consentement requis, afficher le formulaire Google
-        if (status === UMPConsentStatus?.REQUIRED) {
+        if (status === UMPConsentStatus?.REQUIRED || status === UMPConsentStatus?.UNKNOWN) {
           await showConsentForm();
+          // Après affichage, re-vérifier le statut
+          setTimeout(async () => {
+            const newStatus = await getConsentStatus();
+            const consentValue = newStatus === UMPConsentStatus?.OBTAINED ? 'given' : 'refused';
+            setConsentGiven(consentValue);
+            await AsyncStorage.setItem('ump_consent_status', consentValue);
+            setConsentReady(true);
+          }, 1000);
+          return;
         }
+
+        // Consentement déjà obtenu ou non requis
+        const consentValue = status === UMPConsentStatus?.OBTAINED ? 'given' : 'refused';
+        setConsentGiven(consentValue);
+        await AsyncStorage.setItem('ump_consent_status', consentValue);
       } catch (error) {
         console.log('Erreur consentement UMP:', error);
+        setConsentGiven('refused');
       } finally {
         setConsentReady(true);
       }

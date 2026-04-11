@@ -9,7 +9,8 @@ import { themes, colors } from '../theme';
 import { t, getLang, setLang } from '../i18n';
 import { CATEGORIES_FR, CATEGORIES_EN } from '../data/words';
 import { generateAssignments } from '../gameLogic';
-import { initSounds, playClick, playStart, startBackgroundMusic, stopBackgroundMusic, setMusicEnabled, setSfxEnabled, musicEnabled, sfxEnabled } from '../sound';
+import { initSounds, playClick, playStart, startBackgroundMusic, stopBackgroundMusic, setMusicEnabled, setSfxEnabled, musicEnabled, sfxEnabled, loadAndShowRewardedAd } from '../sound';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CATEGORY_EMOJIS = {
   FOOTBALL: '⚽',
@@ -158,8 +159,21 @@ export default function MenuScreen({ navigation }) {
   // États des sons (synchronisés avec sound.js)
   const [musicOn, setMusicOn] = useState(musicEnabled);
   const [sfxOn, setSfxOn] = useState(sfxEnabled);
-  // Catégorie OBJETS débloquée ou non (toujours débloquée sans pub)
-  const [objectsUnlocked, setObjectsUnlocked] = useState(true);
+  // Catégorie OBJETS débloquée ou non
+  const [objectsUnlocked, setObjectsUnlocked] = useState(false);
+
+  // Charger l'état de déblocage OBJETS au démarrage
+  useEffect(() => {
+    const loadObjectsState = async () => {
+      try {
+        const unlocked = await AsyncStorage.getItem('objects_category_unlocked');
+        if (unlocked === 'true') {
+          setObjectsUnlocked(true);
+        }
+      } catch (e) {}
+    };
+    loadObjectsState();
+  }, []);
 
   const pulseAnim = new Animated.Value(1);
 
@@ -245,8 +259,30 @@ export default function MenuScreen({ navigation }) {
     navigation.navigate('Prep', { numPlayers, gameMode, selectedCategory, assignments });
   };
 
-  const handleCategorySelect = (cat) => {
+  const handleCategorySelect = async (cat) => {
     playClick();
+
+    // Si c'est la catégorie OBJETS/OBJECTS et qu'elle n'est pas débloquée
+    const isObjectsCategory = cat === 'OBJETS' || cat === 'OBJECTS';
+    if (isObjectsCategory && !objectsUnlocked) {
+      // Afficher la pub récompensée
+      const rewarded = await loadAndShowRewardedAd(() => {
+        // Callback quand la récompense est gagnée
+        setObjectsUnlocked(true);
+        AsyncStorage.setItem('objects_category_unlocked', 'true');
+        setSelectedCategory(cat);
+        setShowCategories(false);
+      });
+
+      if (!rewarded) {
+        // Pub non disponible (Expo Go), on sélectionne quand même
+        console.log('Pub non disponible, catégorie accessible');
+        setSelectedCategory(cat);
+        setShowCategories(false);
+      }
+      return;
+    }
+
     setSelectedCategory(cat);
     setShowCategories(false);
   };
@@ -415,23 +451,29 @@ export default function MenuScreen({ navigation }) {
                     🎲 {lang === 'fr' ? 'Aléatoire' : 'Random'}
                   </Text>
                 </TouchableOpacity>
-                {categoryKeys.map(cat => (
-                  <TouchableOpacity
-                    key={cat}
-                    style={[
-                      styles.categoryChip,
-                      selectedCategory === cat && styles.categoryChipActive
-                    ]}
-                    onPress={() => setSelectedCategory(cat)}
-                  >
-                    <Text style={[
-                      styles.categoryChipText,
-                      selectedCategory === cat && styles.categoryChipTextActive
-                    ]}>
-                      {CATEGORY_EMOJIS[cat] || '🎯'} {CATEGORY_NAMES[lang][cat] || cat.replace('_', ' ')}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                {categoryKeys.map(cat => {
+                  const isObjectsLocked = cat === 'OBJECTS' && !objectsUnlocked;
+                  return (
+                    <TouchableOpacity
+                      key={cat}
+                      style={[
+                        styles.categoryChip,
+                        selectedCategory === cat && styles.categoryChipActive,
+                        isObjectsLocked && styles.categoryChipLocked
+                      ]}
+                      onPress={() => setSelectedCategory(cat)}
+                      disabled={isObjectsLocked}
+                    >
+                      <Text style={[
+                        styles.categoryChipText,
+                        selectedCategory === cat && styles.categoryChipTextActive,
+                        isObjectsLocked && styles.categoryChipTextLocked
+                      ]}>
+                        {isObjectsLocked ? '🔒' : (CATEGORY_EMOJIS[cat] || '🎯')} {CATEGORY_NAMES[lang][cat] || cat.replace('_', ' ')}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </ScrollView>
             </View>
 
