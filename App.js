@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 import MenuScreen     from './src/screens/MenuScreen';
 import PrepScreen     from './src/screens/PrepScreen';
@@ -103,7 +103,7 @@ export default function App() {
     const checkConsent = async () => {
       try {
         // Charger le consentement sauvegardé
-        const savedConsent = await AsyncStorage.getItem('ump_consent_status');
+        const savedConsent = await SecureStore.getItemAsync('ump_consent_status');
         if (savedConsent) {
           setConsentGiven(savedConsent);
           setConsentReady(true);
@@ -126,7 +126,7 @@ export default function App() {
             const newStatus = await getConsentStatus();
             const consentValue = newStatus === UMPConsentStatus?.OBTAINED ? 'given' : 'refused';
             setConsentGiven(consentValue);
-            await AsyncStorage.setItem('ump_consent_status', consentValue);
+            await SecureStore.setItemAsync('ump_consent_status', consentValue);
             setConsentReady(true);
           }, 1000);
           return;
@@ -135,7 +135,7 @@ export default function App() {
         // Consentement déjà obtenu ou non requis
         const consentValue = status === UMPConsentStatus?.OBTAINED ? 'given' : 'refused';
         setConsentGiven(consentValue);
-        await AsyncStorage.setItem('ump_consent_status', consentValue);
+        await SecureStore.setItemAsync('ump_consent_status', consentValue);
       } catch (error) {
         console.log('Erreur consentement UMP:', error);
         setConsentGiven('refused');

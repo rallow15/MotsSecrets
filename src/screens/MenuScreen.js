@@ -10,7 +10,7 @@ import { t, getLang, setLang } from '../i18n';
 import { CATEGORIES_FR, CATEGORIES_EN } from '../data/words';
 import { generateAssignments } from '../gameLogic';
 import { initSounds, playClick, playStart, startBackgroundMusic, stopBackgroundMusic, setMusicEnabled, setSfxEnabled, musicEnabled, sfxEnabled, loadAndShowRewardedAd } from '../sound';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 const CATEGORY_EMOJIS = {
   FOOTBALL: '⚽',
@@ -166,7 +166,7 @@ export default function MenuScreen({ navigation }) {
   useEffect(() => {
     const loadObjectsState = async () => {
       try {
-        const unlocked = await AsyncStorage.getItem('objects_category_unlocked');
+        const unlocked = await SecureStore.getItemAsync('objects_category_unlocked');
         if (unlocked === 'true') {
           setObjectsUnlocked(true);
         }
@@ -269,7 +269,7 @@ export default function MenuScreen({ navigation }) {
       const rewarded = await loadAndShowRewardedAd(() => {
         // Callback quand la récompense est gagnée
         setObjectsUnlocked(true);
-        AsyncStorage.setItem('objects_category_unlocked', 'true');
+        SecureStore.setItemAsync('objects_category_unlocked', 'true');
         setSelectedCategory(cat);
         setShowCategories(false);
       });
