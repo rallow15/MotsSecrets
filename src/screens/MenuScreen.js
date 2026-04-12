@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View, Text, TouchableOpacity, StyleSheet, StatusBar,
   ScrollView, Modal, Animated, Easing, ImageBackground, Image, Platform,
@@ -20,6 +21,8 @@ const isExpoGo = Constants.appOwnership === 'expo';
 
 // Image pour indiquer les pubs à récompense
 const AD_REWARD_ICON = require('../../assets/ad-reward-icon.png');
+const SURPRISE_BOX_ICON = require('../../assets/surprise-box.png');
+const STAR_ICON = require('../../assets/star-icon.png');
 
 const CATEGORY_EMOJIS = {
   FOOTBALL: '⚽',
@@ -210,6 +213,11 @@ export default function MenuScreen({ navigation }) {
   const [showCategories, setShowCategories] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showUnlockShop, setShowUnlockShop] = useState(false);
+  const [showSpecialeMode, setShowSpecialeMode] = useState(false);
+  const [specialeNumPlayers, setSpecialeNumPlayers] = useState(3);
+  const [specialeIntrus, setSpecialeIntrus] = useState(true);
+  const [specialeMisterWhite, setSpecialeMisterWhite] = useState(false);
   const [showGameSetup, setShowGameSetup] = useState(false);
   const [intrus, setIntrus] = useState(true);
   const [misterWhite, setMisterWhite] = useState(false);
@@ -221,7 +229,6 @@ export default function MenuScreen({ navigation }) {
   const [objectsUnlocked, setObjectsUnlocked] = useState(false);
   // Mots personnalisés pour la catégorie SPÉCIALE
   const [customWords, setCustomWords] = useState([]);
-  const [showAddWords, setShowAddWords] = useState(false);
   const [newWord, setNewWord] = useState('');
 
   // Charger l'état de déblocage OBJETS et les mots personnalisés au démarrage
@@ -243,9 +250,10 @@ export default function MenuScreen({ navigation }) {
 
   const pulseAnim = new Animated.Value(1);
 
+  // Initialisation des sons et chargement initial (une seule fois)
   useEffect(() => {
     initSounds();
-    // Simulation chargement 2 secondes
+    // Simulation chargement 2 secondes au premier montage uniquement
     const startTime = Date.now();
     const duration = 2000;
     const interval = setInterval(() => {
@@ -268,6 +276,35 @@ export default function MenuScreen({ navigation }) {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Réinitialiser l'état quand l'écran revient au premier plan
+  useFocusEffect(
+    useCallback(() => {
+      console.log('MenuScreen focus - réinitialisation');
+
+      // Fermer toutes les modales
+      setShowGameSetup(false);
+      setShowRules(false);
+      setShowSettings(false);
+      setShowUnlockShop(false);
+      setShowSpecialeMode(false);
+      setShowCategories(false);
+
+      // Réinitialiser l'animation pulse
+      pulseAnim.setValue(1);
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 1.1, duration: 800, easing: Easing.ease, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 800, easing: Easing.ease, useNativeDriver: true }),
+        ])
+      ).start();
+
+      // Redémarrer la musique si elle est activée
+      if (musicOn && !showLoading) {
+        startBackgroundMusic();
+      }
+    }, [])
+  );
 
   // Démarrer la musique d'ambiance après le chargement
   useEffect(() => {
@@ -395,7 +432,14 @@ export default function MenuScreen({ navigation }) {
   const rules = RULES[lang];
   const currentCategories = lang === 'en' ? CATEGORIES_EN : CATEGORIES_FR;
   // Exclure MIMER de la liste des catégories (activé via le toggle)
-  const categoryKeys = Object.keys(currentCategories).filter(cat => cat !== 'MIMER');
+  // Exclure OBJETS si pas débloqué
+  // Exclure SPÉCIALE (accessible uniquement via le bouton ⭐ du menu)
+  const categoryKeys = Object.keys(currentCategories).filter(cat => {
+    if (cat === 'MIMER') return false;
+    if (cat === 'SPECIALE') return false;
+    if ((cat === 'OBJECTS' || cat === 'OBJETS') && !objectsUnlocked) return false;
+    return true;
+  });
 
   if (showLoading) {
     return (
@@ -433,6 +477,34 @@ export default function MenuScreen({ navigation }) {
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.iconBtn} onPress={() => setShowSettings(true)}>
                     <Image source={require('../../assets/reglage.png')} style={styles.iconBtnImage} />
+                  </TouchableOpacity>
+                  <View style={styles.iconBtnWithAd}>
+                    <View style={styles.adIconContainer}>
+                      <Image source={AD_REWARD_ICON} style={styles.adIcon} resizeMode="contain" />
+                    </View>
+                    <TouchableOpacity style={styles.iconBtn} onPress={async () => {
+                      playClick();
+                      if (customWords.length === 0) {
+                        alert(lang === 'fr'
+                          ? 'La catégorie SPÉCIALE nécessite au moins 1 mot personnalisé.\n\nAjoutez des mots via le bouton étoile.'
+                          : 'SPECIAL category requires at least 1 custom word.\n\nAdd words via the star button.'
+                        );
+                        return;
+                      }
+                      if (!isExpoGo) {
+                        const rewarded = await loadAndShowRewardedAd(() => {});
+                        if (!rewarded) return;
+                      }
+                      setSpecialeNumPlayers(3);
+                      setSpecialeIntrus(true);
+                      setSpecialeMisterWhite(false);
+                      setShowSpecialeMode(true);
+                    }}>
+                      <Image source={STAR_ICON} style={styles.iconBtnImage} resizeMode="contain" />
+                    </TouchableOpacity>
+                  </View>
+                  <TouchableOpacity style={styles.iconBtn} onPress={() => setShowUnlockShop(true)}>
+                    <Image source={SURPRISE_BOX_ICON} style={styles.iconBtnImage} resizeMode="contain" />
                   </TouchableOpacity>
                 </View>
               </ScrollView>
@@ -504,6 +576,206 @@ export default function MenuScreen({ navigation }) {
         </View>
       </Modal>
 
+      {/* Modal pour débloquer la catégorie OBJETS */}
+      <Modal visible={showUnlockShop} animationType="slide" transparent onRequestClose={() => setShowUnlockShop(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{lang === 'fr' ? 'BOUTIQUE' : 'SHOP'}</Text>
+            <Text style={styles.modalSubtitle}>
+              {lang === 'fr'
+                ? 'Débloquez la catégorie OBJETS avec une publicité !'
+                : 'Unlock the OBJECTS category with a rewarded ad!'}
+            </Text>
+
+            {/* Catégorie OBJETS */}
+            <View style={styles.unlockItem}>
+              <View style={styles.unlockItemHeader}>
+                <Text style={styles.unlockItemIcon}>📦</Text>
+                <View style={styles.unlockItemInfo}>
+                  <Text style={styles.unlockItemTitle}>{lang === 'fr' ? 'OBJETS' : 'OBJECTS'}</Text>
+                  <Text style={styles.unlockItemDesc}>
+                    {lang === 'fr'
+                      ? 'Catégorie spéciale avec des objets du quotidien'
+                      : 'Special category with everyday objects'}
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                style={[styles.unlockBtn, objectsUnlocked && styles.unlockBtnOwned]}
+                onPress={async () => {
+                  if (objectsUnlocked) {
+                    alert(lang === 'fr'
+                      ? 'Déjà débloqué !\n\nLa catégorie OBJETS est disponible.'
+                      : 'Already unlocked!\n\nOBJECTS category is available.'
+                    );
+                    return;
+                  }
+                  if (isExpoGo) {
+                    setObjectsUnlocked(true);
+                    alert(lang === 'fr'
+                      ? 'Catégorie OBJETS débloquée !\n\n(En production, une publicité serait requise)'
+                      : 'OBJECTS category unlocked!\n\n(In production, a rewarded ad would be required)'
+                    );
+                  } else {
+                    const rewarded = await loadAndShowRewardedAd(() => {
+                      setObjectsUnlocked(true);
+                      SecureStore.setItemAsync('objects_category_unlocked', 'true');
+                    });
+                    if (!rewarded) return;
+                  }
+                }}
+              >
+                {!objectsUnlocked && (
+                  <View style={styles.unlockBtnAdIcon}>
+                    <Image source={AD_REWARD_ICON} style={styles.unlockBtnAdIconImg} resizeMode="contain" />
+                  </View>
+                )}
+                <Text style={styles.unlockBtnText}>
+                  {objectsUnlocked
+                    ? (lang === 'fr' ? 'DÉBLOQUÉ' : 'UNLOCKED')
+                    : (lang === 'fr' ? 'DÉBLOQUER' : 'UNLOCK')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowUnlockShop(false)}>
+              <Text style={styles.closeBtnText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal pour le mode SPÉCIALE (bouton étoile) */}
+      <Modal visible={showSpecialeMode} animationType="slide" transparent onRequestClose={() => setShowSpecialeMode(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxHeight: '90%' }]}>
+            <Text style={styles.modalTitle}>⭐ {lang === 'fr' ? 'MODE SPÉCIALE' : 'SPECIAL MODE'}</Text>
+            <Text style={styles.modalSubtitle}>
+              {lang === 'fr'
+                ? 'Gérez vos mots et lancez la partie'
+                : 'Manage your words and start the game'}
+            </Text>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {/* Section: Gérer les mots */}
+              <View style={styles.setupSection}>
+                <Text style={styles.setupLabel}>{lang === 'fr' ? 'Mots personnalisés' : 'Custom words'}</Text>
+                <View style={styles.addWordRow}>
+                  <TextInput
+                    style={styles.wordInput}
+                    placeholder={lang === 'fr' ? 'Nouveau mot...' : 'New word...'}
+                    placeholderTextColor="#999"
+                    value={newWord}
+                    onChangeText={setNewWord}
+                    autoCapitalize="words"
+                  />
+                  <TouchableOpacity
+                    style={[styles.addWordBtn, !newWord.trim() && styles.addWordBtnDisabled]}
+                    onPress={handleAddWord}
+                    disabled={!newWord.trim()}
+                  >
+                    <Text style={styles.addWordBtnText}>{lang === 'fr' ? 'AJOUTER' : 'ADD'}</Text>
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.wordsCount}>{customWords.length} {lang === 'fr' ? 'mots' : 'words'}</Text>
+                <ScrollView style={styles.wordsList} showsVerticalScrollIndicator={false}>
+                  {customWords.length === 0 ? (
+                    <Text style={styles.emptyWords}>{lang === 'fr' ? 'Aucun mot personnalisé' : 'No custom words'}</Text>
+                  ) : (
+                    customWords.map((word, index) => (
+                      <View key={index} style={styles.wordItem}>
+                        <Text style={styles.wordItemText}>••••</Text>
+                        <TouchableOpacity
+                          style={styles.removeBtn}
+                          onPress={() => handleRemoveWord(index)}
+                        >
+                          <Text style={styles.removeBtnText}>×</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))
+                  )}
+                </ScrollView>
+              </View>
+
+              {/* Section: Nombre de joueurs */}
+              <View style={styles.setupSection}>
+                <Text style={styles.setupLabel}>{lang === 'fr' ? 'Nombre de joueurs' : 'Number of players'}</Text>
+                <View style={styles.counterRowLarge}>
+                  <TouchableOpacity style={styles.counterBtnLarge} onPress={() => setSpecialeNumPlayers(p => Math.max(3, p - 1))}><Text style={styles.counterBtnTextLarge}>−</Text></TouchableOpacity>
+                  <Text style={styles.counterValLarge}>{specialeNumPlayers}</Text>
+                  <TouchableOpacity style={styles.counterBtnLarge} onPress={() => setSpecialeNumPlayers(p => Math.min(20, p + 1))}><Text style={styles.counterBtnTextLarge}>+</Text></TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Section: Options */}
+              <View style={styles.setupSection}>
+                <Text style={styles.setupLabel}>{lang === 'fr' ? 'Options' : 'Options'}</Text>
+
+                <View style={styles.toggleRow}>
+                  <Text style={styles.toggleLabel}>🎭 {lang === 'fr' ? 'Intrus' : 'Impostor'}</Text>
+                  <TouchableOpacity
+                    style={[styles.toggleBtn, specialeIntrus && styles.toggleBtnActive]}
+                    onPress={() => setSpecialeIntrus(!specialeIntrus)}
+                  >
+                    <Text style={styles.toggleBtnText}>{specialeIntrus ? 'ON' : 'OFF'}</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.toggleRow}>
+                  <Text style={styles.toggleLabel}>🤵 Mister White</Text>
+                  <TouchableOpacity
+                    style={[styles.toggleBtn, specialeMisterWhite && styles.toggleBtnActive]}
+                    onPress={() => setSpecialeMisterWhite(!specialeMisterWhite)}
+                  >
+                    <Text style={styles.toggleBtnText}>{specialeMisterWhite ? 'ON' : 'OFF'}</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {specialeMisterWhite && specialeIntrus && specialeNumPlayers < 4 && (
+                  <Text style={styles.warningText}>⚠️ {lang === 'fr' ? '4 joueurs minimum' : '4 players minimum'}</Text>
+                )}
+              </View>
+
+              {/* Bouton Lancer la partie */}
+              <TouchableOpacity
+                style={[styles.launchBtn, specialeMisterWhite && specialeIntrus && specialeNumPlayers < 4 && styles.launchBtnDisabled]}
+                onPress={async () => {
+                  if (customWords.length === 0) {
+                    alert(lang === 'fr'
+                      ? 'Ajoutez au moins 1 mot personnalisé.'
+                      : 'Add at least 1 custom word.'
+                    );
+                    return;
+                  }
+                  if (specialeMisterWhite && specialeIntrus && specialeNumPlayers < 4) return;
+                  playClick();
+                  setShowSpecialeMode(false);
+
+                  let gameMode = 0;
+                  if (specialeMisterWhite && specialeIntrus) gameMode = 2;
+                  else if (specialeIntrus) gameMode = 0;
+                  else if (specialeMisterWhite) gameMode = 1;
+
+                  navigation.navigate('Prep', {
+                    numPlayers: specialeNumPlayers,
+                    gameMode,
+                    selectedCategory: 'SPECIALE',
+                    customWords,
+                    mimerMode: false
+                  });
+                }}
+              >
+                <Text style={styles.launchBtnText}>{lang === 'fr' ? 'LANCER LA PARTIE' : 'START GAME'}</Text>
+              </TouchableOpacity>
+            </ScrollView>
+
+            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowSpecialeMode(false)}>
+              <Text style={styles.closeBtnText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <Modal visible={showGameSetup} animationType="slide" transparent onRequestClose={() => setShowGameSetup(false)}>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { maxHeight: '85%' }]}>
@@ -547,14 +819,15 @@ export default function MenuScreen({ navigation }) {
                     <Text style={styles.toggleLabel}>🖼️ {lang === 'fr' ? 'Mime' : 'Mime'}</Text>
                   </View>
                   <View style={styles.toggleRightContainer}>
-                    {!isExpoGo && <Image source={AD_REWARD_ICON} style={styles.adRewardIcon} resizeMode="contain" />}
+                    {!mimerMode && (
+                      <Image source={AD_REWARD_ICON} style={styles.adIconInline} resizeMode="contain" />
+                    )}
                     <TouchableOpacity
                       style={[styles.toggleBtn, mimerMode && styles.toggleBtnActive]}
                       onPress={async () => {
-                        // Si on active le mode MIMER, afficher une pub
                         if (!mimerMode && !isExpoGo) {
                           const rewarded = await loadAndShowRewardedAd(() => {});
-                          if (!rewarded) return; // Pub fermée sans récompense
+                          if (!rewarded) return;
                         }
                         setMimerMode(!mimerMode);
                       }}
@@ -606,12 +879,6 @@ export default function MenuScreen({ navigation }) {
                       );
                     })}
                   </ScrollView>
-                  <TouchableOpacity
-                    style={styles.addWordsBtn}
-                    onPress={() => setShowAddWords(true)}
-                  >
-                    <Text style={styles.addWordsBtnText}>⭐ {lang === 'fr' ? 'GÉRER LES MOTS SPÉCIAUX' : 'MANAGE SPECIAL WORDS'}</Text>
-                  </TouchableOpacity>
                 </View>
               )}
 
@@ -640,61 +907,6 @@ export default function MenuScreen({ navigation }) {
         </View>
       </Modal>
 
-      {/* Modal pour ajouter des mots à la catégorie SPÉCIALE */}
-      <Modal visible={showAddWords} animationType="slide" transparent onRequestClose={() => setShowAddWords(false)}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>{lang === 'fr' ? 'AJOUTER DES MOTS' : 'ADD WORDS'}</Text>
-              <Text style={styles.modalSubtitle}>{lang === 'fr' ? 'Catégorie SPÉCIALE' : 'SPECIAL Category'}</Text>
-
-              <View style={styles.addWordRow}>
-                <TextInput
-                  style={styles.wordInput}
-                  placeholder={lang === 'fr' ? 'Nouveau mot...' : 'New word...'}
-                  placeholderTextColor="#999"
-                  value={newWord}
-                  onChangeText={setNewWord}
-                  autoCapitalize="words"
-                  autoFocus
-                />
-                <TouchableOpacity
-                  style={[styles.addWordBtn, !newWord.trim() && styles.addWordBtnDisabled]}
-                  onPress={handleAddWord}
-                  disabled={!newWord.trim()}
-                >
-                  <Text style={styles.addWordBtnText}>AJOUTER</Text>
-                </TouchableOpacity>
-              </View>
-
-              <Text style={styles.wordsCount}>{customWords.length} {lang === 'fr' ? 'mots personnalisés' : 'custom words'}</Text>
-
-              <ScrollView style={styles.wordsList} showsVerticalScrollIndicator={false}>
-                {customWords.length === 0 ? (
-                  <Text style={styles.emptyWords}>{lang === 'fr' ? 'Aucun mot personnalisé' : 'No custom words'}</Text>
-                ) : (
-                  customWords.map((word, index) => (
-                    <View key={index} style={styles.wordItem}>
-                      <Text style={styles.wordItemText}>••••</Text>
-                      <TouchableOpacity
-                        style={styles.removeBtn}
-                        onPress={() => handleRemoveWord(index)}
-                      >
-                        <Text style={styles.removeBtnText}>×</Text>
-                      </TouchableOpacity>
-                    </View>
-                  ))
-                )}
-              </ScrollView>
-
-              <TouchableOpacity style={styles.closeBtn} onPress={() => setShowAddWords(false)}>
-                <Text style={styles.closeBtnText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
-
     </>
   );
 }
@@ -713,6 +925,9 @@ const styles = StyleSheet.create({
   playContainer: { alignItems: 'center', paddingBottom: 40 },
   playGlowContainer: { shadowColor: '#FFFFFF', shadowOffset: { width: 0, height: 0 }, elevation: 8 },
   topRow: { flexDirection: 'row', gap: 12, marginBottom: 10 },
+  iconBtnWithAd: { alignItems: 'center' },
+  adIconContainer: { position: 'absolute', top: -28, alignItems: 'center' },
+  adIcon: { width: 28, height: 28 },
   iconBtn: { width: 50, height: 50, borderRadius: 25, backgroundColor: 'rgba(255,255,255,0.2)', borderWidth: 2, borderColor: 'rgba(255,255,255,0.35)', alignItems: 'center', justifyContent: 'center' },
   iconBtnImage: { width: 28, height: 28 },
   iconBtnText: { fontSize: 22 },
@@ -766,9 +981,18 @@ const styles = StyleSheet.create({
   toggleLabelContainer: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   toggleRightContainer: { alignItems: 'center', gap: 4 },
   toggleLabel: { fontFamily: 'BebasNeue', fontSize: 16, color: '#1a1a1a' },
+  adLabel: { fontFamily: 'SpaceMono', fontSize: 9, color: '#ff6b6b', marginRight: 6 },
+  adIconInline: { width: 20, height: 20, marginRight: 4 },
   adRewardIcon: { width: 40, height: 20, marginBottom: 2 },
   adRewardIconSmall: { width: 32, height: 16, marginBottom: 2, alignSelf: 'center' },
   categoryWrapper: { alignItems: 'center' },
+  adBanner: { backgroundColor: 'rgba(255,107,107,0.15)', borderWidth: 1, borderColor: '#ff6b6b', borderRadius: 8, paddingVertical: 6, paddingHorizontal: 12, marginBottom: 12, flexDirection: 'row', alignItems: 'center' },
+  adBannerText: { fontFamily: 'SpaceMono', fontSize: 10, color: '#ff6b6b' },
+  toggleSection: { marginBottom: 8 },
+  adBadgeContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,107,107,0.15)', borderRadius: 8, paddingVertical: 6, paddingHorizontal: 10, marginBottom: 6, alignSelf: 'center' },
+  adBadgeText: { fontFamily: 'SpaceMono', fontSize: 10, color: '#ff6b6b', marginLeft: 6 },
+  adRewardBadge: { width: 50, height: 50 },
+  adBannerIcon: { width: 24, height: 24, marginRight: 6 },
   toggleBtn: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.15)', borderWidth: 2, borderColor: 'rgba(0,0,0,0.3)' },
   toggleBtnActive: { backgroundColor: '#1a1a1a', borderColor: '#1a1a1a' },
   toggleBtnText: { fontFamily: 'SpaceMono', fontSize: 11, color: '#F5F5DC', fontWeight: 'bold' },
@@ -784,6 +1008,21 @@ const styles = StyleSheet.create({
   addWordBtnDisabled: { backgroundColor: 'rgba(26,26,26,0.3)' },
   addWordBtnText: { fontFamily: 'BebasNeue', fontSize: 14, color: '#F5F5DC', letterSpacing: 1 },
   wordsCount: { fontFamily: 'SpaceMono', fontSize: 10, color: '#666', marginBottom: 8, textAlign: 'center' },
+  // Styles pour la boutique
+  unlockItem: { backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 2, borderColor: '#1a1a1a', borderRadius: 12, padding: 12, marginBottom: 12 },
+  unlockItemHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  unlockItemIcon: { fontSize: 32, marginRight: 12 },
+  unlockItemInfo: { flex: 1 },
+  unlockItemTitle: { fontFamily: 'BebasNeue', fontSize: 18, color: '#1a1a1a', letterSpacing: 1 },
+  unlockItemDesc: { fontFamily: 'SpaceMono', fontSize: 9, color: '#666', marginTop: 2 },
+  unlockBtn: { backgroundColor: '#1a1a1a', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 10, alignItems: 'center', position: 'relative' },
+  unlockBtnOwned: { backgroundColor: '#4a4a4a' },
+  unlockBtnText: { fontFamily: 'BebasNeue', fontSize: 14, color: '#F5F5DC', letterSpacing: 1 },
+  unlockBtnAdIcon: { position: 'absolute', top: -20, left: 0, right: 0, alignItems: 'center' },
+  unlockBtnAdIconImg: { width: 18, height: 18 },
+  adBannerModal: { backgroundColor: 'rgba(255,107,107,0.15)', borderWidth: 1, borderColor: '#ff6b6b', borderRadius: 8, paddingVertical: 6, paddingHorizontal: 12, marginBottom: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  adBannerModalIcon: { width: 24, height: 24, marginRight: 6 },
+  adBannerModalText: { fontFamily: 'SpaceMono', fontSize: 10, color: '#ff6b6b' },
   wordsList: { maxHeight: 150, width: '100%', marginBottom: 10 },
   emptyWords: { fontFamily: 'SpaceMono', fontSize: 11, color: '#999', textAlign: 'center', paddingVertical: 20 },
   wordItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(0,0,0,0.05)', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, marginBottom: 6 },
@@ -792,4 +1031,14 @@ const styles = StyleSheet.create({
   removeBtnText: { fontFamily: 'BebasNeue', fontSize: 20, color: '#F5F5DC', lineHeight: 28 },
   mimerInfoBox: { backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 2, borderColor: '#1a1a1a', paddingVertical: 12, paddingHorizontal: 16, borderRadius: 12, alignItems: 'center' },
   mimerInfoText: { fontFamily: 'BebasNeue', fontSize: 16, color: '#1a1a1a', letterSpacing: 1 },
+  // Styles pour la boutique
+  unlockItem: { backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 2, borderColor: '#1a1a1a', borderRadius: 12, padding: 12, marginBottom: 12 },
+  unlockItemHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  unlockItemIcon: { fontSize: 32, marginRight: 12 },
+  unlockItemInfo: { flex: 1 },
+  unlockItemTitle: { fontFamily: 'BebasNeue', fontSize: 18, color: '#1a1a1a', letterSpacing: 1 },
+  unlockItemDesc: { fontFamily: 'SpaceMono', fontSize: 9, color: '#666', marginTop: 2 },
+  unlockBtn: { backgroundColor: '#1a1a1a', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 10, alignItems: 'center' },
+  unlockBtnOwned: { backgroundColor: '#4a4a4a' },
+  unlockBtnText: { fontFamily: 'BebasNeue', fontSize: 14, color: '#F5F5DC', letterSpacing: 1 },
 });
