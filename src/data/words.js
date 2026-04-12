@@ -243,6 +243,12 @@ export const CATEGORIES_FR = {
       indice: "2020",
       hintEn: "2020",
     },
+    {
+      nom: "football",
+      images: ["OM 93.png", "PSG 25.png"],
+      indice: "football",
+      hintEn: "football",
+    },
   ],
 
 };
@@ -489,6 +495,12 @@ export const CATEGORIES_EN = {
       images: ["Covid 19.png", "Passe Vaccinal.jpg"],
       indice: "2020",
       hintEn: "2020",
+    },
+    {
+      nom: "football",
+      images: ["OM 93.png", "PSG 25.png"],
+      indice: "football",
+      hintEn: "football",
     },
   ],
 
