@@ -1,25 +1,107 @@
-// Écran de consentement RGPD personnalisé
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Linking } from 'react-native';
+// Écran de consentement RGPD avec Google UMP
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Linking, ActivityIndicator } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
+
+// Variables UMP (chargées dynamiquement)
+let UMPConsentInformation = null;
+let loadAndShowConsentForm = null;
+let showConsentForm = null;
+let initUMP = null;
 
 export default function ConsentScreen({ onConsentGiven }) {
-  const [accepted, setAccepted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [umpError, setUmpError] = useState(null);
+  const [consentForm, setConsentForm] = useState(null);
 
-  const handleAccept = async () => {
-    if (!accepted) return;
-    await SecureStore.setItemAsync('ump_consent_status', 'given');
-    onConsentGiven('given');
-  };
+  const isExpoGo = Constants.appOwnership === 'expo';
+
+  // Charger UMP dynamiquement (uniquement si pas Expo Go)
+  useEffect(() => {
+    if (!isExpoGo) {
+      import('../consent/umpConfig')
+        .then((mod) => {
+          initUMP = mod.initUMP;
+          loadAndShowConsentForm = mod.loadAndShowConsentForm;
+          showConsentForm = mod.showConsentForm;
+          UMPConsentInformation = mod.UMPConsentInformation;
+        })
+        .catch((e) => {
+          console.log('UMP import error:', e);
+        });
+    }
+  }, [isExpoGo]);
+
+  useEffect(() => {
+    initConsent();
+  }, []);
+
+  async function initConsent() {
+    // En Expo Go, on skip UMP (pas de native modules)
+    if (isExpoGo) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { isFormAvailable } = await initUMP();
+      if (isFormAvailable) {
+        const form = await loadAndShowConsentForm();
+        setConsentForm(form);
+      }
+    } catch (e) {
+      console.log('Erreur UMP:', e);
+      setUmpError(e.message || String(e));
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const handleRefuse = async () => {
+    if (!isExpoGo) {
+      // En prod native, on refuse via UMP
+      try {
+        UMPConsentInformation.reset();
+      } catch (e) {}
+    }
     await SecureStore.setItemAsync('ump_consent_status', 'refused');
     onConsentGiven('refused');
+  };
+
+  const handleAccept = async () => {
+    if (!isExpoGo) {
+      // En prod native, on accepte via UMP
+      try {
+        const { isFormAvailable } = await initUMP();
+        if (isFormAvailable) {
+          const form = await loadAndShowConsentForm();
+          await showConsentForm(form);
+          const status = await UMPConsentInformation.getConsentStatus();
+          await SecureStore.setItemAsync('ump_consent_status', status);
+          onConsentGiven(status);
+          return;
+        }
+      } catch (e) {
+        setUmpError(e.message || String(e));
+      }
+    }
+    // Fallback
+    await SecureStore.setItemAsync('ump_consent_status', 'given');
+    onConsentGiven('given');
   };
 
   const openPrivacyPolicy = () => {
     Linking.openURL('https://policies.google.com/privacy');
   };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator color="#1a1a1a" size="large" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -32,8 +114,7 @@ export default function ConsentScreen({ onConsentGiven }) {
           </Text>
 
           <Text style={styles.text}>
-            En acceptant, vous autorisez l'affichage de publicités adaptées à vos centres d'intérêt.
-            Vous pouvez refuser et continuer à utiliser l'application avec des publicités non personnalisées.
+            Conformément au RGPD et à la réglementation européenne, vous pouvez choisir d'accepter ou de refuser les publicités personnalisées.
           </Text>
 
           <Text style={styles.text}>
@@ -43,19 +124,13 @@ export default function ConsentScreen({ onConsentGiven }) {
           <TouchableOpacity onPress={openPrivacyPolicy}>
             <Text style={styles.link}>policies.google.com/privacy</Text>
           </TouchableOpacity>
-        </ScrollView>
 
-        <View style={styles.checkboxContainer}>
-          <TouchableOpacity
-            style={[styles.checkbox, accepted && styles.checkboxChecked]}
-            onPress={() => setAccepted(!accepted)}
-          >
-            {accepted && <Text style={styles.checkmark}>✓</Text>}
-          </TouchableOpacity>
-          <Text style={styles.checkboxLabel}>
-            J'accepte les publicités personnalisées
-          </Text>
-        </View>
+          {umpError && (
+            <Text style={styles.error}>
+             Erreur de chargement: {umpError}
+            </Text>
+          )}
+        </ScrollView>
 
         <View style={styles.buttonRow}>
           <TouchableOpacity
@@ -66,9 +141,8 @@ export default function ConsentScreen({ onConsentGiven }) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, styles.acceptButton, !accepted && styles.buttonDisabled]}
+            style={[styles.button, styles.acceptButton]}
             onPress={handleAccept}
-            disabled={!accepted}
           >
             <Text style={styles.acceptButtonText}>ACCEPTER</Text>
           </TouchableOpacity>
@@ -120,35 +194,14 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     marginBottom: 12,
   },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    paddingVertical: 12,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: '#1a1a1a',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  checkboxChecked: {
-    backgroundColor: '#1a1a1a',
-  },
-  checkmark: {
-    color: '#F5F5DC',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  checkboxLabel: {
+  error: {
     fontFamily: 'SpaceMono',
-    fontSize: 12,
-    color: '#333',
-    flex: 1,
+    fontSize: 11,
+    color: '#cc0000',
+    backgroundColor: '#ffe6e6',
+    padding: 8,
+    borderRadius: 6,
+    marginBottom: 12,
   },
   buttonRow: {
     flexDirection: 'row',

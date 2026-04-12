@@ -61,12 +61,15 @@ export default function ResultScreen({ navigation, route }) {
 
   const handleNewGame = () => go(() => navigation.navigate('Menu'));
 
-  // REJOUER : noms conservés, nouveaux assignments générés par PrepScreenWrapper
+  // REJOUER : noms conservés, catégorie conservée, nouveaux assignments générés par PrepScreenWrapper
   const handleReplay = () => go(() =>
     navigation.navigate('Prep', {
       numPlayers,
       gameMode:     gameMode ?? 0,
       playerNames:  safeNames,          // ← noms conservés
+      selectedCategory: route.params.selectedCategory, // ← catégorie conservée
+      customWords: route.params.customWords || [], // ← mots personnalisés conservés
+      mimerMode: route.params.mimerMode ?? false, // ← mode MIMER conservé
       currentPlayer: 0,
       takenNumbers:  [],
       playerNumbers: new Array(numPlayers).fill(null),
@@ -91,7 +94,11 @@ export default function ResultScreen({ navigation, route }) {
           const isRev       = !!revealed[i];
           const badge       = getRoleBadge(a.role);
           const name        = safeNames[i] || t('playerFallback', i + 1);
-          const wordDisplay = a.role === 'mister' ? 'MISTER WHITE' : (a.word ?? '');
+          let wordDisplay = a.role === 'mister' ? 'MISTER WHITE' : (typeof a.word === 'string' ? a.word : '');
+          // Enlever .jpg et .png pour l'affichage en mode MIMER
+          if (wordDisplay && (wordDisplay.endsWith('.jpg') || wordDisplay.endsWith('.png'))) {
+            wordDisplay = wordDisplay.replace('.jpg', '').replace('.png', '');
+          }
 
           const handleReveal = () => {
             if (!isRev) {

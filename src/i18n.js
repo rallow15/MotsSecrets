@@ -51,6 +51,7 @@ const T = {
     vsAI_innocentsWin: 'LES INNOCENTS GAGNENT !',
     vsAI_intruderWin:  'L\'INTRUS GAGNE !',
     vsAI_menu:      'MENU',
+    mimeInstruction: "MIME CET ÉVÉNEMENT SANS PARLER",
   },
   en: {
     subtitle:       'FIND THE IMPOSTOR AMONG YOU',
@@ -99,6 +100,7 @@ const T = {
     vsAI_innocentsWin: 'INNOCENTS WIN!',
     vsAI_intruderWin:  'IMPOSTOR WINS!',
     vsAI_menu:      'MENU',
+    mimeInstruction: 'MIME THIS EVENT WITHOUT TALKING',
   },
 };
 

@@ -219,6 +219,32 @@ export const CATEGORIES_FR = {
     "Bouilloire", "Mixeur", "Robot culinaire", "Poêle", "Casserole",
   ],
 
+  // ═══════════════════════════════════════════════════════════
+  // ⭐ SPÉCIALE
+  // ═══════════════════════════════════════════════════════════
+  SPECIALE: [
+    "AUCUN",
+  ],
+
+  // ═══════════════════════════════════════════════════════════
+  // 🖼️ MIMER (Images à mimer - paires avec indice pour Mister White)
+  // ═══════════════════════════════════════════════════════════
+  // Format: { nom: "nom_paire", images: ["img_1.jpg", "img_2.jpg"], indice: "indice FR", hintEn: "hint EN" }
+  MIMER: [
+    {
+      nom: "football",
+      images: ["Coupe Du monde 2018.jpg", "Coupe Du monde 1998.jpg"],
+      indice: "Sport avec un ballon rond - Coupe du monde",
+      hintEn: "Sport with a round ball - World Cup",
+    },
+    {
+      nom: "covid",
+      images: ["Covid 19.png", "Passe Vaccinal.jpg"],
+      indice: "2020",
+      hintEn: "2020",
+    },
+  ],
+
 };
 
 // ═════════════════════════════════════════════════════════════
@@ -440,6 +466,32 @@ export const CATEGORIES_EN = {
     "Kettle", "Blender", "Food Processor", "Pan", "Pot",
   ],
 
+  // ═══════════════════════════════════════════════════════════
+  // ⭐ SPECIAL
+  // ═══════════════════════════════════════════════════════════
+  SPECIALE: [
+    "NONE",
+  ],
+
+  // ═══════════════════════════════════════════════════════════
+  // 🖼️ MIMER (Images à mimer - paires avec indice pour Mister White)
+  // ═══════════════════════════════════════════════════════════
+  // Format: { nom: "nom_paire", images: ["img_1.jpg", "img_2.jpg"], indice: "indice FR", hintEn: "hint EN" }
+  MIMER: [
+    {
+      nom: "football",
+      images: ["Coupe Du monde 2018.jpg", "Coupe Du monde 1998.jpg"],
+      indice: "Sport avec un ballon rond - Coupe du monde",
+      hintEn: "Sport with a round ball - World Cup",
+    },
+    {
+      nom: "covid",
+      images: ["Covid 19.png", "Passe Vaccinal.jpg"],
+      indice: "2020",
+      hintEn: "2020",
+    },
+  ],
+
 };
 
 // Get categories based on language
@@ -463,6 +515,8 @@ export const WORD_DB_EN = Object.keys(CATEGORIES_EN).map(cat => ({
 
 export const WORD_CLUES = {};
 Object.keys(CATEGORIES_FR).forEach(cat => {
+  // Skip MIMER category as it uses objects instead of strings
+  if (cat === 'MIMER') return;
   CATEGORIES_FR[cat].forEach(word => {
     WORD_CLUES[word] = [];
   });

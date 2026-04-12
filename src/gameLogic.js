@@ -4,10 +4,12 @@ import { getLang } from './i18n';
 /**
  * gameMode: 0 = Normal (1 intrus), 1 = Mister White, 2 = MW + Intrus
  * selectedCategory: nom de la catégorie ou null pour aléatoire
- * returns array of { word, role, category }
+ * customWords: mots personnalisés pour la catégorie SPÉCIALE (optionnel)
+ * mimerMode: si true, utilise des images à mimer au lieu des mots
+ * returns array of { word, role, category, isMimer }
  * role: 'normal' | 'intrus' | 'mister'
  */
-export function generateAssignments(numPlayers, gameMode = 0, selectedCategory = null) {
+export function generateAssignments(numPlayers, gameMode = 0, selectedCategory = null, customWords = [], mimerMode = false) {
   // Utiliser la base de mots selon la langue
   const lang = getLang();
   const wordDb = lang === 'en' ? WORD_DB_EN : WORD_DB;
@@ -23,16 +25,48 @@ export function generateAssignments(numPlayers, gameMode = 0, selectedCategory =
     categoryData = wordDb[Math.floor(Math.random() * wordDb.length)];
   }
   const category = categoryData.cat;
-  const words = categoryData.words;
 
-  // Choisir 2 mots différents aléatoirement dans la catégorie
-  const idx1 = Math.floor(Math.random() * words.length);
-  let idx2 = Math.floor(Math.random() * words.length);
-  while (idx2 === idx1 && words.length > 1) {
-    idx2 = Math.floor(Math.random() * words.length);
+  // Mode MIMER : utiliser la catégorie MIMER avec des images (paires)
+  const isMimer = mimerMode === true;
+  let mimerData = null;
+  let wordA = null;
+  let wordB = null;
+  let words = categoryData.words;
+
+  if (isMimer) {
+    const mimerCategory = wordDb.find(d => d.cat === 'MIMER');
+    console.log('MIMER category found:', !!mimerCategory);
+    // WORD_DB transforme les catégories en { cat, words }, donc on accède à .words
+    if (mimerCategory && mimerCategory.words && mimerCategory.words.length > 0) {
+      // Choisir une paire aléatoire
+      const pairIndex = Math.floor(Math.random() * mimerCategory.words.length);
+      mimerData = mimerCategory.words[pairIndex];
+      console.log('MIMER mimerData:', mimerData);
+      // Pour le mode MIMER, wordA et wordB sont les noms des 2 images de la paire
+      // On inverse aléatoirement pour que les innocents puissent avoir l'image 1 ou 2
+      const randomSwap = Math.random() < 0.5;
+      wordA = mimerData.images[randomSwap ? 1 : 0];
+      wordB = mimerData.images[randomSwap ? 0 : 1] || mimerData.images[randomSwap ? 1 : 0];
+      console.log('MIMER wordA:', wordA, 'wordB:', wordB, 'swap:', randomSwap);
+    }
   }
-  const wordA = words[idx1];
-  const wordB = words[idx2];
+
+  // Pour la catégorie SPÉCIALE, utiliser les mots personnalisés si disponibles
+  const isSpecialeCategory = category === 'SPECIALE';
+  if (isSpecialeCategory && customWords && customWords.length > 0) {
+    words = customWords;
+  }
+
+  // Choisir 2 mots/images différents aléatoirement (si pas en mode MIMER)
+  if (!isMimer && (!isSpecialeCategory || (isSpecialeCategory && words.length > 1)) && words.length > 0) {
+    const idx1 = Math.floor(Math.random() * words.length);
+    let idx2 = Math.floor(Math.random() * words.length);
+    while (idx2 === idx1 && words.length > 1) {
+      idx2 = Math.floor(Math.random() * words.length);
+    }
+    wordA = words[idx1];
+    wordB = words[idx2];
+  }
 
   const roles = [];
   if (gameMode === 0) {
@@ -59,10 +93,16 @@ export function generateAssignments(numPlayers, gameMode = 0, selectedCategory =
     [roles[i], roles[j]] = [roles[j], roles[i]];
   }
 
+  // Pour la catégorie SPÉCIALE : utiliser les mots personnalisés
+  // Si pas de mots personnalisés, tout le monde n'a pas de mot (bluff pur)
+  // Si mots personnalisés, alors intrus et normaux fonctionnent normalement
+  // Mode MIMER : les mots sont des noms d'images à afficher + indice pour Mister White
   return roles.map((role) => ({
-    word: role === 'intrus' ? wordB : role === 'mister' ? null : wordA,
-    role,
+    word: isSpecialeCategory && words.length <= 1 ? null : (role === 'intrus' ? wordB : role === 'mister' ? null : wordA),
+    role: isSpecialeCategory && words.length <= 1 ? 'normal' : role,
     category,
+    isMimer,
+    mimerData: isMimer ? mimerData : null, // Contient { nom, images, indice } pour Mister White
   }));
 }
 
@@ -89,7 +129,11 @@ export function generateVsAIAssignments(numBots, humanName = '', botNames = []) 
   // Choisir une catégorie aléatoire (utiliser la bonne DB selon la langue)
   const lang = getLang();
   const wordDb = lang === 'en' ? WORD_DB_EN : WORD_DB;
-  const categoryData = wordDb[Math.floor(Math.random() * wordDb.length)];
+  // Exclure la catégorie MIMER (pas utilisée en mode VsAI)
+  let categoryData;
+  do {
+    categoryData = wordDb[Math.floor(Math.random() * wordDb.length)];
+  } while (categoryData.cat === 'MIMER');
   const category = categoryData.cat;
   const words = categoryData.words;
 

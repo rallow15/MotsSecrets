@@ -1,20 +1,67 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { colors } from '../theme';
-import { t } from '../i18n';
+import { t, getLang } from '../i18n';
 import { playClick, playReveal } from '../sound';
 
+// Images MIMER - require statiques pour Metro
+const COUPE_2018 = require('../../assets/mimer/Coupe Du monde 2018.jpg');
+const COUPE_1998 = require('../../assets/mimer/Coupe Du monde 1998.jpg');
+const COVID_19 = require('../../assets/mimer/Covid 19.png');
+const PASSE_VACCINAL = require('../../assets/mimer/Passe Vaccinal.jpg');
+
 export default function RevealScreen({ navigation, route }) {
-  const { numPlayers, assignments, currentPlayer, playerNumbers, playerNames, wordVisible: initialWordVisible } = route.params;
+  const { numPlayers, assignments, currentPlayer, playerNumbers, playerNames, wordVisible: initialWordVisible, mimerMode } = route.params;
   const [wordVisible, setWordVisible] = useState(initialWordVisible || false);
+  const [imageError, setImageError] = useState(false);
+  const lang = getLang();
 
   const assignment = assignments[currentPlayer];
   const isMister = assignment.role === 'mister';
-  const word = isMister ? 'MISTER WHITE' : assignment.word;
+  const isMimer = assignment.isMimer || mimerMode;
   const category = assignment.category ?? assignment.cat ?? '';
+  const playerName = playerNames?.[currentPlayer] ?? '';
+
+  // Récupérer les données MIMER (paire d'images + indice)
+  const mimerData = assignment.mimerData;
+  // word = nom de l'image à afficher (image1 ou image2)
+  const word = isMister ? 'MISTER WHITE' : assignment.word;
+
   const wordLen = word ? word.length : 0;
   const wordFontSize = wordLen > 14 ? 44 : wordLen > 10 ? 58 : wordLen > 7 ? 72 : 88;
-  const playerName = playerNames?.[currentPlayer] ?? '';
+
+  // Reset image error state when player changes
+  React.useEffect(() => {
+    setImageError(false);
+  }, [currentPlayer]);
+
+  // Obtenir la source de l'image pour le mode MIMER
+  const getImageSource = (wordName) => {
+    // Utiliser les images importées directement
+    let imgSource = null;
+    if (wordName === 'Coupe Du monde 2018.jpg') imgSource = COUPE_2018;
+    else if (wordName === 'Coupe Du monde 1998.jpg') imgSource = COUPE_1998;
+    else if (wordName === 'Covid 19.png') imgSource = COVID_19;
+    else if (wordName === 'Passe Vaccinal.jpg') imgSource = PASSE_VACCINAL;
+
+    if (!imgSource) {
+      return null;
+    }
+
+    return (
+      <Image
+        source={imgSource}
+        style={styles.mimerImage}
+        resizeMode="contain"
+        onError={() => setImageError(true)}
+      />
+    );
+  };
+
+  // Indice pour Mister White en mode MIMER - juste le nom de la paire
+  const mimerHint = isMimer && isMister && mimerData
+    ? mimerData.nom
+    : null;
 
   const handleNext = () => {
     playClick();
@@ -23,6 +70,9 @@ export default function RevealScreen({ navigation, route }) {
       playReveal();
       navigation.navigate('Result', {
         numPlayers, assignments, playerNumbers, playerNames,
+        selectedCategory: route.params.selectedCategory,
+        customWords: route.params.customWords || [],
+        mimerMode: route.params.mimerMode,
       });
     } else {
       navigation.navigate('Prep', {
@@ -31,6 +81,9 @@ export default function RevealScreen({ navigation, route }) {
         takenNumbers: [],
         playerNumbers,
         playerNames,
+        selectedCategory: route.params.selectedCategory,
+        customWords: route.params.customWords || [],
+        mimerMode: route.params.mimerMode,
       });
     }
   };
@@ -47,21 +100,38 @@ export default function RevealScreen({ navigation, route }) {
     );
   }
 
-  // Phase 2 : mot visible
+  // Phase 2 : mot/image visible
   return (
     <View style={styles.container}>
       <Text style={styles.playerBadge}>{t('playerLabel', currentPlayer + 1)}</Text>
       {playerName ? <Text style={styles.playerName}>{playerName}</Text> : null}
 
-      {!isMister && category ? (
-        <View style={styles.catBadge}>
-          <Text style={styles.catText}>{category}</Text>
+      {isMimer && !isMister ? (
+        // Mode MIMER : afficher l'image
+        <View style={styles.mimerContainer}>
+          {getImageSource(word)}
+          <Text style={styles.mimerInstruction}>{t('mimeInstruction')}</Text>
         </View>
-      ) : null}
+      ) : (
+        // Mode normal : afficher le mot
+        <>
+          {!isMister && category && typeof category === 'string' ? (
+            <View style={styles.catBadge}>
+              <Text style={styles.catText}>{category}</Text>
+            </View>
+          ) : null}
 
-      <Text style={[styles.word, isMister && styles.wordMister, { fontSize: wordFontSize }]}>
-        {word}
-      </Text>
+          <Text style={[styles.word, isMister && styles.wordMister, { fontSize: wordFontSize }]}>
+            {typeof word === 'string' ? word : ''}
+          </Text>
+        </>
+      )}
+
+      {isMimer && isMister && mimerHint && (
+        <View style={styles.misterHint}>
+          <Text style={styles.misterHintText}>💡 {mimerHint}</Text>
+        </View>
+      )}
 
       <Text style={styles.hint}>{t('memorize')}</Text>
 
@@ -86,4 +156,10 @@ const styles = StyleSheet.create({
   hint: { fontFamily: 'SpaceMono', fontSize: 11, color: '#000000', letterSpacing: 3 },
   okBtn: { marginTop: 20, backgroundColor: '#1a1a1a', paddingVertical: 16, paddingHorizontal: 48, borderRadius: 12, borderWidth: 2, borderColor: 'rgba(0,0,0,0.3)' },
   okBtnText: { fontFamily: 'BebasNeue', fontSize: 26, color: '#F5F5DC', letterSpacing: 3 },
+  // Styles pour le mode MIMER
+  mimerContainer: { alignItems: 'center', gap: 16 },
+  mimerImage: { width: 220, height: 220, borderRadius: 16, borderWidth: 3, borderColor: '#1a1a1a', backgroundColor: '#fff' },
+  mimerInstruction: { fontFamily: 'SpaceMono', fontSize: 11, color: '#666', textAlign: 'center' },
+  misterHint: { backgroundColor: 'rgba(232,255,71,0.3)', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: '#e8ff47' },
+  misterHintText: { fontFamily: 'SpaceMono', fontSize: 11, color: '#1a1a1a' },
 });

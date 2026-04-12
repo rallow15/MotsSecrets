@@ -47,6 +47,8 @@ export default function PrepScreen({ navigation, route }) {
       playerNames: newNames,
       selectedCategory,
       gameMode,
+      customWords: route.params.customWords || [],
+      mimerMode: route.params.mimerMode,
       wordVisible: true,  // Afficher le mot directement
     });
   };

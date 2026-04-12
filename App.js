@@ -46,17 +46,20 @@ const BANNER_TOP_ID    = 'ca-app-pub-2965679591230669/2407188674';
 const BANNER_BOTTOM_ID = 'ca-app-pub-2965679591230669/8830249922';
 
 function PrepScreenWrapper({ navigation, route }) {
-  const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames } = route.params;
+  const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, customWords, mimerMode } = route.params;
 
   const _gameMode      = gameMode      ?? 0;
   const _currentPlayer = currentPlayer ?? 0;
   const _takenNumbers  = takenNumbers  ?? [];
   const _playerNumbers = playerNumbers ?? new Array(numPlayers).fill(null);
   const _playerNames   = Array.isArray(playerNames) ? playerNames : new Array(numPlayers).fill('');
+  const _selectedCategory = selectedCategory ?? null;
+  const _customWords = Array.isArray(customWords) ? customWords : [];
+  const _mimerMode = mimerMode ?? false;
 
   // Générer assignments une seule fois (absent = première entrée dans Prep)
   const assignments = route.params.assignments
-    ?? generateAssignments(numPlayers, _gameMode);
+    ?? generateAssignments(numPlayers, _gameMode, _selectedCategory, _customWords, _mimerMode);
 
   return (
     <PrepScreen
@@ -66,6 +69,9 @@ function PrepScreenWrapper({ navigation, route }) {
         params: {
           numPlayers,
           gameMode:      _gameMode,
+          selectedCategory: _selectedCategory,
+          customWords: _customWords,
+          mimerMode: _mimerMode,
           assignments,
           currentPlayer: _currentPlayer,
           takenNumbers:  _takenNumbers,
@@ -96,7 +102,7 @@ export default function App() {
     setAdMobLoaded(loadAdMob());
   }, []);
 
-  // Vérifier le consentement IMMÉDIATEMENT (sans attendre AdMob)
+  // Vérifier le consentement avec UMP
   useEffect(() => {
     const checkConsent = async () => {
       if (__DEV__) {
@@ -105,18 +111,42 @@ export default function App() {
         return;
       }
 
-      try {
+      // En Expo Go, on utilise le stockage local
+      if (isExpoGo) {
         const savedConsent = await SecureStore.getItemAsync('ump_consent_status');
         if (savedConsent) {
           setConsentGiven(savedConsent);
           setShowConsent(false);
         }
-        // Sinon, on garde showConsent à true
-      } catch (e) {}
+        setConsentChecked(true);
+        return;
+      }
+
+      try {
+        // Import dynamique de UMP (nécessite un build natif)
+        const { initUMP, UMPConsentInformation } = await import('./src/consent/umpConfig');
+
+        // Initialiser UMP et récupérer le statut
+        await initUMP();
+        const umpStatus = await UMPConsentInformation.getConsentStatus();
+
+        if (umpStatus) {
+          setConsentGiven(umpStatus);
+          setShowConsent(false);
+        }
+      } catch (e) {
+        console.log('UMP init error:', e);
+        // Fallback: vérifier le stockage local
+        const savedConsent = await SecureStore.getItemAsync('ump_consent_status');
+        if (savedConsent) {
+          setConsentGiven(savedConsent);
+          setShowConsent(false);
+        }
+      }
       setConsentChecked(true);
     };
     checkConsent();
-  }, []);
+  }, [isExpoGo]);
 
   // Initialiser AdMob (en parallèle, ne bloque pas le consentement)
   useEffect(() => {

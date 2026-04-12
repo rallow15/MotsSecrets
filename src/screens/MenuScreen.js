@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, StatusBar,
   ScrollView, Modal, Animated, Easing, ImageBackground, Image, Platform,
+  TextInput, KeyboardAvoidingView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
@@ -41,6 +42,8 @@ const CATEGORY_EMOJIS = {
   MANGA: '🍥',
   OBJETS: '📦',
   OBJECTS: '📦',
+  SPECIALE: '⭐',
+  MIMER: '🎭',
 };
 
 const CATEGORY_NAMES = {
@@ -58,6 +61,8 @@ const CATEGORY_NAMES = {
     FILMS_SERIES: 'FILMS / SÉRIES',
     MANGA: 'MANGA',
     OBJETS: 'OBJETS',
+    SPECIALE: 'SPÉCIALE',
+    MIMER: 'MIMER',
   },
   en: {
     FOOTBALL: 'FOOTBALL',
@@ -73,6 +78,8 @@ const CATEGORY_NAMES = {
     MOVIES_SERIES: 'MOVIES / SERIES',
     MANGA: 'MANGA',
     OBJECTS: 'OBJECTS',
+    SPECIALE: 'SPECIAL',
+    MIMER: 'MIMER',
   },
 };
 
@@ -108,6 +115,27 @@ const RULES = {
         'L\'intrus et Mister White peuvent s\'allier ou se trahir.',
       ],
     },
+    {
+      mode: 'SPÉCIALE',
+      desc: 'Chaque joueur ajoute 3 mots personnalisés avant de jouer.',
+      steps: [
+        'Avant la partie, chaque joueur ajoute 3 mots dans la catégorie SPÉCIALE via le bouton "GÉRER LES MOTS SPÉCIAUX".',
+        'Pendant la partie, un mot est choisi aléatoirement parmi tous les mots personnalisés.',
+        'Fonctionne comme le mode NORMAL : 1 intrus avec un mot différent, les autres ont le même mot.',
+        'Si aucun mot personnalisé n\'a été ajouté, tous les joueurs n\'ont pas de mot (bluff pur).',
+      ],
+    },
+    {
+      mode: 'MIME',
+      desc: 'Une image s\'affiche, il faut mimer l\'événement.',
+      steps: [
+        'Une image montrant un événement s\'affiche pour chaque joueur.',
+        'Un joueur a une image différente : c\'est l\'intrus.',
+        'Mister White n\'a pas d\'image, mais reçoit un indice texte sur l\'événement.',
+        'Chacun donne des indices en mimant sans parler.',
+        'Les innocents doivent trouver l\'intrus. Mister White peut gagner s\'il n\'est pas découvert.',
+      ],
+    },
   ],
   en: [
     {
@@ -140,6 +168,27 @@ const RULES = {
         'The impostor and Mister White can ally or betray each other.',
       ],
     },
+    {
+      mode: 'SPECIAL',
+      desc: 'Each player adds 3 custom words before playing.',
+      steps: [
+        'Before the game, each player adds 3 words to the SPECIAL category via the "MANAGE SPECIAL WORDS" button.',
+        'During the game, a word is randomly chosen from all custom words.',
+        'Works like NORMAL mode: 1 impostor with a different word, others share the same word.',
+        'If no custom words were added, all players have no word (pure bluff).',
+      ],
+    },
+    {
+      mode: 'MIME',
+      desc: 'An image appears, you must mime the event.',
+      steps: [
+        'An image showing an event appears for each player.',
+        'One player has a different image: the impostor.',
+        'Mister White has no image, but receives a text clue about the event.',
+        'Everyone gives clues by miming without talking.',
+        'Innocents must find the impostor. Mister White can win if not discovered.',
+      ],
+    },
   ],
 };
 
@@ -161,23 +210,32 @@ export default function MenuScreen({ navigation }) {
   const [showGameSetup, setShowGameSetup] = useState(false);
   const [intrus, setIntrus] = useState(true);
   const [misterWhite, setMisterWhite] = useState(false);
+  const [mimerMode, setMimerMode] = useState(false);
   // États des sons (synchronisés avec sound.js)
   const [musicOn, setMusicOn] = useState(musicEnabled);
   const [sfxOn, setSfxOn] = useState(sfxEnabled);
   // Catégorie OBJETS débloquée ou non
   const [objectsUnlocked, setObjectsUnlocked] = useState(false);
+  // Mots personnalisés pour la catégorie SPÉCIALE
+  const [customWords, setCustomWords] = useState([]);
+  const [showAddWords, setShowAddWords] = useState(false);
+  const [newWord, setNewWord] = useState('');
 
-  // Charger l'état de déblocage OBJETS au démarrage
+  // Charger l'état de déblocage OBJETS et les mots personnalisés au démarrage
   useEffect(() => {
-    const loadObjectsState = async () => {
+    const loadStates = async () => {
       try {
         const unlocked = await SecureStore.getItemAsync('objects_category_unlocked');
         if (unlocked === 'true') {
           setObjectsUnlocked(true);
         }
+        const savedWords = await SecureStore.getItemAsync('speciale_custom_words');
+        if (savedWords) {
+          setCustomWords(JSON.parse(savedWords));
+        }
       } catch (e) {}
     };
-    loadObjectsState();
+    loadStates();
   }, []);
 
   const pulseAnim = new Animated.Value(1);
@@ -253,38 +311,14 @@ export default function MenuScreen({ navigation }) {
   const handleLaunchGame = async () => {
     playClick();
 
-    // Si OBJETS est sélectionné et pas encore débloqué
-    const isObjectsSelected = selectedCategory === 'OBJETS' || selectedCategory === 'OBJECTS';
-    console.log('handleLaunchGame - selectedCategory:', selectedCategory);
-    console.log('handleLaunchGame - objectsUnlocked:', objectsUnlocked);
-    console.log('handleLaunchGame - isObjectsSelected:', isObjectsSelected);
-    console.log('handleLaunchGame - isExpoGo:', isExpoGo);
-
-    if (isObjectsSelected && !objectsUnlocked) {
-      // Dans Expo Go, on débloque directement sans pub
-      if (isExpoGo) {
-        console.log('Expo Go - déblocage automatique OBJETS');
-        setObjectsUnlocked(true);
-        SecureStore.setItemAsync('objects_category_unlocked', 'true');
-      } else {
-        console.log('Tentative de chargement pub...');
-        try {
-          const rewarded = await loadAndShowRewardedAd(() => {
-            console.log('Callback récompense appelé');
-            setObjectsUnlocked(true);
-            SecureStore.setItemAsync('objects_category_unlocked', 'true');
-          });
-          console.log('Résultat pub:', rewarded);
-
-          if (!rewarded) {
-            console.log('Pub fermée sans récompense');
-            return;
-          }
-        } catch (e) {
-          console.log('Erreur pub:', e.message);
-          return;
-        }
-      }
+    // Vérifier si la catégorie SPÉCIALE est sélectionnée sans mots
+    const isSpecialeSelected = selectedCategory === 'SPECIALE';
+    if (isSpecialeSelected && customWords.length === 0) {
+      alert(lang === 'fr'
+        ? 'La catégorie SPÉCIALE nécessite au moins 1 mot personnalisé.\n\nAjoutez des mots via le bouton "GÉRER LES MOTS SPÉCIAUX".'
+        : 'SPECIAL category requires at least 1 custom word.\n\nAdd words via the "MANAGE SPECIAL WORDS" button.'
+      );
+      return;
     }
 
     let gameMode = 0; // NORMAL
@@ -294,20 +328,71 @@ export default function MenuScreen({ navigation }) {
 
     if (gameMode === 2 && numPlayers < 4) { return; }
 
+    // En mode MIMER, la catégorie est automatiquement MIMER
+    const finalCategory = mimerMode ? 'MIMER' : selectedCategory;
+
     setShowGameSetup(false);
-    const assignments = generateAssignments(numPlayers, gameMode, selectedCategory);
-    navigation.navigate('Prep', { numPlayers, gameMode, selectedCategory, assignments });
+    navigation.navigate('Prep', {
+      numPlayers,
+      gameMode,
+      selectedCategory: finalCategory,
+      customWords,
+      mimerMode
+    });
   };
 
-  const handleCategorySelect = (cat) => {
+  const handleCategorySelect = async (cat) => {
     playClick();
+
+    // Vérifier si c'est SPÉCIALE et afficher pub si nécessaire
+    const isSpeciale = cat === 'SPECIALE';
+    const isObjects = cat === 'OBJECTS' || cat === 'OBJETS';
+
+    if (isSpeciale && customWords.length === 0) {
+      alert(lang === 'fr'
+        ? 'La catégorie SPÉCIALE nécessite au moins 1 mot personnalisé.\n\nAjoutez des mots via le bouton "GÉRER LES MOTS SPÉCIAUX".'
+        : 'SPECIAL category requires at least 1 custom word.\n\nAdd words via the "MANAGE SPECIAL WORDS" button.'
+      );
+      return;
+    }
+
+    // Pub pour SPÉCIALE (si mots existent)
+    if (isSpeciale && customWords.length > 0 && !isExpoGo) {
+      const rewarded = await loadAndShowRewardedAd(() => {});
+      if (!rewarded) return;
+    }
+
+    // Pub pour OBJETS (si pas encore débloqué)
+    if (isObjects && !objectsUnlocked && !isExpoGo) {
+      const rewarded = await loadAndShowRewardedAd(() => {
+        setObjectsUnlocked(true);
+        SecureStore.setItemAsync('objects_category_unlocked', 'true');
+      });
+      if (!rewarded) return;
+    }
+
     setSelectedCategory(cat);
     setShowCategories(false);
   };
 
+  const handleAddWord = async () => {
+    if (!newWord.trim()) return;
+    const updatedWords = [...customWords, newWord.trim()];
+    setCustomWords(updatedWords);
+    await SecureStore.setItemAsync('speciale_custom_words', JSON.stringify(updatedWords));
+    setNewWord('');
+  };
+
+  const handleRemoveWord = async (index) => {
+    const updatedWords = customWords.filter((_, i) => i !== index);
+    setCustomWords(updatedWords);
+    await SecureStore.setItemAsync('speciale_custom_words', JSON.stringify(updatedWords));
+  };
+
   const rules = RULES[lang];
   const currentCategories = lang === 'en' ? CATEGORIES_EN : CATEGORIES_FR;
-  const categoryKeys = Object.keys(currentCategories);
+  // Exclure MIMER de la liste des catégories (activé via le toggle)
+  const categoryKeys = Object.keys(currentCategories).filter(cat => cat !== 'MIMER');
 
   if (showLoading) {
     return (
@@ -418,95 +503,186 @@ export default function MenuScreen({ navigation }) {
 
       <Modal visible={showGameSetup} animationType="slide" transparent onRequestClose={() => setShowGameSetup(false)}>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { maxHeight: '85%' }]}>
             <Text style={styles.modalTitle}>{lang === 'fr' ? 'CONFIGURATION' : 'CONFIGURATION'}</Text>
 
-            <View style={styles.setupSection}>
-              <Text style={styles.setupLabel}>{lang === 'fr' ? 'Nombre de joueurs' : 'Number of players'}</Text>
-              <View style={styles.counterRowLarge}>
-                <TouchableOpacity style={styles.counterBtnLarge} onPress={() => setNumPlayers(p => Math.max(3, p - 1))}><Text style={styles.counterBtnTextLarge}>−</Text></TouchableOpacity>
-                <Text style={styles.counterValLarge}>{numPlayers}</Text>
-                <TouchableOpacity style={styles.counterBtnLarge} onPress={() => setNumPlayers(p => Math.min(20, p + 1))}><Text style={styles.counterBtnTextLarge}>+</Text></TouchableOpacity>
-              </View>
-            </View>
-
-            <View style={styles.setupSection}>
-              <Text style={styles.setupLabel}>{lang === 'fr' ? 'Options' : 'Options'}</Text>
-
-              <View style={styles.toggleRow}>
-                <Text style={styles.toggleLabel}>🎭 {lang === 'fr' ? 'Intrus' : 'Impostor'}</Text>
-                <TouchableOpacity
-                  style={[styles.toggleBtn, intrus && styles.toggleBtnActive]}
-                  onPress={() => setIntrus(!intrus)}
-                >
-                  <Text style={styles.toggleBtnText}>{intrus ? 'ON' : 'OFF'}</Text>
-                </TouchableOpacity>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={styles.setupSection}>
+                <Text style={styles.setupLabel}>{lang === 'fr' ? 'Nombre de joueurs' : 'Number of players'}</Text>
+                <View style={styles.counterRowLarge}>
+                  <TouchableOpacity style={styles.counterBtnLarge} onPress={() => setNumPlayers(p => Math.max(3, p - 1))}><Text style={styles.counterBtnTextLarge}>−</Text></TouchableOpacity>
+                  <Text style={styles.counterValLarge}>{numPlayers}</Text>
+                  <TouchableOpacity style={styles.counterBtnLarge} onPress={() => setNumPlayers(p => Math.min(20, p + 1))}><Text style={styles.counterBtnTextLarge}>+</Text></TouchableOpacity>
+                </View>
               </View>
 
-              <View style={styles.toggleRow}>
-                <Text style={styles.toggleLabel}>🤵 Mister White</Text>
-                <TouchableOpacity
-                  style={[styles.toggleBtn, misterWhite && styles.toggleBtnActive]}
-                  onPress={() => setMisterWhite(!misterWhite)}
-                >
-                  <Text style={styles.toggleBtnText}>{misterWhite ? 'ON' : 'OFF'}</Text>
-                </TouchableOpacity>
+              <View style={styles.setupSection}>
+                <Text style={styles.setupLabel}>{lang === 'fr' ? 'Options' : 'Options'}</Text>
+
+                <View style={styles.toggleRow}>
+                  <Text style={styles.toggleLabel}>🎭 {lang === 'fr' ? 'Intrus' : 'Impostor'}</Text>
+                  <TouchableOpacity
+                    style={[styles.toggleBtn, intrus && styles.toggleBtnActive]}
+                    onPress={() => setIntrus(!intrus)}
+                  >
+                    <Text style={styles.toggleBtnText}>{intrus ? 'ON' : 'OFF'}</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.toggleRow}>
+                  <Text style={styles.toggleLabel}>🤵 Mister White</Text>
+                  <TouchableOpacity
+                    style={[styles.toggleBtn, misterWhite && styles.toggleBtnActive]}
+                    onPress={() => setMisterWhite(!misterWhite)}
+                  >
+                    <Text style={styles.toggleBtnText}>{misterWhite ? 'ON' : 'OFF'}</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.toggleRow}>
+                  <Text style={styles.toggleLabel}>🖼️ {lang === 'fr' ? 'Mime' : 'Mime'}</Text>
+                  <TouchableOpacity
+                    style={[styles.toggleBtn, mimerMode && styles.toggleBtnActive]}
+                    onPress={async () => {
+                      // Si on active le mode MIMER, afficher une pub
+                      if (!mimerMode && !isExpoGo) {
+                        const rewarded = await loadAndShowRewardedAd(() => {});
+                        if (!rewarded) return; // Pub fermée sans récompense
+                      }
+                      setMimerMode(!mimerMode);
+                    }}
+                  >
+                    <Text style={styles.toggleBtnText}>{mimerMode ? 'ON' : 'OFF'}</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {misterWhite && intrus && numPlayers < 4 && (
+                  <Text style={styles.warningText}>⚠️ {lang === 'fr' ? '4 joueurs minimum' : '4 players minimum'}</Text>
+                )}
               </View>
 
-              {misterWhite && intrus && numPlayers < 4 && (
-                <Text style={styles.warningText}>⚠️ {lang === 'fr' ? '4 joueurs minimum' : '4 players minimum'}</Text>
-              )}
-            </View>
-
-            <View style={styles.setupSection}>
-              <Text style={styles.setupLabel}>{lang === 'fr' ? 'Catégorie' : 'Category'}</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScrollHorizontal}>
-                <TouchableOpacity
-                  style={[styles.categoryChip, selectedCategory === null && styles.categoryChipActive]}
-                  onPress={() => setSelectedCategory(null)}
-                >
-                  <Text style={[styles.categoryChipText, selectedCategory === null && styles.categoryChipTextActive]}>
-                    🎲 {lang === 'fr' ? 'Aléatoire' : 'Random'}
-                  </Text>
-                </TouchableOpacity>
-                {categoryKeys.map(cat => {
-                  const isObjects = cat === 'OBJECTS' || cat === 'OBJETS';
-                  const showAdIndicator = isObjects && !objectsUnlocked;
-                  return (
+              {!mimerMode && (
+                <View style={styles.setupSection}>
+                  <Text style={styles.setupLabel}>{lang === 'fr' ? 'Catégorie' : 'Category'}</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScrollHorizontal}>
                     <TouchableOpacity
-                      key={cat}
-                      style={[
-                        styles.categoryChip,
-                        selectedCategory === cat && styles.categoryChipActive
-                      ]}
-                      onPress={() => handleCategorySelect(cat)}
+                      style={[styles.categoryChip, selectedCategory === null && styles.categoryChipActive]}
+                      onPress={() => setSelectedCategory(null)}
                     >
-                      <Text style={[
-                        styles.categoryChipText,
-                        selectedCategory === cat && styles.categoryChipTextActive
-                      ]}>
-                        {CATEGORY_EMOJIS[cat] || '🎯'} {CATEGORY_NAMES[lang][cat] || cat.replace('_', ' ')}
-                        {showAdIndicator && <Text style={styles.adIndicator}> 📺</Text>}
+                      <Text style={[styles.categoryChipText, selectedCategory === null && styles.categoryChipTextActive]}>
+                        🎲 {lang === 'fr' ? 'Aléatoire' : 'Random'}
                       </Text>
                     </TouchableOpacity>
-                  );
-                })}
-              </ScrollView>
-            </View>
+                    {categoryKeys.map(cat => {
+                      const isObjects = cat === 'OBJECTS' || cat === 'OBJETS';
+                      const showAdIndicator = isObjects && !objectsUnlocked;
+                      return (
+                        <TouchableOpacity
+                          key={cat}
+                          style={[
+                            styles.categoryChip,
+                            selectedCategory === cat && styles.categoryChipActive
+                          ]}
+                          onPress={() => handleCategorySelect(cat)}
+                        >
+                          <Text style={[
+                            styles.categoryChipText,
+                            selectedCategory === cat && styles.categoryChipTextActive
+                          ]}>
+                            {CATEGORY_EMOJIS[cat] || '🎯'} {CATEGORY_NAMES[lang][cat] || cat.replace('_', ' ')}
+                            {showAdIndicator && <Text style={styles.adIndicator}> 📺</Text>}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+                  <TouchableOpacity
+                    style={styles.addWordsBtn}
+                    onPress={() => setShowAddWords(true)}
+                  >
+                    <Text style={styles.addWordsBtnText}>⭐ {lang === 'fr' ? 'GÉRER LES MOTS SPÉCIAUX' : 'MANAGE SPECIAL WORDS'}</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
 
-            <TouchableOpacity
-              style={[styles.launchBtn, misterWhite && intrus && numPlayers < 4 && styles.launchBtnDisabled]}
-              onPress={handleLaunchGame}
-              disabled={misterWhite && intrus && numPlayers < 4}
-            >
-              <Text style={styles.launchBtnText}>{lang === 'fr' ? 'LANCER LA PARTIE' : 'START GAME'}</Text>
-            </TouchableOpacity>
+              {mimerMode && (
+                <View style={styles.setupSection}>
+                  <Text style={styles.setupLabel}>{lang === 'fr' ? 'Mode MIMER activé' : 'MIME Mode enabled'}</Text>
+                  <View style={styles.mimerInfoBox}>
+                    <Text style={styles.mimerInfoText}>🎭 {lang === 'fr' ? 'Des paires d\'images à mimer' : 'Image pairs to mime'}</Text>
+                  </View>
+                </View>
+              )}
+
+              <TouchableOpacity
+                style={[styles.launchBtn, misterWhite && intrus && numPlayers < 4 && styles.launchBtnDisabled]}
+                onPress={handleLaunchGame}
+                disabled={misterWhite && intrus && numPlayers < 4}
+              >
+                <Text style={styles.launchBtnText}>{lang === 'fr' ? 'LANCER LA PARTIE' : 'START GAME'}</Text>
+              </TouchableOpacity>
+            </ScrollView>
 
             <TouchableOpacity style={styles.closeBtn} onPress={() => setShowGameSetup(false)}>
               <Text style={styles.closeBtnText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text>
             </TouchableOpacity>
           </View>
         </View>
+      </Modal>
+
+      {/* Modal pour ajouter des mots à la catégorie SPÉCIALE */}
+      <Modal visible={showAddWords} animationType="slide" transparent onRequestClose={() => setShowAddWords(false)}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>{lang === 'fr' ? 'AJOUTER DES MOTS' : 'ADD WORDS'}</Text>
+              <Text style={styles.modalSubtitle}>{lang === 'fr' ? 'Catégorie SPÉCIALE' : 'SPECIAL Category'}</Text>
+
+              <View style={styles.addWordRow}>
+                <TextInput
+                  style={styles.wordInput}
+                  placeholder={lang === 'fr' ? 'Nouveau mot...' : 'New word...'}
+                  placeholderTextColor="#999"
+                  value={newWord}
+                  onChangeText={setNewWord}
+                  autoCapitalize="words"
+                  autoFocus
+                />
+                <TouchableOpacity
+                  style={[styles.addWordBtn, !newWord.trim() && styles.addWordBtnDisabled]}
+                  onPress={handleAddWord}
+                  disabled={!newWord.trim()}
+                >
+                  <Text style={styles.addWordBtnText}>AJOUTER</Text>
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.wordsCount}>{customWords.length} {lang === 'fr' ? 'mots personnalisés' : 'custom words'}</Text>
+
+              <ScrollView style={styles.wordsList} showsVerticalScrollIndicator={false}>
+                {customWords.length === 0 ? (
+                  <Text style={styles.emptyWords}>{lang === 'fr' ? 'Aucun mot personnalisé' : 'No custom words'}</Text>
+                ) : (
+                  customWords.map((word, index) => (
+                    <View key={index} style={styles.wordItem}>
+                      <Text style={styles.wordItemText}>••••</Text>
+                      <TouchableOpacity
+                        style={styles.removeBtn}
+                        onPress={() => handleRemoveWord(index)}
+                      >
+                        <Text style={styles.removeBtnText}>×</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))
+                )}
+              </ScrollView>
+
+              <TouchableOpacity style={styles.closeBtn} onPress={() => setShowAddWords(false)}>
+                <Text style={styles.closeBtnText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
 
     </>
@@ -571,18 +747,35 @@ const styles = StyleSheet.create({
   counterBtn: { width: 34, height: 34, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 1, borderColor: '#1a1a1a', alignItems: 'center', justifyContent: 'center', borderRadius: 8 },
   counterBtnText: { fontSize: 18, fontFamily: 'SpaceMono', color: '#1a1a1a' },
   counterVal: { fontFamily: 'BebasNeue', fontSize: 28, minWidth: 28, textAlign: 'center', color: '#1a1a1a' },
-  setupSection: { width: '100%', marginBottom: 20 },
-  setupLabel: { fontFamily: 'SpaceMono', fontSize: 12, color: '#333', marginBottom: 10 },
-  counterRowLarge: { flexDirection: 'row', alignItems: 'center', gap: 15, justifyContent: 'center' },
-  counterBtnLarge: { width: 45, height: 45, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 2, borderColor: '#1a1a1a', alignItems: 'center', justifyContent: 'center', borderRadius: 12 },
-  counterBtnTextLarge: { fontSize: 24, fontFamily: 'SpaceMono', color: '#1a1a1a' },
-  counterValLarge: { fontFamily: 'BebasNeue', fontSize: 36, minWidth: 50, textAlign: 'center', color: '#1a1a1a' },
-  toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, paddingVertical: 8 },
-  toggleLabel: { fontFamily: 'BebasNeue', fontSize: 18, color: '#1a1a1a' },
-  toggleBtn: { paddingHorizontal: 20, paddingVertical: 8, borderRadius: 20, backgroundColor: 'rgba(0,0,0,0.15)', borderWidth: 2, borderColor: 'rgba(0,0,0,0.3)' },
+  setupSection: { width: '100%', marginBottom: 16 },
+  setupLabel: { fontFamily: 'SpaceMono', fontSize: 11, color: '#333', marginBottom: 8 },
+  counterRowLarge: { flexDirection: 'row', alignItems: 'center', gap: 12, justifyContent: 'center' },
+  counterBtnLarge: { width: 40, height: 40, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 2, borderColor: '#1a1a1a', alignItems: 'center', justifyContent: 'center', borderRadius: 10 },
+  counterBtnTextLarge: { fontSize: 20, fontFamily: 'SpaceMono', color: '#1a1a1a' },
+  counterValLarge: { fontFamily: 'BebasNeue', fontSize: 28, minWidth: 40, textAlign: 'center', color: '#1a1a1a' },
+  toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingVertical: 4 },
+  toggleLabel: { fontFamily: 'BebasNeue', fontSize: 16, color: '#1a1a1a' },
+  toggleBtn: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.15)', borderWidth: 2, borderColor: 'rgba(0,0,0,0.3)' },
   toggleBtnActive: { backgroundColor: '#1a1a1a', borderColor: '#1a1a1a' },
-  toggleBtnText: { fontFamily: 'SpaceMono', fontSize: 12, color: '#F5F5DC', fontWeight: 'bold' },
-  launchBtn: { backgroundColor: '#1a1a1a', paddingVertical: 15, alignItems: 'center', borderRadius: 15, marginTop: 10, marginBottom: 10 },
+  toggleBtnText: { fontFamily: 'SpaceMono', fontSize: 11, color: '#F5F5DC', fontWeight: 'bold' },
+  launchBtn: { backgroundColor: '#1a1a1a', paddingVertical: 12, alignItems: 'center', borderRadius: 15, marginTop: 8, marginBottom: 8 },
   launchBtnDisabled: { backgroundColor: 'rgba(26,26,26,0.3)' },
-  launchBtnText: { fontFamily: 'BebasNeue', fontSize: 20, color: '#F5F5DC', letterSpacing: 2 },
+  launchBtnText: { fontFamily: 'BebasNeue', fontSize: 18, color: '#F5F5DC', letterSpacing: 2 },
+  addWordsBtn: { backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 2, borderColor: '#1a1a1a', paddingVertical: 12, paddingHorizontal: 16, borderRadius: 12, marginTop: 10, alignItems: 'center' },
+  addWordsBtnText: { fontFamily: 'BebasNeue', fontSize: 16, color: '#1a1a1a', letterSpacing: 1 },
+  modalSubtitle: { fontFamily: 'SpaceMono', fontSize: 11, color: '#666', textAlign: 'center', marginBottom: 16 },
+  addWordRow: { flexDirection: 'row', gap: 10, marginBottom: 10 },
+  wordInput: { flex: 1, backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: 10, paddingHorizontal: 15, paddingVertical: 10, fontFamily: 'SpaceMono', fontSize: 14, color: '#1a1a1a', borderWidth: 1, borderColor: 'rgba(0,0,0,0.1)' },
+  addWordBtn: { backgroundColor: '#1a1a1a', paddingHorizontal: 20, borderRadius: 10, justifyContent: 'center' },
+  addWordBtnDisabled: { backgroundColor: 'rgba(26,26,26,0.3)' },
+  addWordBtnText: { fontFamily: 'BebasNeue', fontSize: 14, color: '#F5F5DC', letterSpacing: 1 },
+  wordsCount: { fontFamily: 'SpaceMono', fontSize: 10, color: '#666', marginBottom: 8, textAlign: 'center' },
+  wordsList: { maxHeight: 150, width: '100%', marginBottom: 10 },
+  emptyWords: { fontFamily: 'SpaceMono', fontSize: 11, color: '#999', textAlign: 'center', paddingVertical: 20 },
+  wordItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(0,0,0,0.05)', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, marginBottom: 6 },
+  wordItemText: { fontFamily: 'SpaceMono', fontSize: 12, color: '#1a1a1a', flex: 1 },
+  removeBtn: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#ff6b6b', alignItems: 'center', justifyContent: 'center' },
+  removeBtnText: { fontFamily: 'BebasNeue', fontSize: 20, color: '#F5F5DC', lineHeight: 28 },
+  mimerInfoBox: { backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 2, borderColor: '#1a1a1a', paddingVertical: 12, paddingHorizontal: 16, borderRadius: 12, alignItems: 'center' },
+  mimerInfoText: { fontFamily: 'BebasNeue', fontSize: 16, color: '#1a1a1a', letterSpacing: 1 },
 });

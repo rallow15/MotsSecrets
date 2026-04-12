@@ -59,7 +59,7 @@ export async function initAds() {
 // PUBLICITÉ RÉCOMPENSÉE (pour débloquer la catégorie OBJETS)
 // ────────────────────────────────────────────────────────
 
-const REWARDED_AD_UNIT_PROD = 'ca-app-pub-2965679591230669/8849548689';
+const REWARDED_AD_UNIT_PROD = 'ca-app-pub-2965679591230669/1666315394';
 
 let rewardedAdInstance = null;
 let onAdEarnedRewardCallback = null;
