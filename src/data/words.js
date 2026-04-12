@@ -249,6 +249,12 @@ export const CATEGORIES_FR = {
       indice: "football",
       hintEn: "football",
     },
+    {
+      nom: "one_piece",
+      images: ["La mort de ace.png", "sacrifice de zoro.png"],
+      indice: "One Piece - Scènes émouvantes",
+      hintEn: "One Piece - Emotional scenes",
+    },
   ],
 
 };

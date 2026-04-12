@@ -11,6 +11,8 @@ const COVID_19 = require('../../assets/mimer/Covid 19.png');
 const PASSE_VACCINAL = require('../../assets/mimer/Passe Vaccinal.jpg');
 const OM_93 = require('../../assets/mimer/OM 93.png');
 const PSG_25 = require('../../assets/mimer/PSG 25.png');
+const ONE_PIECE_ACE = require('../../assets/mimer/La mort de ace.png');
+const ONE_PIECE_ZORO = require('../../assets/mimer/sacrifice de zoro.png');
 
 export default function RevealScreen({ navigation, route }) {
   const { numPlayers, assignments, currentPlayer, playerNumbers, playerNames, wordVisible: initialWordVisible, mimerMode } = route.params;
@@ -47,6 +49,8 @@ export default function RevealScreen({ navigation, route }) {
     else if (wordName === 'Passe Vaccinal.jpg') imgSource = PASSE_VACCINAL;
     else if (wordName === 'OM 93.png') imgSource = OM_93;
     else if (wordName === 'PSG 25.png') imgSource = PSG_25;
+    else if (wordName === 'La mort de ace.png') imgSource = ONE_PIECE_ACE;
+    else if (wordName === 'sacrifice de zoro.png') imgSource = ONE_PIECE_ZORO;
 
     if (!imgSource) {
       return null;
