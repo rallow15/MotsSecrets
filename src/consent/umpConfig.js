@@ -71,15 +71,21 @@ export async function initUMP() {
 
 export async function loadAndShowConsentForm() {
   if (!UMPConsentForm) {
-    console.log('UMPConsentForm non disponible');
-    throw new Error('UMP not available');
+    console.log('UMPConsentForm non disponible, tentative de chargement...');
+    if (!loadUMPModules()) {
+      throw new Error('UMP modules non chargés');
+    }
   }
   return new Promise((resolve, reject) => {
     UMPConsentForm.loadConsentForm(
       (consentForm) => {
+        console.log('Formulaire UMP chargé avec succès');
         resolve(consentForm);
       },
-      (error) => reject(error)
+      (error) => {
+        console.log('Erreur chargement formulaire UMP:', error);
+        reject(error);
+      }
     );
   });
 }

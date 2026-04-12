@@ -6,9 +6,10 @@ import Constants from 'expo-constants';
 
 // Variables UMP (chargées dynamiquement)
 let UMPConsentInformation = null;
-let loadAndShowConsentForm = null;
+let UMPConsentForm = null;
 let showConsentForm = null;
 let initUMP = null;
+let loadAndShowConsentForm = null;
 
 export default function ConsentScreen({ onConsentGiven }) {
   const [loading, setLoading] = useState(true);
@@ -45,6 +46,16 @@ export default function ConsentScreen({ onConsentGiven }) {
     }
 
     try {
+      // Vérifier que les modules UMP sont chargés
+      if (!initUMP) {
+        console.log('UMP non initialisé, chargement...');
+        const mod = await import('../consent/umpConfig');
+        initUMP = mod.initUMP;
+        loadAndShowConsentForm = mod.loadAndShowConsentForm;
+        showConsentForm = mod.showConsentForm;
+        UMPConsentInformation = mod.UMPConsentInformation;
+      }
+
       const { isFormAvailable } = await initUMP();
       if (isFormAvailable) {
         const form = await loadAndShowConsentForm();
@@ -73,6 +84,15 @@ export default function ConsentScreen({ onConsentGiven }) {
     if (!isExpoGo) {
       // En prod native, on accepte via UMP
       try {
+        // Vérifier que les modules UMP sont chargés
+        if (!initUMP) {
+          const mod = await import('../consent/umpConfig');
+          initUMP = mod.initUMP;
+          loadAndShowConsentForm = mod.loadAndShowConsentForm;
+          showConsentForm = mod.showConsentForm;
+          UMPConsentInformation = mod.UMPConsentInformation;
+        }
+
         const { isFormAvailable } = await initUMP();
         if (isFormAvailable) {
           const form = await loadAndShowConsentForm();
