@@ -491,10 +491,10 @@ export default function MenuScreen({ navigation }) {
                         );
                         return;
                       }
-                      if (!isExpoGo) {
-                        const rewarded = await loadAndShowRewardedAd(() => {});
-                        if (!rewarded) return;
-                      }
+                      // Pub requise pour accéder au mode SPÉCIALE
+                      const rewarded = await loadAndShowRewardedAd(() => {});
+                      if (!rewarded) return;
+
                       setSpecialeNumPlayers(3);
                       setSpecialeIntrus(true);
                       setSpecialeMisterWhite(false);
