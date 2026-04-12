@@ -18,6 +18,9 @@ import Constants from 'expo-constants';
 // Détecter si on est dans Expo Go
 const isExpoGo = Constants.appOwnership === 'expo';
 
+// Image pour indiquer les pubs à récompense
+const AD_REWARD_ICON = require('../../assets/ad-reward-icon.png');
+
 const CATEGORY_EMOJIS = {
   FOOTBALL: '⚽',
   BASKETBALL: '🏀',
@@ -540,20 +543,25 @@ export default function MenuScreen({ navigation }) {
                 </View>
 
                 <View style={styles.toggleRow}>
-                  <Text style={styles.toggleLabel}>🖼️ {lang === 'fr' ? 'Mime' : 'Mime'}</Text>
-                  <TouchableOpacity
-                    style={[styles.toggleBtn, mimerMode && styles.toggleBtnActive]}
-                    onPress={async () => {
-                      // Si on active le mode MIMER, afficher une pub
-                      if (!mimerMode && !isExpoGo) {
-                        const rewarded = await loadAndShowRewardedAd(() => {});
-                        if (!rewarded) return; // Pub fermée sans récompense
-                      }
-                      setMimerMode(!mimerMode);
-                    }}
-                  >
-                    <Text style={styles.toggleBtnText}>{mimerMode ? 'ON' : 'OFF'}</Text>
-                  </TouchableOpacity>
+                  <View style={styles.toggleLabelContainer}>
+                    <Text style={styles.toggleLabel}>🖼️ {lang === 'fr' ? 'Mime' : 'Mime'}</Text>
+                  </View>
+                  <View style={styles.toggleRightContainer}>
+                    {!isExpoGo && <Image source={AD_REWARD_ICON} style={styles.adRewardIcon} resizeMode="contain" />}
+                    <TouchableOpacity
+                      style={[styles.toggleBtn, mimerMode && styles.toggleBtnActive]}
+                      onPress={async () => {
+                        // Si on active le mode MIMER, afficher une pub
+                        if (!mimerMode && !isExpoGo) {
+                          const rewarded = await loadAndShowRewardedAd(() => {});
+                          if (!rewarded) return; // Pub fermée sans récompense
+                        }
+                        setMimerMode(!mimerMode);
+                      }}
+                    >
+                      <Text style={styles.toggleBtnText}>{mimerMode ? 'ON' : 'OFF'}</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
 
                 {misterWhite && intrus && numPlayers < 4 && (
@@ -574,25 +582,27 @@ export default function MenuScreen({ navigation }) {
                       </Text>
                     </TouchableOpacity>
                     {categoryKeys.map(cat => {
+                      const isSpeciale = cat === 'SPECIALE';
                       const isObjects = cat === 'OBJECTS' || cat === 'OBJETS';
-                      const showAdIndicator = isObjects && !objectsUnlocked;
+                      const showAdIndicator = (isSpeciale && customWords.length > 0) || (isObjects && !objectsUnlocked);
                       return (
-                        <TouchableOpacity
-                          key={cat}
-                          style={[
-                            styles.categoryChip,
-                            selectedCategory === cat && styles.categoryChipActive
-                          ]}
-                          onPress={() => handleCategorySelect(cat)}
-                        >
-                          <Text style={[
-                            styles.categoryChipText,
-                            selectedCategory === cat && styles.categoryChipTextActive
-                          ]}>
-                            {CATEGORY_EMOJIS[cat] || '🎯'} {CATEGORY_NAMES[lang][cat] || cat.replace('_', ' ')}
-                            {showAdIndicator && <Text style={styles.adIndicator}> 📺</Text>}
-                          </Text>
-                        </TouchableOpacity>
+                        <View key={cat} style={styles.categoryWrapper}>
+                          {!isExpoGo && showAdIndicator && <Image source={AD_REWARD_ICON} style={styles.adRewardIconSmall} resizeMode="contain" />}
+                          <TouchableOpacity
+                            style={[
+                              styles.categoryChip,
+                              selectedCategory === cat && styles.categoryChipActive
+                            ]}
+                            onPress={() => handleCategorySelect(cat)}
+                          >
+                            <Text style={[
+                              styles.categoryChipText,
+                              selectedCategory === cat && styles.categoryChipTextActive
+                            ]}>
+                              {CATEGORY_EMOJIS[cat] || '🎯'} {CATEGORY_NAMES[lang][cat] || cat.replace('_', ' ')}
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
                       );
                     })}
                   </ScrollView>
@@ -731,7 +741,6 @@ const styles = StyleSheet.create({
   categoryChipText: { fontFamily: 'BebasNeue', fontSize: 14, color: '#1a1a1a' },
   categoryChipTextActive: { color: '#F5F5DC' },
   categoryChipTextLocked: { color: '#666' },
-  adIndicator: { fontSize: 12, opacity: 0.7 },
   closeBtn: { backgroundColor: '#1a1a1a', paddingVertical: 10, alignItems: 'center', marginTop: 12, borderRadius: 10 },
   closeBtnText: { fontFamily: 'BebasNeue', fontSize: 16, color: '#F5F5DC', letterSpacing: 2 },
   ruleBlock: { marginBottom: 15, borderWidth: 1, borderColor: 'rgba(0,0,0,0.15)', padding: 12, borderRadius: 10, backgroundColor: 'rgba(0,0,0,0.05)' },
@@ -754,7 +763,12 @@ const styles = StyleSheet.create({
   counterBtnTextLarge: { fontSize: 20, fontFamily: 'SpaceMono', color: '#1a1a1a' },
   counterValLarge: { fontFamily: 'BebasNeue', fontSize: 28, minWidth: 40, textAlign: 'center', color: '#1a1a1a' },
   toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingVertical: 4 },
+  toggleLabelContainer: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  toggleRightContainer: { alignItems: 'center', gap: 4 },
   toggleLabel: { fontFamily: 'BebasNeue', fontSize: 16, color: '#1a1a1a' },
+  adRewardIcon: { width: 40, height: 20, marginBottom: 2 },
+  adRewardIconSmall: { width: 32, height: 16, marginBottom: 2, alignSelf: 'center' },
+  categoryWrapper: { alignItems: 'center' },
   toggleBtn: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.15)', borderWidth: 2, borderColor: 'rgba(0,0,0,0.3)' },
   toggleBtnActive: { backgroundColor: '#1a1a1a', borderColor: '#1a1a1a' },
   toggleBtnText: { fontFamily: 'SpaceMono', fontSize: 11, color: '#F5F5DC', fontWeight: 'bold' },
