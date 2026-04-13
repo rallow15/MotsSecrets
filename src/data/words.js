@@ -255,6 +255,12 @@ export const CATEGORIES_FR = {
       indice: "One Piece - Scènes émouvantes",
       hintEn: "One Piece - Emotional scenes",
     },
+    {
+      nom: "jeux_olympiques",
+      images: ["jeux olympique d'été.jpg", "jeux olympique d'hiver.png"],
+      indice: "Médaille",
+      hintEn: "Medal",
+    },
   ],
 
 };
@@ -507,6 +513,18 @@ export const CATEGORIES_EN = {
       images: ["OM 93.png", "PSG 25.png"],
       indice: "football",
       hintEn: "football",
+    },
+    {
+      nom: "one_piece",
+      images: ["La mort de ace.png", "sacrifice de zoro.png"],
+      indice: "One Piece - Scènes émouvantes",
+      hintEn: "One Piece - Emotional scenes",
+    },
+    {
+      nom: "jeux_olympiques",
+      images: ["jeux olympique d'été.jpg", "jeux olympique d'hiver.png"],
+      indice: "Médaille",
+      hintEn: "Medal",
     },
   ],
 

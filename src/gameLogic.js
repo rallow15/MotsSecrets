@@ -42,11 +42,14 @@ export function generateAssignments(numPlayers, gameMode = 0, selectedCategory =
       const pairIndex = Math.floor(Math.random() * mimerCategory.words.length);
       mimerData = mimerCategory.words[pairIndex];
       console.log('MIMER mimerData:', mimerData);
-      // Pour le mode MIMER, wordA et wordB sont les noms des 2 images de la paire
+      // Pour le mode MIMER, wordA et wordB sont les noms des 2 images de la paire (sans extension)
       // On inverse aléatoirement pour que les innocents puissent avoir l'image 1 ou 2
       const randomSwap = Math.random() < 0.5;
-      wordA = mimerData.images[randomSwap ? 1 : 0];
-      wordB = mimerData.images[randomSwap ? 0 : 1] || mimerData.images[randomSwap ? 1 : 0];
+      const img1 = mimerData.images[randomSwap ? 1 : 0];
+      const img2 = mimerData.images[randomSwap ? 0 : 1] || mimerData.images[randomSwap ? 1 : 0];
+      // Enlever l'extension (.jpg, .png, etc.) pour l'affichage
+      wordA = img1 ? img1.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '') : null;
+      wordB = img2 ? img2.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '') : null;
       console.log('MIMER wordA:', wordA, 'wordB:', wordB, 'swap:', randomSwap);
     }
   }

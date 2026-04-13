@@ -13,6 +13,11 @@ const OM_93 = require('../../assets/mimer/OM 93.png');
 const PSG_25 = require('../../assets/mimer/PSG 25.png');
 const ONE_PIECE_ACE = require('../../assets/mimer/La mort de ace.png');
 const ONE_PIECE_ZORO = require('../../assets/mimer/sacrifice de zoro.png');
+// JO - require dynamique pour éviter problème apostrophe
+const getJoImages = () => ({
+  ete: require('../../assets/mimer/jeux olympique d\'été.jpg'),
+  hiver: require('../../assets/mimer/jeux olympique d\'hiver.png'),
+});
 
 export default function RevealScreen({ navigation, route }) {
   const { numPlayers, assignments, currentPlayer, playerNumbers, playerNames, wordVisible: initialWordVisible, mimerMode } = route.params;
@@ -41,16 +46,24 @@ export default function RevealScreen({ navigation, route }) {
 
   // Obtenir la source de l'image pour le mode MIMER
   const getImageSource = (wordName) => {
-    // Utiliser les images importées directement
+    // Enlever l'extension (.jpg, .png, etc.) pour la comparaison
+    const wordNameClean = wordName ? wordName.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '') : '';
+
+    // Images JO dynamiques (à cause des apostrophes dans les noms de fichiers)
+    const joImages = getJoImages();
+
+    // Utiliser les images importées directement (comparaison sans extension)
     let imgSource = null;
-    if (wordName === 'Coupe Du monde 2018.jpg') imgSource = COUPE_2018;
-    else if (wordName === 'Coupe Du monde 1998.jpg') imgSource = COUPE_1998;
-    else if (wordName === 'Covid 19.png') imgSource = COVID_19;
-    else if (wordName === 'Passe Vaccinal.jpg') imgSource = PASSE_VACCINAL;
-    else if (wordName === 'OM 93.png') imgSource = OM_93;
-    else if (wordName === 'PSG 25.png') imgSource = PSG_25;
-    else if (wordName === 'La mort de ace.png') imgSource = ONE_PIECE_ACE;
-    else if (wordName === 'sacrifice de zoro.png') imgSource = ONE_PIECE_ZORO;
+    if (wordNameClean === 'Coupe Du monde 2018') imgSource = COUPE_2018;
+    else if (wordNameClean === 'Coupe Du monde 1998') imgSource = COUPE_1998;
+    else if (wordNameClean === 'Covid 19') imgSource = COVID_19;
+    else if (wordNameClean === 'Passe Vaccinal') imgSource = PASSE_VACCINAL;
+    else if (wordNameClean === 'OM 93') imgSource = OM_93;
+    else if (wordNameClean === 'PSG 25') imgSource = PSG_25;
+    else if (wordNameClean === 'La mort de ace') imgSource = ONE_PIECE_ACE;
+    else if (wordNameClean === 'sacrifice de zoro') imgSource = ONE_PIECE_ZORO;
+    else if (wordNameClean === 'jeux olympique d\'été') imgSource = joImages.ete;
+    else if (wordNameClean === 'jeux olympique d\'hiver') imgSource = joImages.hiver;
 
     if (!imgSource) {
       return null;
@@ -115,9 +128,10 @@ export default function RevealScreen({ navigation, route }) {
       {playerName ? <Text style={styles.playerName}>{playerName}</Text> : null}
 
       {isMimer && !isMister ? (
-        // Mode MIMER : afficher l'image
+        // Mode MIMER : afficher l'image + le nom
         <View style={styles.mimerContainer}>
           {getImageSource(word)}
+          <Text style={styles.mimerWord}>{word}</Text>
           <Text style={styles.mimerInstruction}>{t('mimeInstruction')}</Text>
         </View>
       ) : (
@@ -167,6 +181,7 @@ const styles = StyleSheet.create({
   // Styles pour le mode MIMER
   mimerContainer: { alignItems: 'center', gap: 16 },
   mimerImage: { width: 220, height: 220, borderRadius: 16, borderWidth: 3, borderColor: '#1a1a1a', backgroundColor: '#fff' },
+  mimerWord: { fontFamily: 'BebasNeue', fontSize: 32, color: '#000000', textAlign: 'center', letterSpacing: 1 },
   mimerInstruction: { fontFamily: 'SpaceMono', fontSize: 11, color: '#666', textAlign: 'center' },
   misterHint: { backgroundColor: 'rgba(232,255,71,0.3)', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: '#e8ff47' },
   misterHintText: { fontFamily: 'SpaceMono', fontSize: 11, color: '#1a1a1a' },
