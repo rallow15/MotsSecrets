@@ -11,6 +11,8 @@ let isInitialized = false;
 export let soundEnabled = true;
 export let musicEnabled = true;
 export let sfxEnabled = true; // Effets sonores (click, start, reveal)
+export let musicVolume = 0.3; // Volume musique (0.0 - 1.0)
+export let sfxVolume = 0.3;   // Volume effets (0.0 - 1.0)
 
 // Musique d'ambiance
 let backgroundMusic = null;
@@ -101,7 +103,7 @@ async function playAsset(soundKey, isMusic = false) {
       await playingSounds[soundKey].unloadAsync();
     }
     const { sound } = await Audio.Sound.createAsync(asset, {
-      volume: isMusic ? 0.3 : 0.5,
+      volume: isMusic ? musicVolume : sfxVolume,
       isLooping: isMusic,
     });
     playingSounds[soundKey] = sound;

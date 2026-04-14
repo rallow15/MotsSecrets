@@ -282,6 +282,19 @@ export default function MenuScreen({ navigation }) {
     useCallback(() => {
       console.log('MenuScreen focus - réinitialisation');
 
+      // Recharger les mots personnalisés SPÉCIALE depuis SecureStore
+      const loadCustomWords = async () => {
+        try {
+          const savedWords = await SecureStore.getItemAsync('speciale_custom_words');
+          if (savedWords) {
+            setCustomWords(JSON.parse(savedWords));
+          }
+        } catch (e) {
+          console.log('Erreur chargement custom words:', e);
+        }
+      };
+      loadCustomWords();
+
       // Fermer toutes les modales
       setShowGameSetup(false);
       setShowRules(false);
@@ -484,17 +497,11 @@ export default function MenuScreen({ navigation }) {
                     </View>
                     <TouchableOpacity style={styles.iconBtn} onPress={async () => {
                       playClick();
-                      if (customWords.length === 0) {
-                        alert(lang === 'fr'
-                          ? 'La catégorie SPÉCIALE nécessite au moins 1 mot personnalisé.\n\nAjoutez des mots via le bouton étoile.'
-                          : 'SPECIAL category requires at least 1 custom word.\n\nAdd words via the star button.'
-                        );
-                        return;
-                      }
                       // Pub requise pour accéder au mode SPÉCIALE
-                      const rewarded = await loadAndShowRewardedAd(() => {});
-                      if (!rewarded) return;
-
+                      if (!isExpoGo) {
+                        const rewarded = await loadAndShowRewardedAd(() => {});
+                        if (!rewarded) return;
+                      }
                       setSpecialeNumPlayers(3);
                       setSpecialeIntrus(true);
                       setSpecialeMisterWhite(false);
