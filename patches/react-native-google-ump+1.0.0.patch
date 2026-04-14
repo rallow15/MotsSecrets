@@ -1,0 +1,18 @@
+diff --git a/node_modules/react-native-google-ump/android/build.gradle b/node_modules/react-native-google-ump/android/build.gradle
+index 47f7bba..f651ae8 100644
+--- a/node_modules/react-native-google-ump/android/build.gradle
++++ b/node_modules/react-native-google-ump/android/build.gradle
+@@ -19,10 +19,10 @@ def safeExtGet(prop, fallback) {
+ }
+ 
+ android {
+-    compileSdkVersion safeExtGet('GoogleUMP_compileSdkVersion', 29)
++    compileSdkVersion safeExtGet('GoogleUMP_compileSdkVersion', 36)
+     defaultConfig {
+-        minSdkVersion safeExtGet('GoogleUMP_minSdkVersion', 16)
+-        targetSdkVersion safeExtGet('GoogleUMP_targetSdkVersion', 29)
++        minSdkVersion safeExtGet('GoogleUMP_minSdkVersion', 24)
++        targetSdkVersion safeExtGet('GoogleUMP_targetSdkVersion', 36)
+         versionCode 1
+         versionName "1.0"
+ 
