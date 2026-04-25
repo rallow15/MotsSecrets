@@ -1,1 +1,5 @@
 node_modules
+dist/
+.expo/
+.claude/settings.local.json
+android/app/debug.keystore

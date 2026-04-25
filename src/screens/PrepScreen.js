@@ -49,6 +49,7 @@ export default function PrepScreen({ navigation, route }) {
       gameMode,
       customWords: route.params.customWords || [],
       mimerMode: route.params.mimerMode,
+      spyfallTimer: route.params.spyfallTimer ?? null,
       wordVisible: true,  // Afficher le mot directement
     });
   };

@@ -15,6 +15,7 @@ import RevealScreen   from './src/screens/RevealScreen';
 import BlackScreen    from './src/screens/BlackScreen';
 import ResultScreen   from './src/screens/ResultScreen';
 import ConsentScreen  from './src/screens/ConsentScreen';
+import SpyfallGameScreen from './src/screens/SpyfallGameScreen';
 import { generateAssignments } from './src/gameLogic';
 import { colors } from './src/theme';
 
@@ -46,7 +47,7 @@ const BANNER_TOP_ID    = 'ca-app-pub-2965679591230669/2407188674';
 const BANNER_BOTTOM_ID = 'ca-app-pub-2965679591230669/8830249922';
 
 function PrepScreenWrapper({ navigation, route }) {
-  const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, customWords, mimerMode } = route.params;
+  const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, customWords, mimerMode, spyfallTimer } = route.params;
 
   const _gameMode      = gameMode      ?? 0;
   const _currentPlayer = currentPlayer ?? 0;
@@ -56,6 +57,7 @@ function PrepScreenWrapper({ navigation, route }) {
   const _selectedCategory = selectedCategory ?? null;
   const _customWords = Array.isArray(customWords) ? customWords : [];
   const _mimerMode = mimerMode ?? false;
+  const _spyfallTimer = spyfallTimer ?? null;
 
   // Générer assignments une seule fois (absent = première entrée dans Prep)
   const assignments = route.params.assignments
@@ -72,6 +74,7 @@ function PrepScreenWrapper({ navigation, route }) {
           selectedCategory: _selectedCategory,
           customWords: _customWords,
           mimerMode: _mimerMode,
+          spyfallTimer: _spyfallTimer,
           assignments,
           currentPlayer: _currentPlayer,
           takenNumbers:  _takenNumbers,
@@ -194,6 +197,7 @@ export default function App() {
             <Stack.Screen name="Reveal" component={RevealScreen} />
             <Stack.Screen name="Black"  component={BlackScreen} />
             <Stack.Screen name="Result" component={ResultScreen} />
+            <Stack.Screen name="SpyfallGame"  component={SpyfallGameScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </View>

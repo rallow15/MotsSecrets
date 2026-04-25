@@ -1,56 +1,37 @@
 // ═════════════════════════════════════════════════════════════
-// GESTION DES SONS
+// GESTION DES SONS (expo-audio — remplace expo-av déprécié)
 // ═════════════════════════════════════════════════════════════
 
-import { Audio } from 'expo-av';
+import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import { AppState, Platform } from 'react-native';
 
 let isInitialized = false;
 
-// État des sons (peut être modifié depuis les paramètres)
+// État des sons
 export let soundEnabled = true;
 export let musicEnabled = true;
-export let sfxEnabled = true; // Effets sonores (click, start, reveal)
-export let musicVolume = 0.3; // Volume musique (0.0 - 1.0)
-export let sfxVolume = 0.3;   // Volume effets (0.0 - 1.0)
+export let sfxEnabled = true;
+export let musicVolume = 0.3;
+export let sfxVolume = 0.3;
 
 // Musique d'ambiance
 let backgroundMusic = null;
 let isMusicPlaying = false;
-let isMusicLoading = false; // Évite les chargements multiples
+let isMusicLoading = false;
 
-// Sons avec require statique (obligatoire pour Metro/Expo)
-// Si un fichier manque, la valeur sera null et on utilisera le fallback
+// Sons avec require statique
 let soundClick = null, soundStart = null, soundReveal = null, soundIntruder = null;
 let soundInnocent = null, soundMister = null, soundWin = null, soundLose = null, soundAmbiance = null;
 
-try {
-  soundClick = require('../assets/sounds/click.mp3');
-} catch (e) {}
-try {
-  soundStart = require('../assets/sounds/start.mp3');
-} catch (e) {}
-try {
-  soundReveal = require('../assets/sounds/reveal.mp3');
-} catch (e) {}
-try {
-  soundIntruder = require('../assets/sounds/intruder.mp3');
-} catch (e) {}
-try {
-  soundInnocent = require('../assets/sounds/innocent.mp3');
-} catch (e) {}
-try {
-  soundMister = require('../assets/sounds/mister.mp3');
-} catch (e) {}
-try {
-  soundWin = require('../assets/sounds/win.mp3');
-} catch (e) {}
-try {
-  soundLose = require('../assets/sounds/lose.mp3');
-} catch (e) {}
-try {
-  soundAmbiance = require('../assets/sounds/ambiance.mp3');
-} catch (e) {}
+try { soundClick = require('../assets/sounds/click.mp3'); } catch (e) {}
+try { soundStart = require('../assets/sounds/start.mp3'); } catch (e) {}
+try { soundReveal = require('../assets/sounds/reveal.mp3'); } catch (e) {}
+try { soundIntruder = require('../assets/sounds/intruder.mp3'); } catch (e) {}
+try { soundInnocent = require('../assets/sounds/innocent.mp3'); } catch (e) {}
+try { soundMister = require('../assets/sounds/mister.mp3'); } catch (e) {}
+try { soundWin = require('../assets/sounds/win.mp3'); } catch (e) {}
+try { soundLose = require('../assets/sounds/lose.mp3'); } catch (e) {}
+try { soundAmbiance = require('../assets/sounds/ambiance.mp3'); } catch (e) {}
 
 const SOUND_ASSETS = {
   click: soundClick,
@@ -64,57 +45,35 @@ const SOUND_ASSETS = {
   ambiance: soundAmbiance,
 };
 
-// Vérifier si le téléphone est en mode silencieux
-function isSilentMode() {
-  if (Platform.OS === 'ios') {
-    // iOS gère automatiquement le mode silencieux avec playsInSilentModeIOS
-    return false;
-  }
-  if (Platform.OS === 'android') {
-    // Android - on vérifie via Audio API
-    return false; // Expo gère cela automatiquement
-  }
-  return false;
-}
+// Sons en cours de lecture
+const playingSounds = {};
 
 // Écouter les changements d'état de l'application
 if (AppState) {
   AppState.addEventListener('change', (state) => {
     if (state === 'background' && backgroundMusic) {
-      // Pause musique quand l'app est en arrière-plan
-      backgroundMusic.pauseAsync().catch(() => {});
-    } else if (state === 'active' && backgroundMusic && isMusicPlaying && musicEnabled && soundEnabled) {
-      // Reprendre musique quand l'app revient
-      backgroundMusic.playAsync().catch(() => {});
+      backgroundMusic.pause();
+      isMusicPlaying = false;
+    } else if (state === 'active' && backgroundMusic && musicEnabled && soundEnabled) {
+      backgroundMusic.play();
+      isMusicPlaying = true;
     }
   });
 }
 
-// Sons en cours de lecture (pour éviter de les couper)
-const playingSounds = {};
-
-// Jouer un fichier audio
+// Jouer un fichier audio avec expo-audio
 async function playAsset(soundKey, isMusic = false) {
   const asset = SOUND_ASSETS[soundKey];
   if (!asset) return false;
   try {
-    // Stopper le son précédent du même type s'il existe encore
     if (playingSounds[soundKey]) {
-      await playingSounds[soundKey].unloadAsync();
+      playingSounds[soundKey].remove();
     }
-    const { sound } = await Audio.Sound.createAsync(asset, {
-      volume: isMusic ? musicVolume : sfxVolume,
-      isLooping: isMusic,
-    });
-    playingSounds[soundKey] = sound;
-    await sound.playAsync();
-    // Ne pas décharger - laisser le son finir
-    sound.setOnPlaybackStatusUpdate((status) => {
-      if (status.isLoaded && status.didJustFinishPlaying && !isMusic) {
-        sound.unloadAsync();
-        delete playingSounds[soundKey];
-      }
-    });
+    const player = createAudioPlayer(asset);
+    player.volume = isMusic ? musicVolume : sfxVolume;
+    player.loop = isMusic;
+    playingSounds[soundKey] = player;
+    player.play();
     return true;
   } catch (error) {
     return false;
@@ -160,21 +119,20 @@ function writeString(view, offset, string) {
 
 async function playTone(frequency, duration, type = 'sine', volume = 0.5) {
   try {
-    const { sound } = await Audio.Sound.createAsync(
-      { uri: `data:audio/wav;base64,${generateWav(frequency, duration, type)}` },
-      { volume }
-    );
-    await sound.playAsync();
+    const player = createAudioPlayer({ uri: `data:audio/wav;base64,${generateWav(frequency, duration, type)}` });
+    player.volume = volume;
+    player.play();
   } catch (e) {}
 }
 
 export async function initSounds() {
   if (isInitialized) return;
   try {
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: false,
-      playsInSilentModeIOS: false, // Respecte le mode silencieux
-      staysActiveInBackground: true,
+    await setAudioModeAsync({
+      allowsRecording: false,
+      playsInSilentMode: false,
+      shouldPlayInBackground: true,
+      interruptionMode: 'doNotMix',
     });
     isInitialized = true;
   } catch (error) {
@@ -187,23 +145,19 @@ export async function startBackgroundMusic() {
   if (!soundEnabled || !musicEnabled || isMusicLoading) return;
   isMusicLoading = true;
   try {
-    // Stopper l'ancienne musique si elle existe
     if (backgroundMusic) {
-      try {
-        await backgroundMusic.stopAsync();
-        await backgroundMusic.unloadAsync();
-      } catch (e) {}
+      try { backgroundMusic.pause(); } catch (e) {}
+      try { backgroundMusic.remove(); } catch (e) {}
       backgroundMusic = null;
     }
     isMusicPlaying = false;
 
     if (soundAmbiance) {
-      const { sound } = await Audio.Sound.createAsync(soundAmbiance, {
-        volume: 0.3,
-        isLooping: true,
-      });
-      backgroundMusic = sound;
-      await sound.playAsync();
+      const player = createAudioPlayer(soundAmbiance);
+      player.volume = 0.3;
+      player.loop = true;
+      backgroundMusic = player;
+      player.play();
       isMusicPlaying = true;
     }
   } catch (error) {
@@ -218,17 +172,12 @@ export async function stopBackgroundMusic() {
   if (!backgroundMusic && !isMusicPlaying) return;
   try {
     if (backgroundMusic) {
-      try {
-        await backgroundMusic.stopAsync();
-      } catch (e) {}
-      try {
-        await backgroundMusic.unloadAsync();
-      } catch (e) {}
+      try { backgroundMusic.pause(); } catch (e) {}
+      try { backgroundMusic.remove(); } catch (e) {}
       backgroundMusic = null;
     }
     isMusicPlaying = false;
   } catch (error) {
-    // Ignorer les erreurs de type "Seeking interrupted"
     if (!error.message?.includes('interrupted')) {
       console.log('Erreur stop musique:', error);
     }
@@ -240,10 +189,10 @@ export async function toggleMusic(play) {
   if (!backgroundMusic) return;
   try {
     if (play) {
-      await backgroundMusic.playAsync();
+      backgroundMusic.play();
       isMusicPlaying = true;
     } else {
-      await backgroundMusic.pauseAsync();
+      backgroundMusic.pause();
       isMusicPlaying = false;
     }
   } catch (error) {
@@ -251,23 +200,16 @@ export async function toggleMusic(play) {
   }
 }
 
-// Définir l'état des sons (depuis les paramètres)
 export function setSoundEnabled(enabled) {
   soundEnabled = enabled;
-  if (!enabled) {
-    stopBackgroundMusic();
-  } else if (musicEnabled) {
-    startBackgroundMusic();
-  }
+  if (!enabled) { stopBackgroundMusic(); }
+  else if (musicEnabled) { startBackgroundMusic(); }
 }
 
 export function setMusicEnabled(enabled) {
   musicEnabled = enabled;
-  if (!enabled) {
-    stopBackgroundMusic();
-  } else if (soundEnabled) {
-    startBackgroundMusic();
-  }
+  if (!enabled) { stopBackgroundMusic(); }
+  else if (soundEnabled) { startBackgroundMusic(); }
 }
 
 export function setSfxEnabled(enabled) {
@@ -277,7 +219,6 @@ export function setSfxEnabled(enabled) {
 // Fallback synthétique si le fichier n'existe pas
 async function playSound(key, fallback) {
   if (!isInitialized) await initSounds();
-  // Vérifier si les sons sont activés
   if (!soundEnabled || !sfxEnabled) return;
   const loaded = await playAsset(key);
   if (!loaded && fallback) fallback();

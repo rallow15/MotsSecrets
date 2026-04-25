@@ -1,36 +1,32 @@
 // ═════════════════════════════════════════════════════════════
 // BASE DE DONNÉES DES MOTS PAR CATÉGORIE
 // ═════════════════════════════════════════════════════════════
+//
+// Les catégories ANIMAUX et FOOTBALL utilisent des sous-catégories
+// invisibles (_subcategories) pour que les mots tirés soient cohérents.
+// Les autres catégories restent des listes plates (tableaux de strings).
+// ═════════════════════════════════════════════════════════════
 
 export const CATEGORIES_FR = {
   // ═══════════════════════════════════════════════════════════
   // ⚽ FOOTBALL
-  // ═══════════════════════════════════════════════════════════
-  FOOTBALL: [
-    "Ronaldo (CR7)", "Messi", "Neymar", "Mbappé", "Zidane",
-    "Ronaldinho", "Benzema", "Lewandowski", "Salah", "Mané",
-    "Pogba", "Kanté", "Griezmann", "Dembélé", "Modric",
-    "Iniesta", "Xavi", "Pirlo", "Beckham", "Lampard",
-    "Rooney", "Gerrard", "Henry", "Trezeguet", "Ribéry",
-    "Matuidi", "Varane", "Ramos", "Pepe", "Marcelo",
-    "Dani Alves", "N'Golo Kanté", "De Bruyne", "Hazard",
-    "Lukaku", "Aguero", "Dybala", "Higuain", "Tevez",
-    "Maradona", "Pelé", "Romario", "R9", "Cafu",
-    "Roberto Carlos", "Toni Kroos", "Modric", "Rakitic",
-    "Casemiro", "Vinicius Jr", "Rodrygo", "Camavinga",
-    "Bellingham", "Haaland", "De Bruyne", "Foden", "Saka",
-    "Pedri", "Gavi", "Vinicius", "Eder Militao", "Alisson",
-    "Ederson", "Courtois", "Ter Stegen", "Donnarumma",
-    "Navas", "Oblak", "Neuer", "Lewandowski", "Muller",
-    "Robben", "Ribery", "Lahm", "Boateng", "Hummels",
-    "Van Dijk", "De Ligt", "Davies", "Alaba", "Aouar",
-    "Benzema", "Vini Jr", "Rodrygo", "Valverde", "Tchouameni",
-    "Son Heung-min", "Kane", "Mbappe", "Neymar Jr", "Lamine Yamal",
-  ],
+  // ═════════════════════════════════════════════════════════════
+  FOOTBALL: {
+    _subcategories: {
+      'Stars mondiales': ["Messi", "Ronaldo (CR7)", "Neymar", "Mbappé", "Zidane", "Ronaldinho", "Maradona", "Pelé", "R9", "Henry"],
+      'Attaquants': ["Benzema", "Lewandowski", "Salah", "Haaland", "Kane", "Son Heung-min", "Lukaku", "Aguero", "Higuain", "Dybala", "Tevez"],
+      'Ailiers': ["Hazard", "Mané", "Dembélé", "Vinicius Jr", "Foden", "Saka", "Lamine Yamal", "Pedri", "Gavi"],
+      'Milieux': ["Iniesta", "Xavi", "Pirlo", "Beckham", "Lampard", "Gerrard", "Modric", "Toni Kroos", "De Bruyne", "Bellingham", "Pogba", "Griezmann"],
+      'Milieux défensifs': ["Matuidi", "Kanté", "Casemiro", "Tchouameni", "Valverde", "Rakitic"],
+      'Défenseurs': ["Varane", "Ramos", "Pepe", "Marcelo", "Dani Alves", "Van Dijk", "De Ligt", "Davies", "Alaba", "Roberto Carlos", "Eder Militao"],
+      'Gardiens': ["Alisson", "Ederson", "Courtois", "Ter Stegen", "Donnarumma", "Navas", "Oblak", "Neuer"],
+      'Légendes': ["Cafu", "Trezeguet", "Ribéry", "Robben", "Lahm", "Boateng", "Hummels", "Muller", "Romario", "Rooney"],
+    },
+  },
 
   // ═══════════════════════════════════════════════════════════
   // 🏀 BASKETBALL
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   BASKETBALL: [
     "Michael Jordan", "LeBron James", "Kobe Bryant", "Shaquille O'Neal",
     "Allen Iverson", "Stephen Curry", "Kevin Durant", "Magic Johnson",
@@ -44,7 +40,7 @@ export const CATEGORIES_FR = {
 
   // ═══════════════════════════════════════════════════════════
   // 🎬 ACTEURS
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   ACTEURS: [
     "Leonardo DiCaprio", "Tom Cruise", "Will Smith", "Brad Pitt", "Johnny Depp",
     "Robert Downey Jr.", "Dwayne Johnson", "Tom Hanks", "Keanu Reeves", "Morgan Freeman",
@@ -54,17 +50,17 @@ export const CATEGORIES_FR = {
     "Jean Dujardin", "Denzel Washington", "Jackie Chan", "Bruce Lee", "Jet Li",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🎬 ACTRICES
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   ACTRICES: [
     "Scarlett Johansson", "Jennifer Lawrence", "Angelina Jolie", "Emma Watson", "Gal Gadot",
     "Meryl Streep", "Natalie Portman", "Margot Robbie", "Charlize Theron", "Zendaya",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🌍 PAYS
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   PAYS: [
     "France", "Allemagne", "Espagne", "Italie", "Royaume-Uni",
     "Portugal", "Belgique", "Pays-Bas", "Suisse", "Autriche",
@@ -101,36 +97,29 @@ export const CATEGORIES_FR = {
     "Émirats Arabes Unis", "Qatar", "Bahreïn", "Koweït", "Afghanistan",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🦁 ANIMAUX
-  // ═══════════════════════════════════════════════════════════
-  ANIMAUX: [
-    "Lion", "Tigre", "Léopard", "Guépard", "Jaguar",
-    "Puma", "Éléphant", "Rhinocéros", "Hippopotame", "Girafe",
-    "Zèbre", "Gnou", "Gazelle", "Antilope", "Buffle",
-    "Singe", "Gorille", "Chimpanzé", "Orang-outan", "Babouin",
-    "Loup", "Renard", "Ours", "Panda", "Koala",
-    "Kangourou", "Dingo", "Castor", "Loutre",
-    "Hérisson", "Écureuil", "Rat", "Souris", "Hamster",
-    "Cochon d'Inde", "Lapin", "Lièvre", "Chat", "Chien",
-    "Cheval", "Âne", "Zèbre", "Vache", "Taureau",
-    "Bœuf", "Mouton", "Brebis", "Chèvre", "Boucs",
-    "Cochon", "Sanglier", "Poule", "Coq", "Poulet",
-    "Canard", "Oie", "Dinde",
-    "Aigle", "Faucon", "Hibou", "Chouette", "Corbeau",
-    "Pigeon", "Moineau", "Perroquet",
-    "Pingouin", "Mouette",
-    "Requin", "Dauphin", "Baleine", "Orque", "Phoque",
-    "Otarie", "Crabe", "Langouste", "Homard",
-    "Crevette", "Poulpe", "Calamar", "Étoile de mer", "Oursin",
-    "Tortue", "Lézard", "Caméléon", "Iguane", "Serpent",
-    "Python", "Cobra", "Vipère", "Crocodile", "Alligator",
-    "Caiman", "Grenouille", "Crapaud",
-  ],
+  // ═════════════════════════════════════════════════════════════
+  ANIMAUX: {
+    _subcategories: {
+      'Félins': ["Lion", "Tigre", "Léopard", "Guépard", "Jaguar", "Puma"],
+      'Primates': ["Singe", "Gorille", "Chimpanzé", "Orang-outan", "Babouin"],
+      'Animaux de maison': ["Chat", "Chien", "Lapin", "Hamster", "Cochon d'Inde"],
+      'Ferme': ["Cheval", "Âne", "Vache", "Taureau", "Mouton", "Brebis", "Chèvre", "Bouc", "Cochon", "Poule", "Coq", "Canard", "Oie", "Dinde", "Bœuf"],
+      'Forêt': ["Loup", "Renard", "Ours", "Sanglier", "Cerf", "Biche", "Chevreuil", "Écureuil", "Hérisson"],
+      'Savane': ["Éléphant", "Rhinocéros", "Hippopotame", "Girafe", "Zèbre", "Gnou", "Gazelle", "Antilope", "Buffle"],
+      'Oiseaux': ["Aigle", "Faucon", "Hibou", "Chouette", "Corbeau", "Pigeon", "Moineau", "Perroquet", "Mouette", "Pingouin"],
+      'Marins': ["Requin", "Dauphin", "Baleine", "Orque", "Phoque", "Otarie"],
+      'Mer': ["Crabe", "Langouste", "Homard", "Crevette", "Poulpe", "Calamar", "Étoile de mer", "Oursin"],
+      'Reptiles': ["Tortue", "Lézard", "Caméléon", "Iguane", "Serpent", "Python", "Cobra", "Vipère", "Crocodile", "Alligator", "Caïman"],
+      'Étang': ["Grenouille", "Crapaud", "Rat", "Souris", "Lièvre", "Castor", "Loutre"],
+      'Exotiques': ["Kangourou", "Koala", "Panda", "Dingo"],
+    },
+  },
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🎮 JEUX VIDÉO
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   JEUX_VIDEO: [
     "Minecraft", "Fortnite", "Grand Theft Auto V (GTA V)", "Grand Theft Auto IV (GTA IV)",
     "Grand Theft Auto: San Andreas", "Grand Theft Auto: Vice City", "The Legend of Zelda: Breath of the Wild",
@@ -143,9 +132,9 @@ export const CATEGORIES_FR = {
   ],
 
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🎵 MUSIQUE / CHANTEURS
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   MUSIQUE: [
     "Niska", "Booba", "Jul", "PNL", "Ninho",
     "Gims", "Maître Gims", "Soprano", "Bigflo", "Oli",
@@ -163,45 +152,45 @@ export const CATEGORIES_FR = {
     "50 Cent", "Snoop Dogg", "Tupac", "Biggie", "Nas",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🚗 VOITURES
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   VOITURES: [
     "Ferrari", "Lamborghini", "Porsche", "Rolls-Royce", "Bentley",
     "Aston Martin", "Maserati", "McLaren", "Bugatti", "Mercedes-Benz",
     "BMW", "Audi", "Jaguar", "Land Rover", "Tesla",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 👜 MARQUES
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   MARQUES: [
     "Louis Vuitton", "Chanel", "Gucci", "Hermès", "Prada",
     "Rolex", "Cartier", "Fendi", "Dior", "Saint Laurent",
     "Balenciaga", "Burberry", "Tom Ford", "Bvlgari", "Nike",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🎌 MANGA
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   MANGA: [
     "Naruto", "Sasuke", "Sakura", "Kakashi", "Itachi",
-    "Goku", "Vegeta", "Gohan", "Piccolo", "Freezer", "Krillin", "Broly", "Trunks", "Bulma", "Cell", "Majin Boo", "Tortue Géniale",
+    "Goku", "Vegeta", "Gohan", "Piccolo", "Frieza", "Krillin", "Broly", "Trunks", "Bulma", "Cell", "Majin Boo", "Tortue Géniale",
     "Luffy", "Zoro", "Nami", "Sanji", "Chopper", "Shanks", "Kaido", "Big Mom",
     "Saitama", "Rock D. Xebec",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🎬 FILMS / SÉRIES
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   FILMS_SERIES: [
     "Avatar", "Star Wars", "Jurassic World", "Mission: Impossible", "Fast & Furious",
     "Game of Thrones", "Stranger Things", "The Last of Us", "Squid Game", "One Piece",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 📦 OBJETS
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   OBJETS: [
     "Téléphone", "Ordinateur", "Tablette", "Montre", "Lunettes",
     "Clé", "Portefeuille", "Sac", "Valise", "Parapluie",
@@ -219,17 +208,30 @@ export const CATEGORIES_FR = {
     "Bouilloire", "Mixeur", "Robot culinaire", "Poêle", "Casserole",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
+  // 🏠 LIEUX (Mode Spyfall)
+  // ═════════════════════════════════════════════════════════════
+  LIEUX: [
+    "Plage", "Restaurant", "Cinéma", "Hôpital", "Avion",
+    "École", "Gare", "Supermarché", "Parc d'attractions", "Stade",
+    "Bibliothèque", "Musée", "Aéroport", "Hôtel", "Banque",
+    "Casino", "Église", "Prison", "Ambassade", "Théâtre",
+    "Cirque", "Bateau de croisière", "Camp militaire", "Station spatiale", "Sous-marin",
+    "Pôle Nord", "Désert", "Forêt tropicale", "Île déserte", "Volcan",
+    "Marché", "Usine", "Laboratoire", "Opéra", "Stade olympique",
+    "Spa", "Festival", "Caravane", "Phare", "Château",
+  ],
+
+  // ═════════════════════════════════════════════════════════════
   // ⭐ SPÉCIALE
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   SPECIALE: [
     "AUCUN",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🖼️ MIMER (Images à mimer - paires avec indice pour Mister White)
-  // ═══════════════════════════════════════════════════════════
-  // Format: { nom: "nom_paire", images: ["img_1.jpg", "img_2.jpg"], indice: "indice FR", hintEn: "hint EN" }
+  // ═════════════════════════════════════════════════════════════
   MIMER: [
     {
       nom: "football",
@@ -270,34 +272,25 @@ export const CATEGORIES_FR = {
 // ═════════════════════════════════════════════════════════════
 
 export const CATEGORIES_EN = {
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // ⚽ FOOTBALL
-  // ═══════════════════════════════════════════════════════════
-  FOOTBALL: [
-    "Ronaldo (CR7)", "Messi", "Neymar", "Mbappé", "Zidane",
-    "Ronaldinho", "Benzema", "Lewandowski", "Salah", "Mané",
-    "Pogba", "Kanté", "Griezmann", "Dembélé", "Modric",
-    "Iniesta", "Xavi", "Pirlo", "Beckham", "Lampard",
-    "Rooney", "Gerrard", "Henry", "Trezeguet", "Ribéry",
-    "Matuidi", "Varane", "Ramos", "Pepe", "Marcelo",
-    "Dani Alves", "De Bruyne", "Hazard",
-    "Lukaku", "Aguero", "Dybala", "Higuain", "Tevez",
-    "Maradona", "Pelé", "Romario", "R9", "Cafu",
-    "Roberto Carlos", "Toni Kroos", "Rakitic",
-    "Casemiro", "Vinicius Jr", "Rodrygo", "Camavinga",
-    "Bellingham", "Haaland", "Foden", "Saka",
-    "Pedri", "Gavi", "Vinicius", "Eder Militao", "Alisson",
-    "Ederson", "Courtois", "Ter Stegen", "Donnarumma",
-    "Navas", "Oblak", "Neuer", "Muller",
-    "Robben", "Lahm", "Boateng", "Hummels",
-    "Van Dijk", "De Ligt", "Davies", "Alaba", "Aouar",
-    "Vini Jr", "Valverde", "Tchouameni",
-    "Son Heung-min", "Kane", "Neymar Jr", "Lamine Yamal",
-  ],
+  // ═════════════════════════════════════════════════════════════
+  FOOTBALL: {
+    _subcategories: {
+      'Global Stars': ["Messi", "Ronaldo (CR7)", "Neymar", "Mbappé", "Zidane", "Ronaldinho", "Maradona", "Pelé", "R9", "Henry"],
+      'Strikers': ["Benzema", "Lewandowski", "Salah", "Haaland", "Kane", "Son Heung-min", "Lukaku", "Aguero", "Higuain", "Dybala", "Tevez"],
+      'Wingers': ["Hazard", "Mané", "Dembélé", "Vinicius Jr", "Foden", "Saka", "Lamine Yamal", "Pedri", "Gavi"],
+      'Midfielders': ["Iniesta", "Xavi", "Pirlo", "Beckham", "Lampard", "Gerrard", "Modric", "Toni Kroos", "De Bruyne", "Bellingham", "Pogba", "Griezmann"],
+      'Defensive Midfielders': ["Matuidi", "Kanté", "Casemiro", "Tchouameni", "Valverde", "Rakitic"],
+      'Defenders': ["Varane", "Ramos", "Pepe", "Marcelo", "Dani Alves", "Van Dijk", "De Ligt", "Davies", "Alaba", "Roberto Carlos", "Eder Militao"],
+      'Goalkeepers': ["Alisson", "Ederson", "Courtois", "Ter Stegen", "Donnarumma", "Navas", "Oblak", "Neuer"],
+      'Legends': ["Cafu", "Trezeguet", "Ribéry", "Robben", "Lahm", "Boateng", "Hummels", "Muller", "Romario", "Rooney"],
+    },
+  },
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🏀 BASKETBALL
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   BASKETBALL: [
     "Michael Jordan", "LeBron James", "Kobe Bryant", "Shaquille O'Neal",
     "Allen Iverson", "Stephen Curry", "Kevin Durant", "Magic Johnson",
@@ -309,9 +302,9 @@ export const CATEGORIES_EN = {
     "Paul George", "Damian Lillard",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🎬 ACTORS
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   ACTORS: [
     "Leonardo DiCaprio", "Tom Cruise", "Will Smith", "Brad Pitt", "Johnny Depp",
     "Robert Downey Jr.", "Dwayne Johnson", "Tom Hanks", "Keanu Reeves", "Morgan Freeman",
@@ -321,17 +314,17 @@ export const CATEGORIES_EN = {
     "Jean Dujardin", "Denzel Washington", "Jackie Chan", "Bruce Lee", "Jet Li",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🎬 ACTRESSES
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   ACTRESSES: [
     "Scarlett Johansson", "Jennifer Lawrence", "Angelina Jolie", "Emma Watson", "Gal Gadot",
     "Meryl Streep", "Natalie Portman", "Margot Robbie", "Charlize Theron", "Zendaya",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🌍 COUNTRIES
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   COUNTRIES: [
     "France", "Germany", "Spain", "Italy", "United Kingdom",
     "Portugal", "Belgium", "Netherlands", "Switzerland", "Austria",
@@ -368,35 +361,29 @@ export const CATEGORIES_EN = {
     "United Arab Emirates", "Qatar", "Bahrain", "Kuwait", "Afghanistan",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🦁 ANIMALS
-  // ═══════════════════════════════════════════════════════════
-  ANIMALS: [
-    "Lion", "Tiger", "Leopard", "Cheetah", "Jaguar",
-    "Puma", "Elephant", "Rhinoceros", "Hippopotamus", "Giraffe",
-    "Zebra", "Wildebeest", "Gazelle", "Antelope", "Buffalo",
-    "Monkey", "Gorilla", "Chimpanzee", "Orangutan", "Baboon",
-    "Wolf", "Fox", "Bear", "Panda", "Koala",
-    "Kangaroo", "Dingo", "Beaver", "Otter",
-    "Hedgehog", "Squirrel", "Rat", "Mouse", "Hamster",
-    "Guinea Pig", "Rabbit", "Hare", "Cat", "Dog",
-    "Horse", "Donkey", "Cow", "Bull", "Ox",
-    "Sheep", "Goat", "Pig", "Boar", "Chicken",
-    "Rooster", "Duck", "Goose", "Turkey",
-    "Eagle", "Falcon", "Owl", "Crow",
-    "Pigeon", "Sparrow", "Parrot",
-    "Penguin", "Seagull",
-    "Shark", "Dolphin", "Whale", "Orca", "Seal",
-    "Sea Lion", "Crab", "Lobster",
-    "Shrimp", "Octopus", "Squid", "Starfish", "Sea Urchin",
-    "Turtle", "Lizard", "Chameleon", "Iguana", "Snake",
-    "Python", "Cobra", "Viper", "Crocodile", "Alligator",
-    "Caiman", "Frog", "Toad",
-  ],
+  // ═════════════════════════════════════════════════════════════
+  ANIMALS: {
+    _subcategories: {
+      'Felines': ["Lion", "Tiger", "Leopard", "Cheetah", "Jaguar", "Puma"],
+      'Primates': ["Monkey", "Gorilla", "Chimpanzee", "Orangutan", "Baboon"],
+      'Pets': ["Cat", "Dog", "Rabbit", "Hamster", "Guinea Pig"],
+      'Farm': ["Horse", "Donkey", "Cow", "Bull", "Sheep", "Goat", "Pig", "Chicken", "Rooster", "Duck", "Goose", "Turkey", "Ox"],
+      'Forest': ["Wolf", "Fox", "Bear", "Boar", "Deer", "Squirrel", "Hedgehog"],
+      'Safari': ["Elephant", "Rhinoceros", "Hippopotamus", "Giraffe", "Zebra", "Wildebeest", "Gazelle", "Antelope", "Buffalo"],
+      'Birds': ["Eagle", "Falcon", "Owl", "Crow", "Pigeon", "Sparrow", "Parrot", "Seagull", "Penguin"],
+      'Marine': ["Shark", "Dolphin", "Whale", "Orca", "Seal", "Sea Lion"],
+      'Seafood': ["Crab", "Lobster", "Shrimp", "Octopus", "Squid", "Starfish", "Sea Urchin"],
+      'Reptiles': ["Turtle", "Lizard", "Chameleon", "Iguana", "Snake", "Python", "Cobra", "Viper", "Crocodile", "Alligator", "Caiman"],
+      'Pond': ["Frog", "Toad", "Rat", "Mouse", "Hare", "Beaver", "Otter"],
+      'Exotic': ["Kangaroo", "Koala", "Panda", "Dingo"],
+    },
+  },
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🎮 VIDEO GAMES
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   VIDEO_GAMES: [
     "Minecraft", "Fortnite", "Grand Theft Auto V (GTA V)", "Grand Theft Auto IV (GTA IV)",
     "Grand Theft Auto: San Andreas", "Grand Theft Auto: Vice City", "The Legend of Zelda: Breath of the Wild",
@@ -408,9 +395,9 @@ export const CATEGORIES_EN = {
     "Diablo III", "Crash Bandicoot",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🎵 MUSIC / SINGERS
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   MUSIC: [
     "Niska", "Booba", "Jul", "PNL", "Ninho",
     "Gims", "Maître Gims", "Soprano", "Bigflo", "Oli",
@@ -428,27 +415,27 @@ export const CATEGORIES_EN = {
     "50 Cent", "Snoop Dogg", "Tupac", "Biggie", "Nas",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🚗 CARS
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   CARS: [
     "Ferrari", "Lamborghini", "Porsche", "Rolls-Royce", "Bentley",
     "Aston Martin", "Maserati", "McLaren", "Bugatti", "Mercedes-Benz",
     "BMW", "Audi", "Jaguar", "Land Rover", "Tesla",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 👜 BRANDS
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   BRANDS: [
     "Louis Vuitton", "Chanel", "Gucci", "Hermès", "Prada",
     "Rolex", "Cartier", "Fendi", "Dior", "Saint Laurent",
     "Balenciaga", "Burberry", "Tom Ford", "Bvlgari", "Nike",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🍥 MANGA
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   MANGA: [
     "Naruto", "Sasuke", "Sakura", "Kakashi", "Itachi",
     "Goku", "Vegeta", "Gohan", "Piccolo", "Frieza", "Krillin", "Broly", "Trunks", "Bulma", "Cell", "Majin Buu", "Master Roshi",
@@ -456,17 +443,17 @@ export const CATEGORIES_EN = {
     "Saitama", "Rock D. Xebec",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🎬 MOVIES / SERIES
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   MOVIES_SERIES: [
     "Avatar", "Star Wars", "Jurassic World", "Mission: Impossible", "Fast & Furious",
     "Game of Thrones", "Stranger Things", "The Last of Us", "Squid Game", "One Piece",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 📦 OBJECTS
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   OBJECTS: [
     "Phone", "Computer", "Tablet", "Watch", "Glasses",
     "Key", "Wallet", "Bag", "Suitcase", "Umbrella",
@@ -484,17 +471,30 @@ export const CATEGORIES_EN = {
     "Kettle", "Blender", "Food Processor", "Pan", "Pot",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
+  // 🏠 LOCATIONS (Spyfall Mode)
+  // ═════════════════════════════════════════════════════════════
+  LOCATIONS: [
+    "Beach", "Restaurant", "Cinema", "Hospital", "Airplane",
+    "School", "Train Station", "Supermarket", "Amusement Park", "Stadium",
+    "Library", "Museum", "Airport", "Hotel", "Bank",
+    "Casino", "Church", "Prison", "Embassy", "Theater",
+    "Circus", "Cruise Ship", "Military Camp", "Space Station", "Submarine",
+    "North Pole", "Desert", "Rainforest", "Desert Island", "Volcano",
+    "Market", "Factory", "Laboratory", "Opera", "Olympic Stadium",
+    "Spa", "Festival", "Caravan", "Lighthouse", "Castle",
+  ],
+
+  // ═════════════════════════════════════════════════════════════
   // ⭐ SPECIAL
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   SPECIALE: [
     "NONE",
   ],
 
-  // ═══════════════════════════════════════════════════════════
+  // ═════════════════════════════════════════════════════════════
   // 🖼️ MIMER (Images à mimer - paires avec indice pour Mister White)
-  // ═══════════════════════════════════════════════════════════
-  // Format: { nom: "nom_paire", images: ["img_1.jpg", "img_2.jpg"], indice: "indice FR", hintEn: "hint EN" }
+  // ═════════════════════════════════════════════════════════════
   MIMER: [
     {
       nom: "football",
@@ -530,6 +530,32 @@ export const CATEGORIES_EN = {
 
 };
 
+// ═════════════════════════════════════════════════════════════
+// HELPERS - Extraction des mots (plat) depuis les catégories
+// ═════════════════════════════════════════════════════════════
+
+// Extrait la liste plate de mots d'une catégorie (string[] ou { _subcategories })
+function getFlatWords(categoryData) {
+  if (Array.isArray(categoryData)) return categoryData;
+  if (categoryData && typeof categoryData === 'object' && categoryData._subcategories) {
+    const subs = categoryData._subcategories;
+    const allWords = [];
+    for (const key of Object.keys(subs)) {
+      allWords.push(...subs[key]);
+    }
+    return allWords;
+  }
+  return [];
+}
+
+// Extrait les sous-catégories d'une catégorie, ou null si c'est une liste plate
+function getSubcategories(categoryData) {
+  if (categoryData && typeof categoryData === 'object' && categoryData._subcategories) {
+    return categoryData._subcategories;
+  }
+  return null;
+}
+
 // Get categories based on language
 export const CATEGORIES = (lang) => {
   return lang === 'en' ? CATEGORIES_EN : CATEGORIES_FR;
@@ -538,27 +564,30 @@ export const CATEGORIES = (lang) => {
 // Default export for backward compatibility (French)
 export const CATEGORIES_DEFAULT = CATEGORIES_FR;
 
-// Export for compatibilité avec gameLogic.js
-export const WORD_DB = Object.keys(CATEGORIES_FR).map(cat => ({
-  cat,
-  words: CATEGORIES_FR[cat],
-}));
+// Export pour gameLogic.js — structure { cat, words: string[], subcategories?: object }
+export const WORD_DB = Object.keys(CATEGORIES_FR).map(cat => {
+  const data = CATEGORIES_FR[cat];
+  return {
+    cat,
+    words: getFlatWords(data),
+    ...(getSubcategories(data) ? { subcategories: getSubcategories(data) } : {}),
+  };
+});
 
-export const WORD_DB_EN = Object.keys(CATEGORIES_EN).map(cat => ({
-  cat,
-  words: CATEGORIES_EN[cat],
-}));
+export const WORD_DB_EN = Object.keys(CATEGORIES_EN).map(cat => {
+  const data = CATEGORIES_EN[cat];
+  return {
+    cat,
+    words: getFlatWords(data),
+    ...(getSubcategories(data) ? { subcategories: getSubcategories(data) } : {}),
+  };
+});
 
 export const WORD_CLUES = {};
 Object.keys(CATEGORIES_FR).forEach(cat => {
-  // Skip MIMER category as it uses objects instead of strings
   if (cat === 'MIMER') return;
-  CATEGORIES_FR[cat].forEach(word => {
+  const words = getFlatWords(CATEGORIES_FR[cat]);
+  words.forEach(word => {
     WORD_CLUES[word] = [];
   });
 });
-
-// Fonctions bot (vides, car plus utilisées sans mode ordi)
-export function generateBotClue() { return ''; }
-export function generateBotClues() { return []; }
-export function botVote() { return {}; }

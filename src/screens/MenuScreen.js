@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import {
   View, Text, TouchableOpacity, StyleSheet, StatusBar,
@@ -48,6 +48,8 @@ const CATEGORY_EMOJIS = {
   MANGA: '🍥',
   OBJETS: '📦',
   OBJECTS: '📦',
+  LIEUX: '🏠',
+  LOCATIONS: '🏠',
   SPECIALE: '⭐',
   MIMER: '🎭',
 };
@@ -67,6 +69,7 @@ const CATEGORY_NAMES = {
     FILMS_SERIES: 'FILMS / SÉRIES',
     MANGA: 'MANGA',
     OBJETS: 'OBJETS',
+    LIEUX: 'LIEUX',
     SPECIALE: 'SPÉCIALE',
     MIMER: 'MIMER',
   },
@@ -84,6 +87,7 @@ const CATEGORY_NAMES = {
     MOVIES_SERIES: 'MOVIES / SERIES',
     MANGA: 'MANGA',
     OBJECTS: 'OBJECTS',
+    LOCATIONS: 'LOCATIONS',
     SPECIALE: 'SPECIAL',
     MIMER: 'MIMER',
   },
@@ -142,6 +146,17 @@ const RULES = {
         'Les innocents doivent trouver l\'intrus. Mister White peut gagner s\'il n\'est pas découvert.',
       ],
     },
+    {
+      mode: 'SPYFALL',
+      desc: '1 espion sans mot, devinez ou démasquez.',
+      steps: [
+        'Un joueur est l\'espion et ne connaît pas le mot secret. Les autres voient le même mot.',
+        'Les joueurs se posent des questions sur le mot pour identifier l\'espion.',
+        'À tout moment, on peut voter pour accuser quelqu\'un ou l\'espion peut deviner le mot.',
+        'Si l\'espion est trouvé au vote, il peut tenter de deviner le mot pour gagner.',
+        'Si le temps est écoulé, l\'espion gagne !',
+      ],
+    },
   ],
   en: [
     {
@@ -195,6 +210,17 @@ const RULES = {
         'Innocents must find the impostor. Mister White can win if not discovered.',
       ],
     },
+    {
+      mode: 'SPYFALL',
+      desc: '1 spy with no word, guess or expose.',
+      steps: [
+        'One player is the spy and doesn\'t know the secret word. The others see the same word.',
+        'Players ask each other questions about the word to identify the spy.',
+        'At any time, players can vote to accuse someone, or the spy can guess the word.',
+        'If the spy is caught in a vote, they can try to guess the word to still win.',
+        'If time runs out, the spy wins!',
+      ],
+    },
   ],
 };
 
@@ -222,6 +248,8 @@ export default function MenuScreen({ navigation }) {
   const [intrus, setIntrus] = useState(true);
   const [misterWhite, setMisterWhite] = useState(false);
   const [mimerMode, setMimerMode] = useState(false);
+  const [spyfallMode, setSpyfallMode] = useState(false);
+  const [spyfallTimer, setSpyfallTimer] = useState(8);
   // États des sons (synchronisés avec sound.js)
   const [musicOn, setMusicOn] = useState(musicEnabled);
   const [sfxOn, setSfxOn] = useState(sfxEnabled);
@@ -230,6 +258,9 @@ export default function MenuScreen({ navigation }) {
   // Mots personnalisés pour la catégorie SPÉCIALE
   const [customWords, setCustomWords] = useState([]);
   const [newWord, setNewWord] = useState('');
+  const [isPlayOpening, setIsPlayOpening] = useState(false);
+  const playOpenAnim = useRef(new Animated.Value(0)).current;
+  const gameSetupAnim = useRef(new Animated.Value(0)).current;
 
   // Charger l'état de déblocage OBJETS et les mots personnalisés au démarrage
   useEffect(() => {
@@ -248,7 +279,27 @@ export default function MenuScreen({ navigation }) {
     loadStates();
   }, []);
 
-  const pulseAnim = new Animated.Value(1);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  // Animations de transition loading → menu
+  const loadingOpacity = useRef(new Animated.Value(1)).current;
+  const loadingScale = useRef(new Animated.Value(1)).current;
+  const menuOpacity = useRef(new Animated.Value(0)).current;
+
+  // Référence pour l'animation pulse (permet de l'annuler proprement)
+  const pulseAnimRef = useRef(null);
+
+  const startPulseAnimation = () => {
+    pulseAnim.setValue(1);
+    if (pulseAnimRef.current) { pulseAnimRef.current.stop(); }
+    pulseAnimRef.current = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.1, duration: 800, easing: Easing.ease, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 800, easing: Easing.ease, useNativeDriver: true }),
+      ])
+    );
+    pulseAnimRef.current.start();
+  };
 
   // Initialisation des sons et chargement initial (une seule fois)
   useEffect(() => {
@@ -262,25 +313,32 @@ export default function MenuScreen({ navigation }) {
       setLoadingProgress(progress);
       if (progress >= 1) {
         clearInterval(interval);
-        setShowLoading(false);
+        // Transition fluide : fade-out du chargement puis fade-in du menu
+        Animated.parallel([
+          Animated.timing(loadingOpacity, { toValue: 0, duration: 500, useNativeDriver: true }),
+          Animated.timing(loadingScale, { toValue: 1.15, duration: 500, useNativeDriver: true }),
+        ]).start(() => {
+          setShowLoading(false);
+          Animated.timing(menuOpacity, { toValue: 1, duration: 500, useNativeDriver: true }).start();
+        });
       }
     }, 16);
 
-    // Animation pulse
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 1.1, duration: 800, easing: Easing.ease, useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 1, duration: 800, easing: Easing.ease, useNativeDriver: true }),
-      ])
-    ).start();
+    startPulseAnimation();
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (pulseAnimRef.current) { pulseAnimRef.current.stop(); }
+    };
   }, []);
 
   // Réinitialiser l'état quand l'écran revient au premier plan
   useFocusEffect(
     useCallback(() => {
       console.log('MenuScreen focus - réinitialisation');
+
+      // S'assurer que le menu est visible (pas de re-transition au retour)
+      menuOpacity.setValue(1);
 
       // Recharger les mots personnalisés SPÉCIALE depuis SecureStore
       const loadCustomWords = async () => {
@@ -297,25 +355,26 @@ export default function MenuScreen({ navigation }) {
 
       // Fermer toutes les modales
       setShowGameSetup(false);
+      gameSetupAnim.setValue(0);
+      playOpenAnim.setValue(0);
+      setIsPlayOpening(false);
       setShowRules(false);
       setShowSettings(false);
       setShowUnlockShop(false);
       setShowSpecialeMode(false);
       setShowCategories(false);
 
-      // Réinitialiser l'animation pulse
-      pulseAnim.setValue(1);
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, { toValue: 1.1, duration: 800, easing: Easing.ease, useNativeDriver: true }),
-          Animated.timing(pulseAnim, { toValue: 1, duration: 800, easing: Easing.ease, useNativeDriver: true }),
-        ])
-      ).start();
+      // Redémarrer l'animation pulse
+      startPulseAnimation();
 
       // Redémarrer la musique si elle est activée
       if (musicOn && !showLoading) {
         startBackgroundMusic();
       }
+
+      return () => {
+        if (pulseAnimRef.current) { pulseAnimRef.current.stop(); }
+      };
     }, [])
   );
 
@@ -334,6 +393,18 @@ export default function MenuScreen({ navigation }) {
       stopBackgroundMusic();
     }
   }, [musicOn]);
+
+  // Animer l'entrée du modal de configuration quand il apparaît
+  useEffect(() => {
+    if (showGameSetup) {
+      Animated.spring(gameSetupAnim, {
+        toValue: 1,
+        friction: 7,
+        tension: 50,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [showGameSetup]);
 
   const toggleLang = () => {
     const next = lang === 'fr' ? 'en' : 'fr';
@@ -358,7 +429,37 @@ export default function MenuScreen({ navigation }) {
 
   const handleStart = () => {
     playClick();
-    setShowGameSetup(true);
+    setIsPlayOpening(true);
+    if (pulseAnimRef.current) { pulseAnimRef.current.stop(); }
+    Animated.timing(playOpenAnim, {
+      toValue: 1,
+      duration: 350,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start(() => {
+      setShowGameSetup(true);
+    });
+  };
+
+  const closeGameSetup = () => {
+    playClick();
+    Animated.parallel([
+      Animated.timing(gameSetupAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(playOpenAnim, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setShowGameSetup(false);
+      gameSetupAnim.setValue(0);
+      setIsPlayOpening(false);
+      startPulseAnimation();
+    });
   };
 
   const handleLaunchGame = async () => {
@@ -375,22 +476,30 @@ export default function MenuScreen({ navigation }) {
     }
 
     let gameMode = 0; // NORMAL
-    if (misterWhite && intrus) gameMode = 2; // MISTER WHITE + INTRUS
+    if (spyfallMode) gameMode = 3; // SPYFALL
+    else if (misterWhite && intrus) gameMode = 2; // MISTER WHITE + INTRUS
     else if (intrus) gameMode = 0; // NORMAL avec intrus (défaut)
     else if (misterWhite) gameMode = 1; // MISTER WHITE
 
     if (gameMode === 2 && numPlayers < 4) { return; }
 
     // En mode MIMER, la catégorie est automatiquement MIMER
-    const finalCategory = mimerMode ? 'MIMER' : selectedCategory;
+    // En mode SPYFALL, la catégorie est automatiquement LIEUX/LOCATIONS
+    let finalCategory = selectedCategory;
+    if (mimerMode) finalCategory = 'MIMER';
+    if (spyfallMode) finalCategory = lang === 'fr' ? 'LIEUX' : 'LOCATIONS';
 
     setShowGameSetup(false);
+    setIsPlayOpening(false);
+    playOpenAnim.setValue(0);
+    gameSetupAnim.setValue(0);
     navigation.navigate('Prep', {
       numPlayers,
       gameMode,
       selectedCategory: finalCategory,
       customWords,
-      mimerMode
+      mimerMode,
+      spyfallTimer: spyfallMode ? spyfallTimer : null,
     });
   };
 
@@ -454,22 +563,10 @@ export default function MenuScreen({ navigation }) {
     return true;
   });
 
-  if (showLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Image source={require('../../assets/icon.png')} style={styles.loadingLogo} />
-        <Text style={styles.loadingTitle}>MOTS SECRETS</Text>
-        <View style={styles.loadingBarContainer}>
-          <View style={[styles.loadingBar, { width: `${loadingProgress * 100}%` }]} />
-        </View>
-        <Text style={styles.loadingText}>{Math.round(loadingProgress * 100)}%</Text>
-      </View>
-    );
-  }
-
   return (
     <>
-      <View style={styles.fullContainer}>
+      {/* Menu toujours rendu en dessous */}
+      <Animated.View style={[styles.fullContainer, { opacity: menuOpacity }]}>
         <ImageBackground source={require('../../assets/bg-menu.png')} style={styles.bg} resizeMode="cover">
           <View style={styles.overlay}>
             <View style={{ flex: 1 }}>
@@ -516,15 +613,27 @@ export default function MenuScreen({ navigation }) {
                 </View>
               </ScrollView>
 
-              <Animated.View style={[styles.playContainer, { transform: [{ scale: pulseAnim }] }]}>
-                <TouchableOpacity onPress={handleStart} activeOpacity={0.8}>
+              <Animated.View style={[
+                styles.playContainer,
+                {
+                  transform: [{
+                    scale: isPlayOpening
+                      ? playOpenAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.8] })
+                      : pulseAnim
+                  }],
+                  opacity: isPlayOpening
+                    ? playOpenAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 0] })
+                    : 1,
+                }
+              ]}>
+                <TouchableOpacity onPress={handleStart} activeOpacity={0.8} disabled={isPlayOpening}>
                   <Image source={require('../../assets/video.png')} style={styles.playIcon} />
                 </TouchableOpacity>
               </Animated.View>
             </View>
           </View>
         </ImageBackground>
-      </View>
+      </Animated.View>
 
       <Modal visible={showRules} animationType="slide" transparent onRequestClose={() => setShowRules(false)}>
         <View style={styles.modalOverlay}>
@@ -783,9 +892,11 @@ export default function MenuScreen({ navigation }) {
         </View>
       </Modal>
 
-      <Modal visible={showGameSetup} animationType="slide" transparent onRequestClose={() => setShowGameSetup(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { maxHeight: '85%' }]}>
+      <Modal visible={showGameSetup} animationType="none" transparent onRequestClose={closeGameSetup}>
+        <Animated.View style={[styles.modalOverlay, { opacity: gameSetupAnim }]}>
+          <Animated.View style={[styles.modalContent, { maxHeight: '85%',
+            transform: [{ scale: gameSetupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }]
+          }]}>
             <Text style={styles.modalTitle}>{lang === 'fr' ? 'CONFIGURATION' : 'CONFIGURATION'}</Text>
 
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -801,55 +912,97 @@ export default function MenuScreen({ navigation }) {
               <View style={styles.setupSection}>
                 <Text style={styles.setupLabel}>{lang === 'fr' ? 'Options' : 'Options'}</Text>
 
-                <View style={styles.toggleRow}>
-                  <Text style={styles.toggleLabel}>🎭 {lang === 'fr' ? 'Intrus' : 'Impostor'}</Text>
-                  <TouchableOpacity
-                    style={[styles.toggleBtn, intrus && styles.toggleBtnActive]}
-                    onPress={() => setIntrus(!intrus)}
-                  >
-                    <Text style={styles.toggleBtnText}>{intrus ? 'ON' : 'OFF'}</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.toggleRow}>
-                  <Text style={styles.toggleLabel}>🤵 Mister White</Text>
-                  <TouchableOpacity
-                    style={[styles.toggleBtn, misterWhite && styles.toggleBtnActive]}
-                    onPress={() => setMisterWhite(!misterWhite)}
-                  >
-                    <Text style={styles.toggleBtnText}>{misterWhite ? 'ON' : 'OFF'}</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.toggleRow}>
-                  <View style={styles.toggleLabelContainer}>
-                    <Text style={styles.toggleLabel}>🖼️ {lang === 'fr' ? 'Mime' : 'Mime'}</Text>
-                  </View>
-                  <View style={styles.toggleRightContainer}>
-                    {!mimerMode && (
-                      <Image source={AD_REWARD_ICON} style={styles.adIconInline} resizeMode="contain" />
-                    )}
+                {!spyfallMode && (
+                  <View style={styles.toggleRow}>
+                    <Text style={styles.toggleLabel}>🎭 {lang === 'fr' ? 'Intrus' : 'Impostor'}</Text>
                     <TouchableOpacity
-                      style={[styles.toggleBtn, mimerMode && styles.toggleBtnActive]}
-                      onPress={async () => {
-                        if (!mimerMode && !isExpoGo) {
-                          const rewarded = await loadAndShowRewardedAd(() => {});
-                          if (!rewarded) return;
-                        }
-                        setMimerMode(!mimerMode);
-                      }}
+                      style={[styles.toggleBtn, intrus && styles.toggleBtnActive]}
+                      onPress={() => setIntrus(!intrus)}
                     >
-                      <Text style={styles.toggleBtnText}>{mimerMode ? 'ON' : 'OFF'}</Text>
+                      <Text style={styles.toggleBtnText}>{intrus ? 'ON' : 'OFF'}</Text>
                     </TouchableOpacity>
                   </View>
+                )}
+
+                {!spyfallMode && (
+                  <View style={styles.toggleRow}>
+                    <Text style={styles.toggleLabel}>🤵 Mister White</Text>
+                    <TouchableOpacity
+                      style={[styles.toggleBtn, misterWhite && styles.toggleBtnActive]}
+                      onPress={() => setMisterWhite(!misterWhite)}
+                    >
+                      <Text style={styles.toggleBtnText}>{misterWhite ? 'ON' : 'OFF'}</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {!spyfallMode && (
+                  <View style={styles.toggleRow}>
+                    <View style={styles.toggleLabelContainer}>
+                      <Text style={styles.toggleLabel}>🖼️ {lang === 'fr' ? 'Mime' : 'Mime'}</Text>
+                    </View>
+                    <View style={styles.toggleRightContainer}>
+                      {!mimerMode && (
+                        <Image source={AD_REWARD_ICON} style={styles.adIconInline} resizeMode="contain" />
+                      )}
+                      <TouchableOpacity
+                        style={[styles.toggleBtn, mimerMode && styles.toggleBtnActive]}
+                        onPress={async () => {
+                          if (!mimerMode && !isExpoGo) {
+                            const rewarded = await loadAndShowRewardedAd(() => {});
+                            if (!rewarded) return;
+                          }
+                          setMimerMode(!mimerMode);
+                        }}
+                      >
+                        <Text style={styles.toggleBtnText}>{mimerMode ? 'ON' : 'OFF'}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+
+                <View style={styles.toggleRow}>
+                  <Text style={styles.toggleLabel}>🕵️ Spyfall</Text>
+                  <TouchableOpacity
+                    style={[styles.toggleBtn, spyfallMode && styles.toggleBtnActive]}
+                    onPress={() => {
+                      const newVal = !spyfallMode;
+                      setSpyfallMode(newVal);
+                      if (newVal) {
+                        setIntrus(false);
+                        setMisterWhite(false);
+                        setMimerMode(false);
+                        setSelectedCategory(lang === 'fr' ? 'LIEUX' : 'LOCATIONS');
+                      }
+                    }}
+                  >
+                    <Text style={styles.toggleBtnText}>{spyfallMode ? 'ON' : 'OFF'}</Text>
+                  </TouchableOpacity>
                 </View>
+
+                {spyfallMode && (
+                  <View style={styles.setupSection}>
+                    <Text style={styles.setupLabel}>{lang === 'fr' ? 'Timer' : 'Timer'}</Text>
+                    <View style={styles.counterRowLarge}>
+                      {[3, 5, 8, 10].map(m => (
+                        <TouchableOpacity
+                          key={m}
+                          style={[styles.timerChip, spyfallTimer === m && styles.timerChipActive]}
+                          onPress={() => setSpyfallTimer(m)}
+                        >
+                          <Text style={[styles.timerChipText, spyfallTimer === m && styles.timerChipTextActive]}>{m} {t('timerLabel')}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                )}
 
                 {misterWhite && intrus && numPlayers < 4 && (
                   <Text style={styles.warningText}>⚠️ {lang === 'fr' ? '4 joueurs minimum' : '4 players minimum'}</Text>
                 )}
               </View>
 
-              {!mimerMode && (
+              {!mimerMode && !spyfallMode && (
                 <View style={styles.setupSection}>
                   <Text style={styles.setupLabel}>{lang === 'fr' ? 'Catégorie' : 'Category'}</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScrollHorizontal}>
@@ -898,6 +1051,22 @@ export default function MenuScreen({ navigation }) {
                 </View>
               )}
 
+              {spyfallMode && !mimerMode && (
+                <View style={styles.setupSection}>
+                  <Text style={styles.setupLabel}>{lang === 'fr' ? 'Catégorie' : 'Category'}</Text>
+                  <View style={styles.categoryScrollHorizontal}>
+                    <TouchableOpacity
+                      style={[styles.categoryChip, styles.categoryChipActive]}
+                      onPress={() => { playClick(); setSelectedCategory(lang === 'fr' ? 'LIEUX' : 'LOCATIONS'); }}
+                    >
+                      <Text style={[styles.categoryChipText, styles.categoryChipTextActive]}>
+                        🏠 {CATEGORY_NAMES[lang][lang === 'fr' ? 'LIEUX' : 'LOCATIONS'] || (lang === 'fr' ? 'LIEUX' : 'LOCATIONS')}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
               <TouchableOpacity
                 style={[styles.launchBtn, misterWhite && intrus && numPlayers < 4 && styles.launchBtnDisabled]}
                 onPress={handleLaunchGame}
@@ -907,19 +1076,33 @@ export default function MenuScreen({ navigation }) {
               </TouchableOpacity>
             </ScrollView>
 
-            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowGameSetup(false)}>
+            <TouchableOpacity style={styles.closeBtn} onPress={closeGameSetup}>
               <Text style={styles.closeBtnText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text>
             </TouchableOpacity>
-          </View>
-        </View>
+          </Animated.View>
+        </Animated.View>
       </Modal>
 
+      {/* Écran de chargement en superposition */}
+      {showLoading && (
+        <Animated.View style={[styles.loadingOverlay, { opacity: loadingOpacity }]}>
+          <Animated.View style={{ transform: [{ scale: loadingScale }] }}>
+            <Image source={require('../../assets/icon.png')} style={styles.loadingLogo} />
+          </Animated.View>
+          <Text style={styles.loadingTitle}>MOTS SECRETS</Text>
+          <View style={styles.loadingBarContainer}>
+            <View style={[styles.loadingBar, { width: `${loadingProgress * 100}%` }]} />
+          </View>
+          <Text style={styles.loadingText}>{Math.round(loadingProgress * 100)}%</Text>
+        </Animated.View>
+      )}
     </>
   );
 }
 
 const styles = StyleSheet.create({
   fullContainer: { flex: 1 },
+  loadingOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F5F5DC', zIndex: 100 },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F5F5DC' },
   loadingLogo: { width: 100, height: 100, marginBottom: 20 },
   loadingTitle: { fontFamily: 'BebasNeue', fontSize: 32, color: '#1a1a1a', letterSpacing: 3, marginBottom: 30 },
@@ -1038,14 +1221,9 @@ const styles = StyleSheet.create({
   removeBtnText: { fontFamily: 'BebasNeue', fontSize: 20, color: '#F5F5DC', lineHeight: 28 },
   mimerInfoBox: { backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 2, borderColor: '#1a1a1a', paddingVertical: 12, paddingHorizontal: 16, borderRadius: 12, alignItems: 'center' },
   mimerInfoText: { fontFamily: 'BebasNeue', fontSize: 16, color: '#1a1a1a', letterSpacing: 1 },
-  // Styles pour la boutique
-  unlockItem: { backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 2, borderColor: '#1a1a1a', borderRadius: 12, padding: 12, marginBottom: 12 },
-  unlockItemHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  unlockItemIcon: { fontSize: 32, marginRight: 12 },
-  unlockItemInfo: { flex: 1 },
-  unlockItemTitle: { fontFamily: 'BebasNeue', fontSize: 18, color: '#1a1a1a', letterSpacing: 1 },
-  unlockItemDesc: { fontFamily: 'SpaceMono', fontSize: 9, color: '#666', marginTop: 2 },
-  unlockBtn: { backgroundColor: '#1a1a1a', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 10, alignItems: 'center' },
-  unlockBtnOwned: { backgroundColor: '#4a4a4a' },
-  unlockBtnText: { fontFamily: 'BebasNeue', fontSize: 14, color: '#F5F5DC', letterSpacing: 1 },
+  toggleBtnDisabled: { opacity: 0.3 },
+  timerChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 16, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 1, borderColor: 'rgba(0,0,0,0.2)' },
+  timerChipActive: { backgroundColor: '#1a1a1a', borderColor: '#1a1a1a' },
+  timerChipText: { fontFamily: 'BebasNeue', fontSize: 14, color: '#1a1a1a' },
+  timerChipTextActive: { color: '#F5F5DC' },
 });
