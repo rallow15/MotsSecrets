@@ -8,11 +8,11 @@ import { playClick, playWin, playLose, playIntruderReveal, playInnocentReveal, p
 const LIEUX_IMAGES = {
   'Plage': require('../../assets/lieux/01_Plage.png'),
   'Restaurant': require('../../assets/lieux/02_Restaurant.png'),
-  'Cinéma': require('../../assets/lieux/03_Cinema.png'),
-  'Hôpital': require('../../assets/lieux/04_Hopital.png'),
-  'Avion': require('../../assets/lieux/05_Avion.png'),
-  'École': require('../../assets/lieux/06_Ecole.png'),
-  'Gare': require('../../assets/lieux/07_Gare.png'),
+  'Cinéma': require('../../assets/lieux/03_Cinema.jpeg'),
+  'Hôpital': require('../../assets/lieux/04_Hopital.jpeg'),
+  'Avion': require('../../assets/lieux/05_Avion.jpeg'),
+  'École': require('../../assets/lieux/06_Ecole.jpeg'),
+  'Gare': require('../../assets/lieux/07_Gare.jpeg'),
   'Supermarché': require('../../assets/lieux/08_Supermarche.png'),
   "Parc d'attractions": require('../../assets/lieux/09_Parc_attractions.png'),
   'Stade': require('../../assets/lieux/10_Stade.png'),
@@ -47,11 +47,11 @@ const LIEUX_IMAGES = {
   'Phare': require('../../assets/lieux/39_Phare.png'),
   'Château': require('../../assets/lieux/40_Chateau.png'),
   'Beach': require('../../assets/lieux/01_Plage.png'),
-  'Cinema': require('../../assets/lieux/03_Cinema.png'),
-  'Hospital': require('../../assets/lieux/04_Hopital.png'),
-  'Airplane': require('../../assets/lieux/05_Avion.png'),
-  'School': require('../../assets/lieux/06_Ecole.png'),
-  'Train Station': require('../../assets/lieux/07_Gare.png'),
+  'Cinema': require('../../assets/lieux/03_Cinema.jpeg'),
+  'Hospital': require('../../assets/lieux/04_Hopital.jpeg'),
+  'Airplane': require('../../assets/lieux/05_Avion.jpeg'),
+  'School': require('../../assets/lieux/06_Ecole.jpeg'),
+  'Train Station': require('../../assets/lieux/07_Gare.jpeg'),
   'Supermarket': require('../../assets/lieux/08_Supermarche.png'),
   'Amusement Park': require('../../assets/lieux/09_Parc_attractions.png'),
   'Stadium': require('../../assets/lieux/10_Stade.png'),
@@ -119,7 +119,7 @@ export default function ResultScreen({ navigation, route }) {
   // Joueur aléatoire qui commence
   const [starterIdx] = useState(() => Math.floor(Math.random() * numPlayers));
   const [revealed,   setRevealed]  = useState({});
-  const [showRecap,  setShowRecap] = useState(false);
+  const [showRecap,  setShowRecap] = useState(isSpyfall && !spyfallOutcome);
 
   const scaleAnim   = useRef(new Animated.Value(0.2)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;

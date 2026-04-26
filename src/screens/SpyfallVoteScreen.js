@@ -42,6 +42,7 @@ export default function SpyfallVoteScreen({ navigation, route }) {
           selectedCategory,
           gameMode: 3,
           spyfallOutcome: 'spyWinsTie',
+          spyfallTimer,
         });
         return;
       }
@@ -69,6 +70,7 @@ export default function SpyfallVoteScreen({ navigation, route }) {
           selectedCategory,
           gameMode: 3,
           spyfallOutcome: 'spyWinsWrongAccusation',
+          spyfallTimer,
         });
       }
     } else {

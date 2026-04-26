@@ -9,6 +9,10 @@ export default function SpyfallGameScreen({ navigation, route }) {
   const [timeLeft, setTimeLeft] = useState((initialTimer ?? 8) * 60);
   const timerRef = useRef(null);
 
+  const safeNames = Array.isArray(playerNames) ? playerNames : new Array(numPlayers).fill('');
+  const [starterIdx] = useState(() => Math.floor(Math.random() * numPlayers));
+  const starterName = safeNames[starterIdx] || t('playerFallback', starterIdx + 1);
+
   useEffect(() => {
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
@@ -33,6 +37,7 @@ export default function SpyfallGameScreen({ navigation, route }) {
         selectedCategory,
         gameMode: 3,
         spyfallOutcome: 'spyWinsTimer',
+        spyfallTimer: initialTimer,
       });
     }
   }, [timeLeft]);
@@ -53,6 +58,7 @@ export default function SpyfallGameScreen({ navigation, route }) {
       playerNames,
       selectedCategory,
       gameMode: 3,
+      spyfallTimer: initialTimer,
     });
   };
 
@@ -62,6 +68,11 @@ export default function SpyfallGameScreen({ navigation, route }) {
       <Text style={[styles.timer, isUrgent && styles.timerUrgent]}>{timeStr}</Text>
 
       <View style={styles.divider} />
+
+      <View style={styles.starterRow}>
+        <Text style={styles.starterLabel}>{t('startsFirst')}</Text>
+        <Text style={styles.starterName}>{starterName}</Text>
+      </View>
 
       <TouchableOpacity style={styles.revealBtn} onPress={handleReveal} activeOpacity={0.8}>
         <Text style={styles.revealBtnText}>{t('revealPlayers')}</Text>
@@ -78,6 +89,9 @@ const styles = StyleSheet.create({
   timer: { fontFamily: 'BebasNeue', fontSize: 96, color: '#1a1a1a', letterSpacing: 4 },
   timerUrgent: { color: '#ff4444' },
   divider: { width: '60%', height: 2, backgroundColor: 'rgba(0,0,0,0.15)', marginVertical: 8 },
+  starterRow: { alignItems: 'center', gap: 4 },
+  starterLabel: { fontFamily: 'SpaceMono', fontSize: 10, color: '#666', letterSpacing: 3 },
+  starterName: { fontFamily: 'BebasNeue', fontSize: 28, color: '#1a1a1a', letterSpacing: 2 },
   revealBtn: { width: '100%', backgroundColor: '#1a1a1a', paddingVertical: 18, alignItems: 'center', borderRadius: 12 },
   revealBtnText: { fontFamily: 'BebasNeue', fontSize: 22, color: '#F5F5DC', letterSpacing: 2 },
   hint: { fontFamily: 'SpaceMono', fontSize: 11, color: '#666', textAlign: 'center', letterSpacing: 1 },

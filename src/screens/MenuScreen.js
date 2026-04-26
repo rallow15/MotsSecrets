@@ -242,13 +242,10 @@ export default function MenuScreen({ navigation }) {
   const [showUnlockShop, setShowUnlockShop] = useState(false);
   const [showSpecialeMode, setShowSpecialeMode] = useState(false);
   const [specialeNumPlayers, setSpecialeNumPlayers] = useState(3);
-  const [specialeIntrus, setSpecialeIntrus] = useState(true);
-  const [specialeMisterWhite, setSpecialeMisterWhite] = useState(false);
+  const [specialeGameMode, setSpecialeGameMode] = useState(0); // 0=Normal, 1=MW, 2=MW+Intrus
   const [showGameSetup, setShowGameSetup] = useState(false);
-  const [intrus, setIntrus] = useState(true);
-  const [misterWhite, setMisterWhite] = useState(false);
+  const [gameMode, setGameMode] = useState(0); // 0=Normal, 1=MW, 2=MW+Intrus, 3=Spyfall
   const [mimerMode, setMimerMode] = useState(false);
-  const [spyfallMode, setSpyfallMode] = useState(false);
   const [spyfallTimer, setSpyfallTimer] = useState(8);
   // États des sons (synchronisés avec sound.js)
   const [musicOn, setMusicOn] = useState(musicEnabled);
@@ -475,19 +472,13 @@ export default function MenuScreen({ navigation }) {
       return;
     }
 
-    let gameMode = 0; // NORMAL
-    if (spyfallMode) gameMode = 3; // SPYFALL
-    else if (misterWhite && intrus) gameMode = 2; // MISTER WHITE + INTRUS
-    else if (intrus) gameMode = 0; // NORMAL avec intrus (défaut)
-    else if (misterWhite) gameMode = 1; // MISTER WHITE
-
     if (gameMode === 2 && numPlayers < 4) { return; }
 
     // En mode MIMER, la catégorie est automatiquement MIMER
     // En mode SPYFALL, la catégorie est automatiquement LIEUX/LOCATIONS
     let finalCategory = selectedCategory;
     if (mimerMode) finalCategory = 'MIMER';
-    if (spyfallMode) finalCategory = lang === 'fr' ? 'LIEUX' : 'LOCATIONS';
+    if (gameMode === 3) finalCategory = lang === 'fr' ? 'LIEUX' : 'LOCATIONS';
 
     setShowGameSetup(false);
     setIsPlayOpening(false);
@@ -499,7 +490,7 @@ export default function MenuScreen({ navigation }) {
       selectedCategory: finalCategory,
       customWords,
       mimerMode,
-      spyfallTimer: spyfallMode ? spyfallTimer : null,
+      spyfallTimer: gameMode === 3 ? spyfallTimer : null,
     });
   };
 
@@ -600,8 +591,7 @@ export default function MenuScreen({ navigation }) {
                         if (!rewarded) return;
                       }
                       setSpecialeNumPlayers(3);
-                      setSpecialeIntrus(true);
-                      setSpecialeMisterWhite(false);
+                      setSpecialeGameMode(0);
                       setShowSpecialeMode(true);
                     }}>
                       <Image source={STAR_ICON} style={styles.iconBtnImage} resizeMode="contain" />
@@ -823,38 +813,37 @@ export default function MenuScreen({ navigation }) {
                 </View>
               </View>
 
-              {/* Section: Options */}
+              {/* Section: Mode de jeu */}
               <View style={styles.setupSection}>
-                <Text style={styles.setupLabel}>{lang === 'fr' ? 'Options' : 'Options'}</Text>
+                <Text style={styles.setupLabel}>{lang === 'fr' ? 'Mode de jeu' : 'Game mode'}</Text>
 
-                <View style={styles.toggleRow}>
-                  <Text style={styles.toggleLabel}>🎭 {lang === 'fr' ? 'Intrus' : 'Impostor'}</Text>
-                  <TouchableOpacity
-                    style={[styles.toggleBtn, specialeIntrus && styles.toggleBtnActive]}
-                    onPress={() => setSpecialeIntrus(!specialeIntrus)}
-                  >
-                    <Text style={styles.toggleBtnText}>{specialeIntrus ? 'ON' : 'OFF'}</Text>
-                  </TouchableOpacity>
+                <View style={styles.modeGrid}>
+                  {[
+                    { mode: 0, emoji: '🎭', titleKey: 'modeNormal', descKey: 'modeNormalDesc' },
+                    { mode: 1, emoji: '🤵', titleKey: 'modeMisterWhite', descKey: 'modeMisterWhiteDesc' },
+                    { mode: 2, emoji: '🎭+🤵', titleKey: 'modeMWIntrus', descKey: 'modeMWIntrusDesc' },
+                  ].map(({ mode, emoji, titleKey, descKey }) => (
+                    <TouchableOpacity
+                      key={mode}
+                      style={[styles.modeCard, specialeGameMode === mode && styles.modeCardActive]}
+                      onPress={() => setSpecialeGameMode(mode)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.modeCardEmoji}>{emoji}</Text>
+                      <Text style={[styles.modeCardTitle, specialeGameMode === mode && styles.modeCardTitleActive]}>{t(titleKey)}</Text>
+                      <Text style={[styles.modeCardDesc, specialeGameMode === mode && styles.modeCardDescActive]}>{t(descKey)}</Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
 
-                <View style={styles.toggleRow}>
-                  <Text style={styles.toggleLabel}>🤵 Mister White</Text>
-                  <TouchableOpacity
-                    style={[styles.toggleBtn, specialeMisterWhite && styles.toggleBtnActive]}
-                    onPress={() => setSpecialeMisterWhite(!specialeMisterWhite)}
-                  >
-                    <Text style={styles.toggleBtnText}>{specialeMisterWhite ? 'ON' : 'OFF'}</Text>
-                  </TouchableOpacity>
-                </View>
-
-                {specialeMisterWhite && specialeIntrus && specialeNumPlayers < 4 && (
+                {specialeGameMode === 2 && specialeNumPlayers < 4 && (
                   <Text style={styles.warningText}>⚠️ {lang === 'fr' ? '4 joueurs minimum' : '4 players minimum'}</Text>
                 )}
               </View>
 
               {/* Bouton Lancer la partie */}
               <TouchableOpacity
-                style={[styles.launchBtn, specialeMisterWhite && specialeIntrus && specialeNumPlayers < 4 && styles.launchBtnDisabled]}
+                style={[styles.launchBtn, specialeGameMode === 2 && specialeNumPlayers < 4 && styles.launchBtnDisabled]}
                 onPress={async () => {
                   if (customWords.length === 0) {
                     alert(lang === 'fr'
@@ -863,18 +852,13 @@ export default function MenuScreen({ navigation }) {
                     );
                     return;
                   }
-                  if (specialeMisterWhite && specialeIntrus && specialeNumPlayers < 4) return;
+                  if (specialeGameMode === 2 && specialeNumPlayers < 4) return;
                   playClick();
                   setShowSpecialeMode(false);
 
-                  let gameMode = 0;
-                  if (specialeMisterWhite && specialeIntrus) gameMode = 2;
-                  else if (specialeIntrus) gameMode = 0;
-                  else if (specialeMisterWhite) gameMode = 1;
-
                   navigation.navigate('Prep', {
                     numPlayers: specialeNumPlayers,
-                    gameMode,
+                    gameMode: specialeGameMode,
                     selectedCategory: 'SPECIALE',
                     customWords,
                     mimerMode: false
@@ -910,99 +894,81 @@ export default function MenuScreen({ navigation }) {
               </View>
 
               <View style={styles.setupSection}>
-                <Text style={styles.setupLabel}>{lang === 'fr' ? 'Options' : 'Options'}</Text>
+                <Text style={styles.setupLabel}>{lang === 'fr' ? 'Mode de jeu' : 'Game mode'}</Text>
 
-                {!spyfallMode && (
-                  <View style={styles.toggleRow}>
-                    <Text style={styles.toggleLabel}>🎭 {lang === 'fr' ? 'Intrus' : 'Impostor'}</Text>
-                    <TouchableOpacity
-                      style={[styles.toggleBtn, intrus && styles.toggleBtnActive]}
-                      onPress={() => setIntrus(!intrus)}
-                    >
-                      <Text style={styles.toggleBtnText}>{intrus ? 'ON' : 'OFF'}</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-
-                {!spyfallMode && (
-                  <View style={styles.toggleRow}>
-                    <Text style={styles.toggleLabel}>🤵 Mister White</Text>
-                    <TouchableOpacity
-                      style={[styles.toggleBtn, misterWhite && styles.toggleBtnActive]}
-                      onPress={() => setMisterWhite(!misterWhite)}
-                    >
-                      <Text style={styles.toggleBtnText}>{misterWhite ? 'ON' : 'OFF'}</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-
-                {!spyfallMode && (
-                  <View style={styles.toggleRow}>
-                    <View style={styles.toggleLabelContainer}>
-                      <Text style={styles.toggleLabel}>🖼️ {lang === 'fr' ? 'Mime' : 'Mime'}</Text>
-                    </View>
-                    <View style={styles.toggleRightContainer}>
-                      {!mimerMode && (
-                        <Image source={AD_REWARD_ICON} style={styles.adIconInline} resizeMode="contain" />
-                      )}
+                <View style={styles.modeGrid}>
+                  {[
+                    { mode: 0, emoji: '🎭', titleKey: 'modeNormal', descKey: 'modeNormalDesc', isMimer: false },
+                    { mode: 1, emoji: '🤵', titleKey: 'modeMisterWhite', descKey: 'modeMisterWhiteDesc', isMimer: false },
+                    { mode: 2, emoji: '🎭+🤵', titleKey: 'modeMWIntrus', descKey: 'modeMWIntrusDesc', isMimer: false },
+                    { mode: 3, emoji: '🕵️', titleKey: 'modeSpyfall', descKey: 'modeSpyfallDesc', isMimer: false },
+                    { mode: 4, emoji: '🖼️', titleKey: 'modeMimer', descKey: 'modeMimerDesc', isMimer: true },
+                  ].map(({ mode, emoji, titleKey, descKey, isMimer }) => {
+                    const isActive = isMimer ? mimerMode : gameMode === mode;
+                    return (
                       <TouchableOpacity
-                        style={[styles.toggleBtn, mimerMode && styles.toggleBtnActive]}
+                        key={mode}
+                        style={[styles.modeCard, isActive && styles.modeCardActive]}
                         onPress={async () => {
-                          if (!mimerMode && !isExpoGo) {
+                          if (isMimer && !mimerMode && !isExpoGo) {
                             const rewarded = await loadAndShowRewardedAd(() => {});
                             if (!rewarded) return;
+                            setMimerMode(true);
+                            setGameMode(0);
+                            playClick();
+                          } else if (isMimer) {
+                            setMimerMode(!mimerMode);
+                            if (!mimerMode) setGameMode(0);
+                            playClick();
+                          } else {
+                            playClick();
+                            if (mode === 3) {
+                              setSelectedCategory(lang === 'fr' ? 'LIEUX' : 'LOCATIONS');
+                              setMimerMode(false);
+                            } else if (mimerMode) {
+                              setMimerMode(false);
+                            }
+                            setGameMode(mode);
                           }
-                          setMimerMode(!mimerMode);
                         }}
+                        activeOpacity={0.7}
                       >
-                        <Text style={styles.toggleBtnText}>{mimerMode ? 'ON' : 'OFF'}</Text>
+                        {!isMimer ? null : !mimerMode && !isExpoGo ? (
+                          <View style={styles.modeCardAdBadge}>
+                            <Image source={AD_REWARD_ICON} style={styles.modeCardAdIcon} resizeMode="contain" />
+                          </View>
+                        ) : null}
+                        <Text style={styles.modeCardEmoji}>{emoji}</Text>
+                        <Text style={[styles.modeCardTitle, isActive && styles.modeCardTitleActive]}>{t(titleKey)}</Text>
+                        <Text style={[styles.modeCardDesc, isActive && styles.modeCardDescActive]}>{t(descKey)}</Text>
                       </TouchableOpacity>
-                    </View>
-                  </View>
-                )}
-
-                <View style={styles.toggleRow}>
-                  <Text style={styles.toggleLabel}>🕵️ Spyfall</Text>
-                  <TouchableOpacity
-                    style={[styles.toggleBtn, spyfallMode && styles.toggleBtnActive]}
-                    onPress={() => {
-                      const newVal = !spyfallMode;
-                      setSpyfallMode(newVal);
-                      if (newVal) {
-                        setIntrus(false);
-                        setMisterWhite(false);
-                        setMimerMode(false);
-                        setSelectedCategory(lang === 'fr' ? 'LIEUX' : 'LOCATIONS');
-                      }
-                    }}
-                  >
-                    <Text style={styles.toggleBtnText}>{spyfallMode ? 'ON' : 'OFF'}</Text>
-                  </TouchableOpacity>
+                    );
+                  })}
                 </View>
 
-                {spyfallMode && (
-                  <View style={styles.setupSection}>
-                    <Text style={styles.setupLabel}>{lang === 'fr' ? 'Timer' : 'Timer'}</Text>
-                    <View style={styles.counterRowLarge}>
-                      {[3, 5, 8, 10].map(m => (
-                        <TouchableOpacity
-                          key={m}
-                          style={[styles.timerChip, spyfallTimer === m && styles.timerChipActive]}
-                          onPress={() => setSpyfallTimer(m)}
-                        >
-                          <Text style={[styles.timerChipText, spyfallTimer === m && styles.timerChipTextActive]}>{m} {t('timerLabel')}</Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
-                )}
-
-                {misterWhite && intrus && numPlayers < 4 && (
+                {gameMode === 2 && !mimerMode && numPlayers < 4 && (
                   <Text style={styles.warningText}>⚠️ {lang === 'fr' ? '4 joueurs minimum' : '4 players minimum'}</Text>
                 )}
               </View>
 
-              {!mimerMode && !spyfallMode && (
+              {gameMode === 3 && (
+                <View style={styles.setupSection}>
+                  <Text style={styles.setupLabel}>{lang === 'fr' ? 'Timer' : 'Timer'}</Text>
+                  <View style={styles.counterRowLarge}>
+                    {[3, 5, 8, 10].map(m => (
+                      <TouchableOpacity
+                        key={m}
+                        style={[styles.timerChip, spyfallTimer === m && styles.timerChipActive]}
+                        onPress={() => setSpyfallTimer(m)}
+                      >
+                        <Text style={[styles.timerChipText, spyfallTimer === m && styles.timerChipTextActive]}>{m} {t('timerLabel')}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+              {!mimerMode && gameMode !== 3 && (
                 <View style={styles.setupSection}>
                   <Text style={styles.setupLabel}>{lang === 'fr' ? 'Catégorie' : 'Category'}</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScrollHorizontal}>
@@ -1051,7 +1017,7 @@ export default function MenuScreen({ navigation }) {
                 </View>
               )}
 
-              {spyfallMode && !mimerMode && (
+              {gameMode === 3 && !mimerMode && (
                 <View style={styles.setupSection}>
                   <Text style={styles.setupLabel}>{lang === 'fr' ? 'Catégorie' : 'Category'}</Text>
                   <View style={styles.categoryScrollHorizontal}>
@@ -1068,9 +1034,9 @@ export default function MenuScreen({ navigation }) {
               )}
 
               <TouchableOpacity
-                style={[styles.launchBtn, misterWhite && intrus && numPlayers < 4 && styles.launchBtnDisabled]}
+                style={[styles.launchBtn, gameMode === 2 && numPlayers < 4 && styles.launchBtnDisabled]}
                 onPress={handleLaunchGame}
-                disabled={misterWhite && intrus && numPlayers < 4}
+                disabled={gameMode === 2 && numPlayers < 4}
               >
                 <Text style={styles.launchBtnText}>{lang === 'fr' ? 'LANCER LA PARTIE' : 'START GAME'}</Text>
               </TouchableOpacity>
@@ -1136,6 +1102,16 @@ const styles = StyleSheet.create({
   modeTitleLarge: { fontFamily: 'BebasNeue', fontSize: 20, color: '#fff', letterSpacing: 1 },
   modeDescLarge: { fontFamily: 'SpaceMono', fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 4 },
   warningText: { fontFamily: 'SpaceMono', fontSize: 10, color: '#ff6b6b', marginTop: 6, textAlign: 'center' },
+  modeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'center' },
+  modeCard: { width: '47%', backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.15)', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 8, alignItems: 'center', gap: 2 },
+  modeCardActive: { backgroundColor: '#1a1a1a', borderColor: '#1a1a1a' },
+  modeCardEmoji: { fontSize: 28, marginBottom: 2 },
+  modeCardTitle: { fontFamily: 'BebasNeue', fontSize: 15, color: '#1a1a1a', letterSpacing: 1, textAlign: 'center' },
+  modeCardTitleActive: { color: '#F5F5DC' },
+  modeCardDesc: { fontFamily: 'SpaceMono', fontSize: 8, color: '#666', textAlign: 'center', lineHeight: 11 },
+  modeCardDescActive: { color: 'rgba(245,245,220,0.7)' },
+  modeCardAdBadge: { position: 'absolute', top: -12, right: -8, zIndex: 1 },
+  modeCardAdIcon: { width: 22, height: 22 },
   modalOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
   modalContent: { width: '85%', backgroundColor: '#F5F5DC', borderRadius: 20, padding: 20, borderWidth: 2, borderColor: '#1a1a1a', maxHeight: '85%' },
   modalTitle: { fontFamily: 'BebasNeue', fontSize: 24, color: '#1a1a1a', letterSpacing: 2, textAlign: 'center', marginBottom: 15 },

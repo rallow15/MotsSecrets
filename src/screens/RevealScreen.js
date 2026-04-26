@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions, StatusBar } from 'react-native';
 import { colors } from '../theme';
 import { t, getLang } from '../i18n';
 import { playClick, playReveal } from '../sound';
@@ -8,11 +8,11 @@ import { playClick, playReveal } from '../sound';
 const LIEUX_IMAGES = {
   'Plage': require('../../assets/lieux/01_Plage.png'),
   'Restaurant': require('../../assets/lieux/02_Restaurant.png'),
-  'Cinéma': require('../../assets/lieux/03_Cinema.png'),
-  'Hôpital': require('../../assets/lieux/04_Hopital.png'),
-  'Avion': require('../../assets/lieux/05_Avion.png'),
-  'École': require('../../assets/lieux/06_Ecole.png'),
-  'Gare': require('../../assets/lieux/07_Gare.png'),
+  'Cinéma': require('../../assets/lieux/03_Cinema.jpeg'),
+  'Hôpital': require('../../assets/lieux/04_Hopital.jpeg'),
+  'Avion': require('../../assets/lieux/05_Avion.jpeg'),
+  'École': require('../../assets/lieux/06_Ecole.jpeg'),
+  'Gare': require('../../assets/lieux/07_Gare.jpeg'),
   'Supermarché': require('../../assets/lieux/08_Supermarche.png'),
   "Parc d'attractions": require('../../assets/lieux/09_Parc_attractions.png'),
   'Stade': require('../../assets/lieux/10_Stade.png'),
@@ -48,11 +48,11 @@ const LIEUX_IMAGES = {
   'Château': require('../../assets/lieux/40_Chateau.png'),
   // EN locations (même image que FR)
   'Beach': require('../../assets/lieux/01_Plage.png'),
-  'Cinema': require('../../assets/lieux/03_Cinema.png'),
-  'Hospital': require('../../assets/lieux/04_Hopital.png'),
-  'Airplane': require('../../assets/lieux/05_Avion.png'),
-  'School': require('../../assets/lieux/06_Ecole.png'),
-  'Train Station': require('../../assets/lieux/07_Gare.png'),
+  'Cinema': require('../../assets/lieux/03_Cinema.jpeg'),
+  'Hospital': require('../../assets/lieux/04_Hopital.jpeg'),
+  'Airplane': require('../../assets/lieux/05_Avion.jpeg'),
+  'School': require('../../assets/lieux/06_Ecole.jpeg'),
+  'Train Station': require('../../assets/lieux/07_Gare.jpeg'),
   'Supermarket': require('../../assets/lieux/08_Supermarche.png'),
   'Amusement Park': require('../../assets/lieux/09_Parc_attractions.png'),
   'Stadium': require('../../assets/lieux/10_Stade.png'),
@@ -222,10 +222,11 @@ export default function RevealScreen({ navigation, route }) {
   }
 
   // Phase 2 : mot/image visible
+  const isSpyfallInnocent = isSpyfall && !isSpy && lieuImage;
   return (
-    <View style={styles.container}>
-      <Text style={styles.playerBadge}>{t('playerLabel', currentPlayer + 1)}</Text>
-      {playerName ? <Text style={styles.playerName}>{playerName}</Text> : null}
+    <View style={isSpyfallInnocent ? styles.containerSpyfall : styles.container}>
+      <Text style={[styles.playerBadge, isSpyfallInnocent && styles.textLight]}>{t('playerLabel', currentPlayer + 1)}</Text>
+      {playerName ? <Text style={[styles.playerName, isSpyfallInnocent && styles.textLight]}>{playerName}</Text> : null}
 
       {isMimer && !isMister ? (
         // Mode MIMER : afficher l'image + le nom
@@ -242,10 +243,13 @@ export default function RevealScreen({ navigation, route }) {
           <Text style={styles.spyInstruction}>{t('spyInstruction')}</Text>
         </View>
       ) : isSpyfall && lieuImage ? (
-        // Mode SPYFALL innocent : afficher image + lieu
-        <View style={styles.lieuContainer}>
-          <Image source={lieuImage} style={styles.lieuImage} resizeMode="contain" />
-          <Text style={styles.lieuWord}>{word}</Text>
+        // Mode SPYFALL innocent : image plein écran
+        <View style={styles.spyfallFullscreen}>
+          <Image source={lieuImage} style={styles.spyfallBgImage} resizeMode="cover" />
+          <View style={styles.spyfallOverlay} />
+          <View style={styles.spyfallContent}>
+            <Text style={styles.spyfallLieuWord}>{word}</Text>
+          </View>
         </View>
       ) : (
         // Mode normal : afficher le mot
@@ -268,10 +272,10 @@ export default function RevealScreen({ navigation, route }) {
         </View>
       )}
 
-      <Text style={styles.hint}>{t('memorize')}</Text>
+      <Text style={[styles.hint, isSpyfallInnocent && styles.hintLight]}>{isSpyfall ? t('memorizeLieu') : t('memorize')}</Text>
 
-      <TouchableOpacity style={styles.okBtn} onPress={() => handleNext()} activeOpacity={0.8}>
-        <Text style={styles.okBtnText}>OK 👆</Text>
+      <TouchableOpacity style={isSpyfallInnocent ? styles.okBtnLight : styles.okBtn} onPress={() => handleNext()} activeOpacity={0.8}>
+        <Text style={isSpyfallInnocent ? styles.okBtnTextLight : styles.okBtnText}>OK 👆</Text>
       </TouchableOpacity>
     </View>
   );
@@ -305,4 +309,15 @@ const styles = StyleSheet.create({
   lieuContainer: { alignItems: 'center', gap: 12, backgroundColor: 'rgba(0,0,0,0.06)', paddingHorizontal: 32, paddingVertical: 24, borderRadius: 20, borderWidth: 2, borderColor: 'rgba(0,0,0,0.15)' },
   lieuImage: { width: 220, height: 220, borderRadius: 16, borderWidth: 3, borderColor: '#1a1a1a', backgroundColor: '#fff' },
   lieuWord: { fontFamily: 'BebasNeue', fontSize: 44, color: '#000000', textAlign: 'center', letterSpacing: 2 },
+  // Spyfall fullscreen
+  spyfallFullscreen: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  spyfallBgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: undefined, height: undefined },
+  spyfallOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },
+  spyfallContent: { flex: 1, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 100 },
+  spyfallLieuWord: { fontFamily: 'BebasNeue', fontSize: 56, color: '#FFFFFF', textAlign: 'center', letterSpacing: 3, textShadowColor: 'rgba(0,0,0,0.75)', textShadowOffset: { width: 2, height: 2 }, textShadowRadius: 6 },
+  containerSpyfall: { flex: 1, backgroundColor: '#000000', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28, gap: 12 },
+  textLight: { color: '#FFFFFF' },
+  hintLight: { color: 'rgba(255,255,255,0.7)' },
+  okBtnLight: { marginTop: 20, backgroundColor: 'rgba(255,255,255,0.2)', paddingVertical: 16, paddingHorizontal: 48, borderRadius: 12, borderWidth: 2, borderColor: 'rgba(255,255,255,0.5)' },
+  okBtnTextLight: { fontFamily: 'BebasNeue', fontSize: 26, color: '#FFFFFF', letterSpacing: 3 },
 });
