@@ -2,14 +2,16 @@ import { WORD_DB, WORD_DB_EN } from './data/words';
 import { getLang } from './i18n';
 
 /**
- * gameMode: 0 = Normal (1 intrus), 1 = Mister White, 2 = MW + Intrus
+ * gameMode: 0 = Normal (1 intrus), 1 = Mister White, 2 = MW + Intrus, 3 = Spyfall
+ * numUndercovers: nombre d'intrus (défaut 1 si gameMode 0 ou 2)
+ * numMisterWhites: nombre de Mister White (défaut 1 si gameMode 1 ou 2)
  * selectedCategory: nom de la catégorie ou null pour aléatoire
  * customWords: mots personnalisés pour la catégorie SPÉCIALE (optionnel)
  * mimerMode: si true, utilise des images à mimer au lieu des mots
  * returns array of { word, role, category, isMimer }
- * role: 'normal' | 'intrus' | 'mister'
+ * role: 'normal' | 'intrus' | 'mister' | 'spy'
  */
-export function generateAssignments(numPlayers, gameMode = 0, selectedCategory = null, customWords = [], mimerMode = false) {
+export function generateAssignments(numPlayers, gameMode = 0, selectedCategory = null, customWords = [], mimerMode = false, numUndercovers = 1, numMisterWhites = 0) {
   // Utiliser la base de mots selon la langue
   const lang = getLang();
   const wordDb = lang === 'en' ? WORD_DB_EN : WORD_DB;
@@ -97,19 +99,14 @@ export function generateAssignments(numPlayers, gameMode = 0, selectedCategory =
   }
 
   const roles = [];
-  if (gameMode === 0) {
-    roles.push('intrus');
-    while (roles.length < numPlayers) roles.push('normal');
-  } else if (gameMode === 1) {
-    roles.push('mister');
-    while (roles.length < numPlayers) roles.push('normal');
-  } else if (gameMode === 2) {
-    roles.push('mister');
-    roles.push('intrus');
-    while (roles.length < numPlayers) roles.push('normal');
-  } else if (gameMode === 3) {
+  if (gameMode === 3) {
     // SPYFALL : 1 espion sans mot, les autres ont le même mot
     roles.push('spy');
+    while (roles.length < numPlayers) roles.push('normal');
+  } else {
+    // Modes Normal / Mister White / MW+Intrus : utiliser les compteurs
+    for (let i = 0; i < numUndercovers && roles.length < numPlayers; i++) roles.push('intrus');
+    for (let i = 0; i < numMisterWhites && roles.length < numPlayers; i++) roles.push('mister');
     while (roles.length < numPlayers) roles.push('normal');
   }
 

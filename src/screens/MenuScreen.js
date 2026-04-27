@@ -5,8 +5,10 @@ import {
   ScrollView, Modal, Animated, Easing, ImageBackground, Image, Platform,
   TextInput, KeyboardAvoidingView,
 } from 'react-native';
+import Slider from '@react-native-community/slider';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
+const WORLD_MAP = require('../../assets/world-map.png');
 import { themes, colors } from '../theme';
 import { t, getLang, setLang } from '../i18n';
 import { CATEGORIES_FR, CATEGORIES_EN } from '../data/words';
@@ -224,10 +226,109 @@ const RULES = {
   ],
 };
 
-// Icônes (utilisent les PNG personnalisés)
-// Les icônes SVG sont gardées en fallback si les PNG ne sont pas disponibles
+// Images pour les cartes de mode
+const MODE_IMAGES = {
+  normal: require('../../assets/mode-normal.png'),
+  misterWhite: require('../../assets/mode-mister-white.png'),
+  misterIntrus: require('../../assets/mode-mister-intrus.png'),
+  spyfall: require('../../assets/mode-spyfall.png'),
+  mime: require('../../assets/mode-mime.png'),
+};
 
 
+// Globe terrestre animé avec vraie carte du monde
+function SpinningGlobe({ size = 72 }) {
+  const spinValue = useRef(new Animated.Value(0)).current;
+  const imgWidth = size * 2;
+  const imgHeight = size * 1.2;
+  const radius = size / 2;
+
+  useEffect(() => {
+    spinValue.setValue(0);
+    const anim = Animated.loop(
+      Animated.timing(spinValue, {
+        toValue: 1,
+        duration: 20000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    );
+    anim.start();
+    return () => {
+      anim.stop();
+      spinValue.setValue(0);
+    };
+  }, [size]);
+
+  const translateX = spinValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -imgWidth],
+  });
+
+  return (
+    <View style={{ width: size, height: size, position: 'relative' }}>
+      {/* Atmosphère : lueur bleue autour du globe */}
+      <View style={{
+        position: 'absolute', top: -4, left: -4, width: size + 8, height: size + 8,
+        borderRadius: (size + 8) / 2,
+        backgroundColor: 'rgba(100, 160, 255, 0.25)',
+        shadowColor: '#4a90d9', shadowOffset: { width: 0, height: 0 }, shadowRadius: 12, shadowOpacity: 0.6,
+      }} />
+      {/* Globe avec carte qui défile de droite à gauche */}
+      <View style={{ width: size, height: size, borderRadius: radius, overflow: 'hidden', backgroundColor: '#0d2b50', alignItems: 'center', justifyContent: 'center' }}>
+        <Animated.View style={{ flexDirection: 'row', transform: [{ translateX }] }}>
+          <Image source={WORLD_MAP} style={{ width: imgWidth, height: imgHeight, resizeMode: 'contain' }} />
+          <Image source={WORLD_MAP} style={{ width: imgWidth, height: imgHeight, resizeMode: 'contain' }} />
+        </Animated.View>
+        {/* Ombrage sphérique : bords sombres pour l'effet 3D */}
+        <LinearGradient
+          colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.15)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.15)', 'rgba(0,0,0,0.6)']}
+          locations={[0, 0.15, 0.5, 0.85, 1]}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: radius }}
+          start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }}
+        />
+        <LinearGradient
+          colors={['rgba(0,0,0,0.45)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.35)']}
+          locations={[0, 0.5, 1]}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: radius }}
+          start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }}
+        />
+        {/* Reflet spéculaire : tache claire en haut à gauche */}
+        <View style={{
+          position: 'absolute', top: size * 0.12, left: size * 0.1,
+          width: size * 0.35, height: size * 0.22,
+          borderRadius: size * 0.15,
+          backgroundColor: 'rgba(255,255,255,0.18)',
+          transform: [{ rotate: '-25deg' }],
+        }} />
+      </View>
+    </View>
+  );
+}
+
+
+const ROLE_UNDERCOVER = require('../../assets/role-undercover.png');
+const ROLE_MISTERWHITE = require('../../assets/role-misterwhite.png');
+
+// Slider simple avec valeur affichée
+function ModeSlider({ value, onValueChange, min, max }) {
+  return (
+    <View style={styles.sliderRow}>
+      <Slider
+        style={styles.slider}
+        minimumValue={min}
+        maximumValue={max}
+        step={1}
+        value={value}
+        onValueChange={onValueChange}
+        minimumTrackTintColor="#1a1a1a"
+        maximumTrackTintColor="rgba(0,0,0,0.15)"
+        thumbTintColor="#1a1a1a"
+      />
+      <Text style={styles.sliderValue}>{value}</Text>
+    </View>
+  );
+}
 
 export default function MenuScreen({ navigation }) {
   const insets = useSafeAreaInsets();
@@ -247,6 +348,56 @@ export default function MenuScreen({ navigation }) {
   const [gameMode, setGameMode] = useState(0); // 0=Normal, 1=MW, 2=MW+Intrus, 3=Spyfall
   const [mimerMode, setMimerMode] = useState(false);
   const [spyfallTimer, setSpyfallTimer] = useState(8);
+  // Toggles pour Intrus et Mister White (mode Normal)
+  const [numUndercovers, setNumUndercovers] = useState(1);
+  const [numMisterWhites, setNumMisterWhites] = useState(0);
+
+  // Calculer les valeurs par défaut selon le nombre de joueurs
+  const autoUndercovers = Math.floor(numPlayers / 4) || 1;
+  const autoMisterWhites = numPlayers >= 15 ? 2 : 1;
+  // Il doit toujours y avoir plus de joueurs normaux que de rôles spéciaux
+  // => specials <= floor((numPlayers - 1) / 2)
+  const maxTotalSpecials = Math.floor((numPlayers - 1) / 2);
+
+  const canAddUC = numUndercovers < autoUndercovers && (numUndercovers + 1 + numMisterWhites) <= maxTotalSpecials;
+  const canAddMW = numMisterWhites < autoMisterWhites && (numUndercovers + numMisterWhites + 1) <= maxTotalSpecials;
+
+  // Synchroniser gameMode avec les compteurs
+  useEffect(() => {
+    if (gameMode !== 3 && !mimerMode) {
+      if (numUndercovers > 0 && numMisterWhites > 0) setGameMode(2);
+      else if (numMisterWhites > 0) setGameMode(1);
+      else setGameMode(0);
+    }
+  }, [numUndercovers, numMisterWhites]);
+
+  // Quand le nombre de joueurs change, ajuster les compteurs pour rester cohérent
+  useEffect(() => {
+    const maxUC = Math.floor(numPlayers / 4) || 1;
+    const maxMW = numPlayers >= 15 ? 2 : 1;
+    const maxTotal = Math.floor((numPlayers - 1) / 2);
+
+    let newUC = numUndercovers;
+    let newMW = numMisterWhites;
+
+    // Règle 1 : undercovers max = floor(players/4) (min 1)
+    if (newUC > maxUC) newUC = maxUC;
+
+    // Règle 2 : mister whites max = 1 (2 si ≥15 joueurs)
+    if (newMW > maxMW) newMW = maxMW;
+
+    // Règle 3 : toujours plus de joueurs normaux que de rôles spéciaux
+    if (newUC + newMW > maxTotal) {
+      const excess = (newUC + newMW) - maxTotal;
+      const reduceUC = Math.min(excess, newUC);
+      newUC -= reduceUC;
+      const remaining = excess - reduceUC;
+      if (remaining > 0) newMW -= Math.min(remaining, newMW);
+    }
+
+    if (newUC !== numUndercovers) setNumUndercovers(newUC);
+    if (newMW !== numMisterWhites) setNumMisterWhites(newMW);
+  }, [numPlayers]);
   // États des sons (synchronisés avec sound.js)
   const [musicOn, setMusicOn] = useState(musicEnabled);
   const [sfxOn, setSfxOn] = useState(sfxEnabled);
@@ -360,6 +511,8 @@ export default function MenuScreen({ navigation }) {
       setShowUnlockShop(false);
       setShowSpecialeMode(false);
       setShowCategories(false);
+      setNumUndercovers(1);
+      setNumMisterWhites(0);
 
       // Redémarrer l'animation pulse
       startPulseAnimation();
@@ -473,6 +626,11 @@ export default function MenuScreen({ navigation }) {
     }
 
     if (gameMode === 2 && numPlayers < 4) { return; }
+    // Il faut toujours plus de joueurs normaux que de rôles spéciaux
+    if (gameMode !== 3 && !mimerMode && numUndercovers + numMisterWhites >= numPlayers) {
+      alert(lang === 'fr' ? 'Il faut plus de joueurs normaux que d\'intrus et Mister White réunis.' : 'Need more normal players than Undercover + Mister White combined.');
+      return;
+    }
 
     // En mode MIMER, la catégorie est automatiquement MIMER
     // En mode SPYFALL, la catégorie est automatiquement LIEUX/LOCATIONS
@@ -491,6 +649,8 @@ export default function MenuScreen({ navigation }) {
       customWords,
       mimerMode,
       spyfallTimer: gameMode === 3 ? spyfallTimer : null,
+      numUndercovers,
+      numMisterWhites,
     });
   };
 
@@ -563,8 +723,13 @@ export default function MenuScreen({ navigation }) {
             <View style={{ flex: 1 }}>
               <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
+              {/* Globe animé en arrière-plan */}
+              <View style={styles.globeBackground} pointerEvents="none">
+                <SpinningGlobe />
+              </View>
+
               <ScrollView
-                style={{ flex: 1 }}
+                style={{ flex: 1, zIndex: 1 }}
                 contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 45 }]}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
@@ -806,11 +971,12 @@ export default function MenuScreen({ navigation }) {
               {/* Section: Nombre de joueurs */}
               <View style={styles.setupSection}>
                 <Text style={styles.setupLabel}>{lang === 'fr' ? 'Nombre de joueurs' : 'Number of players'}</Text>
-                <View style={styles.counterRowLarge}>
-                  <TouchableOpacity style={styles.counterBtnLarge} onPress={() => setSpecialeNumPlayers(p => Math.max(3, p - 1))}><Text style={styles.counterBtnTextLarge}>−</Text></TouchableOpacity>
-                  <Text style={styles.counterValLarge}>{specialeNumPlayers}</Text>
-                  <TouchableOpacity style={styles.counterBtnLarge} onPress={() => setSpecialeNumPlayers(p => Math.min(20, p + 1))}><Text style={styles.counterBtnTextLarge}>+</Text></TouchableOpacity>
-                </View>
+                <ModeSlider
+                  value={specialeNumPlayers}
+                  onValueChange={setSpecialeNumPlayers}
+                  min={3}
+                  max={20}
+                />
               </View>
 
               {/* Section: Mode de jeu */}
@@ -819,17 +985,17 @@ export default function MenuScreen({ navigation }) {
 
                 <View style={styles.modeGrid}>
                   {[
-                    { mode: 0, emoji: '🎭', titleKey: 'modeNormal', descKey: 'modeNormalDesc' },
-                    { mode: 1, emoji: '🤵', titleKey: 'modeMisterWhite', descKey: 'modeMisterWhiteDesc' },
-                    { mode: 2, emoji: '🎭+🤵', titleKey: 'modeMWIntrus', descKey: 'modeMWIntrusDesc' },
-                  ].map(({ mode, emoji, titleKey, descKey }) => (
+                    { mode: 0, imageKey: 'normal', titleKey: 'modeNormal', descKey: 'modeNormalDesc' },
+                    { mode: 1, imageKey: 'misterWhite', titleKey: 'modeMisterWhite', descKey: 'modeMisterWhiteDesc' },
+                    { mode: 2, imageKey: 'misterIntrus', titleKey: 'modeMWIntrus', descKey: 'modeMWIntrusDesc' },
+                  ].map(({ mode, imageKey, titleKey, descKey }) => (
                     <TouchableOpacity
                       key={mode}
                       style={[styles.modeCard, specialeGameMode === mode && styles.modeCardActive]}
                       onPress={() => setSpecialeGameMode(mode)}
                       activeOpacity={0.7}
                     >
-                      <Text style={styles.modeCardEmoji}>{emoji}</Text>
+                      <Image source={MODE_IMAGES[imageKey]} style={styles.modeCardImage} resizeMode="contain" />
                       <Text style={[styles.modeCardTitle, specialeGameMode === mode && styles.modeCardTitleActive]}>{t(titleKey)}</Text>
                       <Text style={[styles.modeCardDesc, specialeGameMode === mode && styles.modeCardDescActive]}>{t(descKey)}</Text>
                     </TouchableOpacity>
@@ -878,7 +1044,7 @@ export default function MenuScreen({ navigation }) {
 
       <Modal visible={showGameSetup} animationType="none" transparent onRequestClose={closeGameSetup}>
         <Animated.View style={[styles.modalOverlay, { opacity: gameSetupAnim }]}>
-          <Animated.View style={[styles.modalContent, { maxHeight: '85%',
+          <Animated.View style={[styles.modalContent, { maxHeight: '90%',
             transform: [{ scale: gameSetupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }]
           }]}>
             <Text style={styles.modalTitle}>{lang === 'fr' ? 'CONFIGURATION' : 'CONFIGURATION'}</Text>
@@ -886,24 +1052,58 @@ export default function MenuScreen({ navigation }) {
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styles.setupSection}>
                 <Text style={styles.setupLabel}>{lang === 'fr' ? 'Nombre de joueurs' : 'Number of players'}</Text>
-                <View style={styles.counterRowLarge}>
-                  <TouchableOpacity style={styles.counterBtnLarge} onPress={() => setNumPlayers(p => Math.max(3, p - 1))}><Text style={styles.counterBtnTextLarge}>−</Text></TouchableOpacity>
-                  <Text style={styles.counterValLarge}>{numPlayers}</Text>
-                  <TouchableOpacity style={styles.counterBtnLarge} onPress={() => setNumPlayers(p => Math.min(20, p + 1))}><Text style={styles.counterBtnTextLarge}>+</Text></TouchableOpacity>
-                </View>
+                <ModeSlider
+                  value={numPlayers}
+                  onValueChange={setNumPlayers}
+                  min={3}
+                  max={20}
+                />
               </View>
 
               <View style={styles.setupSection}>
                 <Text style={styles.setupLabel}>{lang === 'fr' ? 'Mode de jeu' : 'Game mode'}</Text>
 
-                <View style={styles.modeGrid}>
+                {/* Carte Normal centrée */}
+                <TouchableOpacity
+                  style={[styles.modeCardLarge, (gameMode === 0 || gameMode === 1 || gameMode === 2) && !mimerMode && styles.modeCardActive]}
+                  onPress={() => {
+                    playClick();
+                    if (mimerMode) setMimerMode(false);
+                    // Compute gameMode from toggles
+                    setGameMode(numUndercovers > 0 && numMisterWhites > 0 ? 2 : numMisterWhites > 0 ? 1 : 0);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Image source={ROLE_UNDERCOVER} style={styles.modeCardImageLarge} resizeMode="contain" />
+                  <Text style={[styles.modeCardTitle, (gameMode === 0 || gameMode === 1 || gameMode === 2) && !mimerMode && styles.modeCardTitleActive]}>UNDERCOVER</Text>
+                </TouchableOpacity>
+
+                {/* Compteurs Undercover + Mister White */}
+                <View style={styles.roleCounters}>
+                  <View style={styles.roleCounterRow}>
+                    <Image source={MODE_IMAGES.normal} style={styles.roleCounterIcon} resizeMode="contain" />
+                    <View style={styles.roleCounterControls}>
+                      <TouchableOpacity style={styles.roleCounterBtn} onPress={() => { playClick(); setNumUndercovers(v => Math.max(0, v - 1)); }}><Text style={styles.roleCounterBtnText}>−</Text></TouchableOpacity>
+                      <Text style={styles.roleCounterVal}>{numUndercovers}</Text>
+                      <TouchableOpacity style={[styles.roleCounterBtn, !canAddUC && styles.roleCounterBtnDisabled]} onPress={() => { playClick(); if (canAddUC) setNumUndercovers(v => v + 1); }} disabled={!canAddUC}><Text style={styles.roleCounterBtnText}>+</Text></TouchableOpacity>
+                    </View>
+                  </View>
+                  <View style={styles.roleCounterRow}>
+                    <Image source={ROLE_MISTERWHITE} style={styles.roleCounterIcon} resizeMode="contain" />
+                    <View style={styles.roleCounterControls}>
+                      <TouchableOpacity style={styles.roleCounterBtn} onPress={() => { playClick(); setNumMisterWhites(v => Math.max(0, v - 1)); }}><Text style={styles.roleCounterBtnText}>−</Text></TouchableOpacity>
+                      <Text style={styles.roleCounterVal}>{numMisterWhites}</Text>
+                      <TouchableOpacity style={[styles.roleCounterBtn, !canAddMW && styles.roleCounterBtnDisabled]} onPress={() => { playClick(); if (canAddMW) setNumMisterWhites(v => v + 1); }} disabled={!canAddMW}><Text style={styles.roleCounterBtnText}>+</Text></TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Spyfall et MIME */}
+                <View style={styles.modeGridSmall}>
                   {[
-                    { mode: 0, emoji: '🎭', titleKey: 'modeNormal', descKey: 'modeNormalDesc', isMimer: false },
-                    { mode: 1, emoji: '🤵', titleKey: 'modeMisterWhite', descKey: 'modeMisterWhiteDesc', isMimer: false },
-                    { mode: 2, emoji: '🎭+🤵', titleKey: 'modeMWIntrus', descKey: 'modeMWIntrusDesc', isMimer: false },
-                    { mode: 3, emoji: '🕵️', titleKey: 'modeSpyfall', descKey: 'modeSpyfallDesc', isMimer: false },
-                    { mode: 4, emoji: '🖼️', titleKey: 'modeMimer', descKey: 'modeMimerDesc', isMimer: true },
-                  ].map(({ mode, emoji, titleKey, descKey, isMimer }) => {
+                    { mode: 3, imageKey: 'spyfall', titleKey: 'modeSpyfall', descKey: 'modeSpyfallDesc' },
+                    { mode: 4, imageKey: 'mime', titleKey: 'modeMimer', descKey: 'modeMimerDesc', isMimer: true },
+                  ].map(({ mode, imageKey, titleKey, descKey, isMimer }) => {
                     const isActive = isMimer ? mimerMode : gameMode === mode;
                     return (
                       <TouchableOpacity
@@ -925,6 +1125,8 @@ export default function MenuScreen({ navigation }) {
                             if (mode === 3) {
                               setSelectedCategory(lang === 'fr' ? 'LIEUX' : 'LOCATIONS');
                               setMimerMode(false);
+                              setNumUndercovers(1);
+                              setNumMisterWhites(0);
                             } else if (mimerMode) {
                               setMimerMode(false);
                             }
@@ -938,7 +1140,7 @@ export default function MenuScreen({ navigation }) {
                             <Image source={AD_REWARD_ICON} style={styles.modeCardAdIcon} resizeMode="contain" />
                           </View>
                         ) : null}
-                        <Text style={styles.modeCardEmoji}>{emoji}</Text>
+                        <Image source={MODE_IMAGES[imageKey]} style={styles.modeCardImage} resizeMode="contain" />
                         <Text style={[styles.modeCardTitle, isActive && styles.modeCardTitleActive]}>{t(titleKey)}</Text>
                         <Text style={[styles.modeCardDesc, isActive && styles.modeCardDescActive]}>{t(descKey)}</Text>
                       </TouchableOpacity>
@@ -1032,15 +1234,16 @@ export default function MenuScreen({ navigation }) {
                   </View>
                 </View>
               )}
-
-              <TouchableOpacity
-                style={[styles.launchBtn, gameMode === 2 && numPlayers < 4 && styles.launchBtnDisabled]}
-                onPress={handleLaunchGame}
-                disabled={gameMode === 2 && numPlayers < 4}
-              >
-                <Text style={styles.launchBtnText}>{lang === 'fr' ? 'LANCER LA PARTIE' : 'START GAME'}</Text>
-              </TouchableOpacity>
             </ScrollView>
+
+            {/* Bouton LANCER toujours visible en bas */}
+            <TouchableOpacity
+              style={[styles.launchBtn, gameMode === 2 && numPlayers < 4 && styles.launchBtnDisabled]}
+              onPress={handleLaunchGame}
+              disabled={gameMode === 2 && numPlayers < 4}
+            >
+              <Text style={styles.launchBtnText}>{lang === 'fr' ? 'LANCER LA PARTIE' : 'START GAME'}</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity style={styles.closeBtn} onPress={closeGameSetup}>
               <Text style={styles.closeBtnText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text>
@@ -1078,6 +1281,7 @@ const styles = StyleSheet.create({
   bg: { flex: 1 },
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.1)' },
   scrollContent: { alignItems: 'center', paddingHorizontal: 20, paddingBottom: 10 },
+  globeBackground: { position: 'absolute', top: 310, alignSelf: 'center', zIndex: 1, marginLeft: -8 },
   playContainer: { alignItems: 'center', paddingBottom: 40 },
   playGlowContainer: { shadowColor: '#FFFFFF', shadowOffset: { width: 0, height: 0 }, elevation: 8 },
   topRow: { flexDirection: 'row', gap: 12, marginBottom: 10 },
@@ -1102,19 +1306,31 @@ const styles = StyleSheet.create({
   modeTitleLarge: { fontFamily: 'BebasNeue', fontSize: 20, color: '#fff', letterSpacing: 1 },
   modeDescLarge: { fontFamily: 'SpaceMono', fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 4 },
   warningText: { fontFamily: 'SpaceMono', fontSize: 10, color: '#ff6b6b', marginTop: 6, textAlign: 'center' },
-  modeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'center' },
-  modeCard: { width: '47%', backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.15)', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 8, alignItems: 'center', gap: 2 },
-  modeCardActive: { backgroundColor: '#1a1a1a', borderColor: '#1a1a1a' },
-  modeCardEmoji: { fontSize: 28, marginBottom: 2 },
-  modeCardTitle: { fontFamily: 'BebasNeue', fontSize: 15, color: '#1a1a1a', letterSpacing: 1, textAlign: 'center' },
+  modeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center' },
+  modeCardLarge: { width: '55%', backgroundColor: '#F5F5DC', borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.15)', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 6, alignItems: 'center', alignSelf: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5 },
+  modeCardImageLarge: { width: 44, height: 44, marginBottom: 2 },
+  modeGridSmall: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 8 },
+  roleCounters: { width: '100%', gap: 5, marginTop: 8 },
+  roleCounterRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.12)', borderRadius: 8, paddingVertical: 5, paddingHorizontal: 8, gap: 6 },
+  roleCounterIcon: { width: 24, height: 24 },
+  roleCounterControls: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 'auto' },
+  roleCounterBtn: { width: 26, height: 26, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 1.5, borderColor: '#1a1a1a', alignItems: 'center', justifyContent: 'center', borderRadius: 6 },
+  roleCounterBtnDisabled: { opacity: 0.3 },
+  roleCounterBtnText: { fontSize: 14, fontFamily: 'SpaceMono', color: '#1a1a1a' },
+  roleCounterVal: { fontFamily: 'BebasNeue', fontSize: 18, minWidth: 20, textAlign: 'center', color: '#1a1a1a' },
+  modeCard: { width: '47%', backgroundColor: '#F5F5DC', borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.15)', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 6, alignItems: 'center', gap: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5 },
+  modeCardActive: { backgroundColor: '#1a1a1a', borderColor: '#1a1a1a', shadowOpacity: 0.4, shadowRadius: 6, elevation: 8 },
+  modeCardEmoji: { fontSize: 22, marginBottom: 1 },
+  modeCardImage: { width: '85%', height: 40, marginBottom: 2 },
+  modeCardTitle: { fontFamily: 'BebasNeue', fontSize: 13, color: '#1a1a1a', letterSpacing: 1, textAlign: 'center' },
   modeCardTitleActive: { color: '#F5F5DC' },
-  modeCardDesc: { fontFamily: 'SpaceMono', fontSize: 8, color: '#666', textAlign: 'center', lineHeight: 11 },
+  modeCardDesc: { fontFamily: 'SpaceMono', fontSize: 7, color: '#666', textAlign: 'center', lineHeight: 10 },
   modeCardDescActive: { color: 'rgba(245,245,220,0.7)' },
   modeCardAdBadge: { position: 'absolute', top: -12, right: -8, zIndex: 1 },
   modeCardAdIcon: { width: 22, height: 22 },
   modalOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
-  modalContent: { width: '85%', backgroundColor: '#F5F5DC', borderRadius: 20, padding: 20, borderWidth: 2, borderColor: '#1a1a1a', maxHeight: '85%' },
-  modalTitle: { fontFamily: 'BebasNeue', fontSize: 24, color: '#1a1a1a', letterSpacing: 2, textAlign: 'center', marginBottom: 15 },
+  modalContent: { width: '85%', backgroundColor: '#F5F5DC', borderRadius: 20, padding: 16, borderWidth: 2, borderColor: '#1a1a1a', maxHeight: '85%' },
+  modalTitle: { fontFamily: 'BebasNeue', fontSize: 24, color: '#1a1a1a', letterSpacing: 2, textAlign: 'center', marginBottom: 10 },
   categoryScrollHorizontal: { flexDirection: 'row', gap: 8, paddingVertical: 8 },
   categoryChip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 1, borderColor: 'rgba(0,0,0,0.2)' },
   categoryChipActive: { backgroundColor: '#1a1a1a', borderColor: '#1a1a1a' },
@@ -1137,12 +1353,15 @@ const styles = StyleSheet.create({
   counterBtn: { width: 34, height: 34, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 1, borderColor: '#1a1a1a', alignItems: 'center', justifyContent: 'center', borderRadius: 8 },
   counterBtnText: { fontSize: 18, fontFamily: 'SpaceMono', color: '#1a1a1a' },
   counterVal: { fontFamily: 'BebasNeue', fontSize: 28, minWidth: 28, textAlign: 'center', color: '#1a1a1a' },
-  setupSection: { width: '100%', marginBottom: 16 },
-  setupLabel: { fontFamily: 'SpaceMono', fontSize: 11, color: '#333', marginBottom: 8 },
+  setupSection: { width: '100%', marginBottom: 6 },
+  setupLabel: { fontFamily: 'SpaceMono', fontSize: 11, color: '#333', marginBottom: 4 },
   counterRowLarge: { flexDirection: 'row', alignItems: 'center', gap: 12, justifyContent: 'center' },
   counterBtnLarge: { width: 40, height: 40, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 2, borderColor: '#1a1a1a', alignItems: 'center', justifyContent: 'center', borderRadius: 10 },
   counterBtnTextLarge: { fontSize: 20, fontFamily: 'SpaceMono', color: '#1a1a1a' },
   counterValLarge: { fontFamily: 'BebasNeue', fontSize: 28, minWidth: 40, textAlign: 'center', color: '#1a1a1a' },
+  sliderRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  slider: { flex: 1 },
+  sliderValue: { fontFamily: 'BebasNeue', fontSize: 28, color: '#1a1a1a', minWidth: 36, textAlign: 'center' },
   toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingVertical: 4 },
   toggleLabelContainer: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   toggleRightContainer: { alignItems: 'center', gap: 4 },
