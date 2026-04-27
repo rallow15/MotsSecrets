@@ -51,13 +51,20 @@ workflows:
     environment:
       xcode: latest
       node: latest
+      vars:
+        BUNDLE_ID: "com.tonnom.motssecrets"
     scripts:
       - name: Install dependencies
         script: npm install
       - name: Expo prebuild iOS
         script: npx expo prebuild --platform ios --clean
-      - name: Build IPA unsigned
+      - name: Set Pod deployment target
         script: |
+          cd ios
+          pod install
+      - name: Build IPA (unsigned with frameworks)
+        script: |
+          # Build archive
           xcodebuild -workspace ios/MotsSecrets.xcworkspace \
             -scheme MotsSecrets \
             -configuration Release \
@@ -66,11 +73,29 @@ workflows:
             archive \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY=""
+            CODE_SIGN_IDENTITY="" \
+            IPHONEOS_DEPLOYMENT_TARGET=15.0 \
+            ENABLE_BITCODE=NO
+
+          # Verify the .app exists in the archive
+          APP_PATH=$(find "$CM_BUILD_DIR/MotsSecrets.xcarchive/Products/Applications" -name "*.app" -maxdepth 1 | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "ERROR: No .app found in archive!"
+            ls -la "$CM_BUILD_DIR/MotsSecrets.xcarchive/Products/Applications/" || true
+            exit 1
+          fi
+          echo "Found app: $APP_PATH"
+          echo "App size: $(du -sh "$APP_PATH" | cut -f1)"
+
+          # Create IPA
           mkdir -p $CM_BUILD_DIR/ipa/Payload
-          cp -r "$CM_BUILD_DIR/MotsSecrets.xcarchive/Products/Applications/MotsSecrets.app" \
-            "$CM_BUILD_DIR/ipa/Payload/"
+          cp -r "$APP_PATH" "$CM_BUILD_DIR/ipa/Payload/"
+
+          # Remove code signature (since we're unsigned)
+          rm -rf "$CM_BUILD_DIR/ipa/Payload/"*.app/_CodeSignature 2>/dev/null || true
+
           cd $CM_BUILD_DIR/ipa
-          zip -r MotsSecrets.ipa Payload
+          zip --symlinks -r MotsSecrets.ipa Payload
+          echo "IPA size: $(du -sh MotsSecrets.ipa | cut -f1)"
     artifacts:
       - $CM_BUILD_DIR/ipa/MotsSecrets.ipa
