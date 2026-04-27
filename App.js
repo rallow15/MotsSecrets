@@ -126,17 +126,18 @@ export default function App() {
       }
 
       try {
-        // Import dynamique de UMP (nécessite un build natif)
-        const { initUMP, UMPConsentInformation } = await import('./src/consent/umpConfig');
+        const { initUMP } = await import('./src/consent/umpConfig');
 
-        // Initialiser UMP et récupérer le statut
-        await initUMP();
-        const umpStatus = await UMPConsentInformation.getConsentStatus();
+        const { status, isFormAvailable } = await initUMP();
 
-        if (umpStatus) {
-          setConsentGiven(umpStatus);
+        if (status === 'OBTAINED' || status === 'NOT_REQUIRED') {
+          setConsentGiven('given');
+          setShowConsent(false);
+        } else if (!isFormAvailable) {
+          setConsentGiven('pending');
           setShowConsent(false);
         }
+        // Si isFormAvailable && status === REQUIRED → showConsent reste true
       } catch (e) {
         console.log('UMP init error:', e);
         // Fallback: vérifier le stockage local

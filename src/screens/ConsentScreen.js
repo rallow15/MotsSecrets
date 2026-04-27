@@ -1,24 +1,19 @@
-// Écran de consentement RGPD avec Google UMP
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Linking, ActivityIndicator } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 
-// Variables UMP (chargées dynamiquement)
-let UMPConsentInformation = null;
-let UMPConsentForm = null;
-let showConsentForm = null;
+let AdsConsent = null;
 let initUMP = null;
 let loadAndShowConsentForm = null;
+let showConsentForm = null;
 
 export default function ConsentScreen({ onConsentGiven }) {
   const [loading, setLoading] = useState(true);
   const [umpError, setUmpError] = useState(null);
-  const [consentForm, setConsentForm] = useState(null);
 
   const isExpoGo = Constants.appOwnership === 'expo';
 
-  // Charger UMP dynamiquement (uniquement si pas Expo Go)
   useEffect(() => {
     if (!isExpoGo) {
       import('../consent/umpConfig')
@@ -26,11 +21,9 @@ export default function ConsentScreen({ onConsentGiven }) {
           initUMP = mod.initUMP;
           loadAndShowConsentForm = mod.loadAndShowConsentForm;
           showConsentForm = mod.showConsentForm;
-          UMPConsentInformation = mod.UMPConsentInformation;
+          AdsConsent = mod.AdsConsent;
         })
-        .catch((e) => {
-          console.log('UMP import error:', e);
-        });
+        .catch((e) => console.log('UMP import error:', e));
     }
   }, [isExpoGo]);
 
@@ -39,27 +32,38 @@ export default function ConsentScreen({ onConsentGiven }) {
   }, []);
 
   async function initConsent() {
-    // En Expo Go, on skip UMP (pas de native modules)
     if (isExpoGo) {
       setLoading(false);
       return;
     }
 
     try {
-      // Vérifier que les modules UMP sont chargés
       if (!initUMP) {
-        console.log('UMP non initialisé, chargement...');
         const mod = await import('../consent/umpConfig');
         initUMP = mod.initUMP;
         loadAndShowConsentForm = mod.loadAndShowConsentForm;
         showConsentForm = mod.showConsentForm;
-        UMPConsentInformation = mod.UMPConsentInformation;
+        AdsConsent = mod.AdsConsent;
       }
 
-      const { isFormAvailable } = await initUMP();
+      const { isFormAvailable, status } = await initUMP();
+
+      // Si consentement déjà obtenu ou pas requis, on valide directement
+      if (status === 'OBTAINED' || status === 'NOT_REQUIRED') {
+        await SecureStore.setItemAsync('ump_consent_status', 'given');
+        onConsentGiven('given');
+        return;
+      }
+
+      // Si un formulaire est disponible, le montrer automatiquement
       if (isFormAvailable) {
-        const form = await loadAndShowConsentForm();
-        setConsentForm(form);
+        const result = await loadAndShowConsentForm();
+        const finalStatus = result?.status || 'UNKNOWN';
+        if (finalStatus === 'OBTAINED') {
+          await SecureStore.setItemAsync('ump_consent_status', 'given');
+          onConsentGiven('given');
+          return;
+        }
       }
     } catch (e) {
       console.log('Erreur UMP:', e);
@@ -70,11 +74,8 @@ export default function ConsentScreen({ onConsentGiven }) {
   }
 
   const handleRefuse = async () => {
-    if (!isExpoGo) {
-      // En prod native, on refuse via UMP
-      try {
-        UMPConsentInformation.reset();
-      } catch (e) {}
+    if (!isExpoGo && AdsConsent) {
+      try { await AdsConsent.reset(); } catch (e) {}
     }
     await SecureStore.setItemAsync('ump_consent_status', 'refused');
     onConsentGiven('refused');
@@ -82,31 +83,29 @@ export default function ConsentScreen({ onConsentGiven }) {
 
   const handleAccept = async () => {
     if (!isExpoGo) {
-      // En prod native, on accepte via UMP
       try {
-        // Vérifier que les modules UMP sont chargés
         if (!initUMP) {
           const mod = await import('../consent/umpConfig');
           initUMP = mod.initUMP;
           loadAndShowConsentForm = mod.loadAndShowConsentForm;
           showConsentForm = mod.showConsentForm;
-          UMPConsentInformation = mod.UMPConsentInformation;
+          AdsConsent = mod.AdsConsent;
         }
 
         const { isFormAvailable } = await initUMP();
         if (isFormAvailable) {
-          const form = await loadAndShowConsentForm();
-          await showConsentForm(form);
-          const status = await UMPConsentInformation.getConsentStatus();
-          await SecureStore.setItemAsync('ump_consent_status', status);
-          onConsentGiven(status);
-          return;
+          const result = await showConsentForm();
+          const status = result?.status;
+          if (status === 'OBTAINED') {
+            await SecureStore.setItemAsync('ump_consent_status', 'given');
+            onConsentGiven('given');
+            return;
+          }
         }
       } catch (e) {
         setUmpError(e.message || String(e));
       }
     }
-    // Fallback
     await SecureStore.setItemAsync('ump_consent_status', 'given');
     onConsentGiven('given');
   };
