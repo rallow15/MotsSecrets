@@ -89,6 +89,41 @@ const LIEUX_IMAGES = {
   'Prison': require('../../assets/lieux/18_Prison.png'),
 };
 
+// Images GROUPES - require statiques pour Metro
+const GROUPES_IMAGES = {
+  // FR
+  '300 Spartans': require('../../assets/groupes/01_300 spartans.png'),
+  'Akatsuki': require('../../assets/groupes/02_akastuki.png'),
+  'Amiraux': require('../../assets/groupes/03_amiraux.png'),
+  'Armée Révolutionnaire': require('../../assets/groupes/04_Armée Révolutionnaire.png'),
+  'Avengers': require('../../assets/groupes/05_avengers.jpeg'),
+  'Chevalier du Zodiaque': require('../../assets/groupes/06_chevalier du zodiaque.png'),
+  'Chevaliers Divins': require('../../assets/groupes/07_chevaliers divins.png'),
+  'Cinq Doyens': require('../../assets/groupes/08_Cinq Doyens.png'),
+  'Clan D': require('../../assets/groupes/09_clan D.png'),
+  'Clan Uchiha': require('../../assets/groupes/10_clan uchiha.png'),
+  'Expendables': require('../../assets/groupes/11_expendable.png'),
+  'Jedi': require('../../assets/groupes/12_jedi.png'),
+  'Justice League': require('../../assets/groupes/13_justice league.jpeg'),
+  'Power Rangers': require('../../assets/groupes/14_power rangers.png'),
+  'Rang Nation': require('../../assets/groupes/15_rang nation.png'),
+  'Rang S': require('../../assets/groupes/16_rang s.png'),
+  'Saiyan': require('../../assets/groupes/17_saiyan.png'),
+  'Shichibukai': require('../../assets/groupes/18_shichibukai.png'),
+  'X-Men': require('../../assets/groupes/19_x men.jpeg'),
+  'Yonko': require('../../assets/groupes/20_yonko.png'),
+  // EN
+  'Warlords': require('../../assets/groupes/03_amiraux.png'),
+  'Revolutionary Army': require('../../assets/groupes/04_Armée Révolutionnaire.png'),
+  'Zodiac Knights': require('../../assets/groupes/06_chevalier du zodiaque.png'),
+  'Divine Knights': require('../../assets/groupes/07_chevaliers divins.png'),
+  'Five Elders': require('../../assets/groupes/08_Cinq Doyens.png'),
+  'Uchiha Clan': require('../../assets/groupes/10_clan uchiha.png'),
+  'Naruto Nation': require('../../assets/groupes/15_rang nation.png'),
+  'S Rank': require('../../assets/groupes/16_rang s.png'),
+  'Saiyans': require('../../assets/groupes/17_saiyan.png'),
+};
+
 // Images MIMER - require statiques pour Metro
 const COUPE_2018 = require('../../assets/mimer/Coupe Du monde 2018.jpg');
 const COUPE_1998 = require('../../assets/mimer/Coupe Du monde 1998.jpg');
@@ -109,6 +144,7 @@ export default function RevealScreen({ navigation, route }) {
   const [wordVisible, setWordVisible] = useState(initialWordVisible || false);
   const [imageError, setImageError] = useState(false);
   const lang = getLang();
+  const spyfallUndercover = route.params.spyfallUndercover ?? false;
 
   const gameMode = route.params.gameMode ?? 0;
   const assignment = assignments[currentPlayer];
@@ -116,14 +152,15 @@ export default function RevealScreen({ navigation, route }) {
   const isSpy = assignment.role === 'spy';
   const isMimer = assignment.isMimer || mimerMode;
   const category = assignment.category ?? assignment.cat ?? '';
+  const easyMode = assignment.easyMode || route.params.easyMode || false;
   const playerName = playerNames?.[currentPlayer] ?? '';
   const isSpyfall = gameMode === 3;
 
   // Récupérer les données MIMER (paire d'images + indice)
   const mimerData = assignment.mimerData;
-  // word = nom de l'image à afficher (image1 ou image2)
-  const word = isMister ? 'MISTER WHITE' : isSpy ? null : assignment.word;
-  const lieuImage = word && LIEUX_IMAGES[word] ? LIEUX_IMAGES[word] : null;
+  // En mode facile, Mister White connaît la catégorie
+  const word = isMister ? (easyMode && category ? category : 'MISTER WHITE') : isSpy ? null : assignment.word;
+  const lieuImage = word && (LIEUX_IMAGES[word] || GROUPES_IMAGES[word]) ? (LIEUX_IMAGES[word] || GROUPES_IMAGES[word]) : null;
 
   const wordLen = word ? word.length : 0;
   const wordFontSize = wordLen > 14 ? 44 : wordLen > 10 ? 58 : wordLen > 7 ? 72 : 88;
@@ -184,6 +221,12 @@ export default function RevealScreen({ navigation, route }) {
           numPlayers, assignments, playerNames,
           selectedCategory: route.params.selectedCategory,
           spyfallTimer: route.params.spyfallTimer ?? 8,
+          spyfallUndercover,
+          numUndercovers: route.params.numUndercovers ?? 1,
+          numMisterWhites: route.params.numMisterWhites ?? 0,
+          easyMode: route.params.easyMode ?? false,
+          mimerMode: route.params.mimerMode ?? false,
+          customWords: route.params.customWords || [],
         });
       } else {
         navigation.navigate('Result', {
@@ -205,6 +248,7 @@ export default function RevealScreen({ navigation, route }) {
         mimerMode: route.params.mimerMode,
         gameMode,
         spyfallTimer: route.params.spyfallTimer ?? 8,
+        spyfallUndercover,
       });
     }
   };
@@ -254,14 +298,27 @@ export default function RevealScreen({ navigation, route }) {
       ) : (
         // Mode normal : afficher le mot
         <>
-          {!isMister && category && typeof category === 'string' ? (
-            <View style={styles.catBadge}>
-              <Text style={styles.catText}>{category}</Text>
-            </View>
-          ) : null}
+          {isMister && easyMode && category ? (
+            // Mister White en mode facile : titre jaune + indice catégorie
+            <>
+              <Text style={styles.misterTitle}>TU ES</Text>
+              <Text style={styles.misterYellow}>MISTER WHITE</Text>
+              <View style={styles.easyHint}>
+                <Text style={styles.easyHintText}>💡 {lang === 'fr' ? 'Indice : la catégorie est' : 'Hint: the category is'} <Text style={styles.easyHintCategory}>{category}</Text></Text>
+              </View>
+            </>
+          ) : (
+            <>
+              {!isMister && category && typeof category === 'string' ? (
+                <View style={styles.catBadge}>
+                  <Text style={styles.catText}>{category}</Text>
+                </View>
+              ) : null}
+            </>
+          )}
 
-          <Text style={[styles.word, isMister && styles.wordMister, { fontSize: wordFontSize }]}>
-            {typeof word === 'string' ? word : ''}
+          <Text style={[styles.word, isMister && !easyMode && styles.wordMister, { fontSize: isMister && easyMode ? 0 : wordFontSize }]}>
+            {isMister && easyMode ? '' : (typeof word === 'string' ? word : '')}
           </Text>
         </>
       )}
@@ -320,4 +377,9 @@ const styles = StyleSheet.create({
   hintLight: { color: 'rgba(255,255,255,0.7)' },
   okBtnLight: { marginTop: 20, backgroundColor: 'rgba(255,255,255,0.2)', paddingVertical: 16, paddingHorizontal: 48, borderRadius: 12, borderWidth: 2, borderColor: 'rgba(255,255,255,0.5)' },
   okBtnTextLight: { fontFamily: 'BebasNeue', fontSize: 26, color: '#FFFFFF', letterSpacing: 3 },
+  easyHint: { backgroundColor: 'rgba(232,255,71,0.3)', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: '#e8ff47', marginTop: 4 },
+  easyHintText: { fontFamily: 'SpaceMono', fontSize: 12, color: '#1a1a1a' },
+  easyHintCategory: { fontFamily: 'BebasNeue', fontSize: 16, color: '#1a1a1a', letterSpacing: 1 },
+  misterTitle: { fontFamily: 'SpaceMono', fontSize: 14, color: '#666', letterSpacing: 3 },
+  misterYellow: { fontFamily: 'BebasNeue', fontSize: 48, color: '#e8ff47', letterSpacing: 3, textShadowColor: '#000', textShadowOffset: { width: 2, height: 2 }, textShadowRadius: 4 },
 });

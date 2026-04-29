@@ -78,6 +78,13 @@ const T = {
     spyTypeWord:    'TAPEZ LE MOT SECRET',
     timeLeft:       'TEMPS RESTANT',
     spyTapGuess:    'ESPION ? DEVINEZ !',
+    // Spyfall Undercover
+    passToUndercover:   "PASSEZ LE TÉLÉPHONE À L'INTRUS",
+    undercoverCaught:  "L'INTRUS EST DÉCOUVERT !",
+    intruderWinsSpyfall: "L'INTRUS GAGNE !",
+    undercoverGuessRight: "L'intrus a deviné le mot !",
+    undercoverGuessWrong: "L'intrus s'est trompé !",
+    voteTitleUndercover: "QUI EST L'INTRUS ?",
     // Mode cards
     modeNormal:     'NORMAL',
     modeNormalDesc: '1 intrus parmi tous les joueurs',
@@ -164,6 +171,13 @@ const T = {
     spyTypeWord:    'TYPE THE SECRET WORD',
     timeLeft:       'TIME LEFT',
     spyTapGuess:    'SPY? GUESS!',
+    // Spyfall Undercover
+    passToUndercover:   'PASS THE PHONE TO THE UNDERCOVER',
+    undercoverCaught:  'THE UNDERCOVER IS CAUGHT!',
+    intruderWinsSpyfall: 'THE UNDERCOVER WINS!',
+    undercoverGuessRight: 'The undercover guessed the word!',
+    undercoverGuessWrong: 'The undercover guessed wrong!',
+    voteTitleUndercover: 'WHO IS THE UNDERCOVER?',
     // Mode cards
     modeNormal:     'NORMAL',
     modeNormalDesc: '1 impostor among all players',

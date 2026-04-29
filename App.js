@@ -47,7 +47,7 @@ const BANNER_TOP_ID    = 'ca-app-pub-2965679591230669/2407188674';
 const BANNER_BOTTOM_ID = 'ca-app-pub-2965679591230669/8830249922';
 
 function PrepScreenWrapper({ navigation, route }) {
-  const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, customWords, mimerMode, spyfallTimer, numUndercovers, numMisterWhites } = route.params;
+  const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, customWords, mimerMode, spyfallTimer, numUndercovers, numMisterWhites, easyMode, spyfallUndercover } = route.params;
 
   const _gameMode      = gameMode      ?? 0;
   const _currentPlayer = currentPlayer ?? 0;
@@ -60,10 +60,12 @@ function PrepScreenWrapper({ navigation, route }) {
   const _spyfallTimer = spyfallTimer ?? null;
   const _numUndercovers = numUndercovers ?? 1;
   const _numMisterWhites = numMisterWhites ?? 0;
+  const _easyMode = easyMode ?? false;
+  const _spyfallUndercover = spyfallUndercover ?? false;
 
   // Générer assignments une seule fois (absent = première entrée dans Prep)
   const assignments = route.params.assignments
-    ?? generateAssignments(numPlayers, _gameMode, _selectedCategory, _customWords, _mimerMode, _numUndercovers, _numMisterWhites);
+    ?? generateAssignments(numPlayers, _gameMode, _selectedCategory, _customWords, _mimerMode, _numUndercovers, _numMisterWhites, _easyMode, _spyfallUndercover);
 
   return (
     <PrepScreen
@@ -79,6 +81,8 @@ function PrepScreenWrapper({ navigation, route }) {
           spyfallTimer: _spyfallTimer,
           numUndercovers: _numUndercovers,
           numMisterWhites: _numMisterWhites,
+          easyMode: _easyMode,
+          spyfallUndercover: _spyfallUndercover,
           assignments,
           currentPlayer: _currentPlayer,
           takenNumbers:  _takenNumbers,

@@ -5,7 +5,7 @@ import { t, getLang } from '../i18n';
 import { playClick } from '../sound';
 
 export default function SpyfallVoteScreen({ navigation, route }) {
-  const { numPlayers, assignments, playerNames, selectedCategory, spyfallTimer, currentVoter, votes, timeLeft } = route.params;
+  const { numPlayers, assignments, playerNames, selectedCategory, spyfallTimer, currentVoter, votes, timeLeft, spyfallUndercover } = route.params;
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const lang = getLang();
 
@@ -43,15 +43,17 @@ export default function SpyfallVoteScreen({ navigation, route }) {
           gameMode: 3,
           spyfallOutcome: 'spyWinsTie',
           spyfallTimer,
+          spyfallUndercover,
         });
         return;
       }
 
-      // Le plus voté est-il l'espion ?
-      const isAccusedSpy = assignments[mostVoted].role === 'spy';
+      // Le plus voté est-il l'espion / l'intrus ?
+      const suspectRole = spyfallUndercover ? 'intrus' : 'spy';
+      const isAccusedSuspect = assignments[mostVoted].role === suspectRole;
 
-      if (isAccusedSpy) {
-        // L'espion est trouvé → il peut deviner le mot
+      if (isAccusedSuspect) {
+        // L'espion/intrus est trouvé → il peut deviner le mot
         navigation.navigate('SpyfallGuess', {
           numPlayers,
           assignments,
@@ -59,9 +61,11 @@ export default function SpyfallVoteScreen({ navigation, route }) {
           selectedCategory,
           spyfallTimer,
           fromGame: false,
+          spyfallUndercover,
+          votedPlayerIndex: mostVoted,
         });
       } else {
-        // Mauvaise accusation → l'espion gagne
+        // Mauvaise accusation → l'espion/intrus gagne
         navigation.navigate('Result', {
           numPlayers,
           assignments,
@@ -71,6 +75,7 @@ export default function SpyfallVoteScreen({ navigation, route }) {
           gameMode: 3,
           spyfallOutcome: 'spyWinsWrongAccusation',
           spyfallTimer,
+          spyfallUndercover,
         });
       }
     } else {
@@ -84,13 +89,14 @@ export default function SpyfallVoteScreen({ navigation, route }) {
         currentVoter: currentVoter + 1,
         votes: newVotes,
         timeLeft,
+        spyfallUndercover,
       });
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{t('voteTitle')}</Text>
+      <Text style={styles.title}>{spyfallUndercover ? t('voteTitleUndercover') : t('voteTitle')}</Text>
       <Text style={styles.voterLabel}>{t('playerLabel', currentVoter + 1)}: {voterName}</Text>
       <Text style={styles.instruction}>{t('voteInstruction')}</Text>
 

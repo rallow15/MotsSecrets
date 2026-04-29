@@ -11,7 +11,7 @@ import { getLang } from './i18n';
  * returns array of { word, role, category, isMimer }
  * role: 'normal' | 'intrus' | 'mister' | 'spy'
  */
-export function generateAssignments(numPlayers, gameMode = 0, selectedCategory = null, customWords = [], mimerMode = false, numUndercovers = 1, numMisterWhites = 0) {
+export function generateAssignments(numPlayers, gameMode = 0, selectedCategory = null, customWords = [], mimerMode = false, numUndercovers = 1, numMisterWhites = 0, easyMode = false, spyfallUndercover = false) {
   // Utiliser la base de mots selon la langue
   const lang = getLang();
   const wordDb = lang === 'en' ? WORD_DB_EN : WORD_DB;
@@ -100,9 +100,15 @@ export function generateAssignments(numPlayers, gameMode = 0, selectedCategory =
 
   const roles = [];
   if (gameMode === 3) {
-    // SPYFALL : 1 espion sans mot, les autres ont le même mot
-    roles.push('spy');
-    while (roles.length < numPlayers) roles.push('normal');
+    if (spyfallUndercover) {
+      // SPYFALL UNDERCOVER : intrus avec un mot différent, les autres ont le même mot
+      for (let i = 0; i < numUndercovers && roles.length < numPlayers; i++) roles.push('intrus');
+      while (roles.length < numPlayers) roles.push('normal');
+    } else {
+      // SPYFALL : 1 espion sans mot, les autres ont le même mot
+      roles.push('spy');
+      while (roles.length < numPlayers) roles.push('normal');
+    }
   } else {
     // Modes Normal / Mister White / MW+Intrus : utiliser les compteurs
     for (let i = 0; i < numUndercovers && roles.length < numPlayers; i++) roles.push('intrus');
@@ -120,12 +126,15 @@ export function generateAssignments(numPlayers, gameMode = 0, selectedCategory =
   // Si pas de mots personnalisés, tout le monde n'a pas de mot (bluff pur)
   // Si mots personnalisés, alors intrus et normaux fonctionnent normalement
   // Mode MIMER : les mots sont des noms d'images à afficher + indice pour Mister White
+  const misterWord = easyMode ? category : null;
+
   return roles.map((role) => ({
-    word: isSpecialeCategory && words.length <= 1 ? null : (role === 'intrus' ? wordB : role === 'mister' || role === 'spy' ? null : wordA),
+    word: isSpecialeCategory && words.length <= 1 ? null : (role === 'intrus' ? wordB : role === 'mister' ? misterWord : role === 'spy' ? null : wordA),
     role: isSpecialeCategory && words.length <= 1 ? 'normal' : role,
     category,
     isMimer,
     mimerData: isMimer ? mimerData : null, // Contient { nom, images, indice } pour Mister White
+    easyMode,
   }));
 }
 

@@ -87,6 +87,39 @@ const LIEUX_IMAGES = {
   'Casino': require('../../assets/lieux/16_Casino.png'),
   'Prison': require('../../assets/lieux/18_Prison.png'),
 };
+
+// Images GROUPES - require statiques pour Metro
+const GROUPES_IMAGES = {
+  '300 Spartans': require('../../assets/groupes/01_300 spartans.png'),
+  'Akatsuki': require('../../assets/groupes/02_akastuki.png'),
+  'Amiraux': require('../../assets/groupes/03_amiraux.png'),
+  'Armée Révolutionnaire': require('../../assets/groupes/04_Armée Révolutionnaire.png'),
+  'Avengers': require('../../assets/groupes/05_avengers.jpeg'),
+  'Chevalier du Zodiaque': require('../../assets/groupes/06_chevalier du zodiaque.png'),
+  'Chevaliers Divins': require('../../assets/groupes/07_chevaliers divins.png'),
+  'Cinq Doyens': require('../../assets/groupes/08_Cinq Doyens.png'),
+  'Clan D': require('../../assets/groupes/09_clan D.png'),
+  'Clan Uchiha': require('../../assets/groupes/10_clan uchiha.png'),
+  'Expendables': require('../../assets/groupes/11_expendable.png'),
+  'Jedi': require('../../assets/groupes/12_jedi.png'),
+  'Justice League': require('../../assets/groupes/13_justice league.jpeg'),
+  'Power Rangers': require('../../assets/groupes/14_power rangers.png'),
+  'Rang Nation': require('../../assets/groupes/15_rang nation.png'),
+  'Rang S': require('../../assets/groupes/16_rang s.png'),
+  'Saiyan': require('../../assets/groupes/17_saiyan.png'),
+  'Shichibukai': require('../../assets/groupes/18_shichibukai.png'),
+  'X-Men': require('../../assets/groupes/19_x men.jpeg'),
+  'Yonko': require('../../assets/groupes/20_yonko.png'),
+  'Warlords': require('../../assets/groupes/03_amiraux.png'),
+  'Revolutionary Army': require('../../assets/groupes/04_Armée Révolutionnaire.png'),
+  'Zodiac Knights': require('../../assets/groupes/06_chevalier du zodiaque.png'),
+  'Divine Knights': require('../../assets/groupes/07_chevaliers divins.png'),
+  'Five Elders': require('../../assets/groupes/08_Cinq Doyens.png'),
+  'Uchiha Clan': require('../../assets/groupes/10_clan uchiha.png'),
+  'Naruto Nation': require('../../assets/groupes/15_rang nation.png'),
+  'S Rank': require('../../assets/groupes/16_rang s.png'),
+  'Saiyans': require('../../assets/groupes/17_saiyan.png'),
+};
 import Constants from 'expo-constants';
 
 // Détecter si on est dans Expo Go
@@ -114,6 +147,7 @@ function loadInterstitialAd() {
 
 export default function ResultScreen({ navigation, route }) {
   const { numPlayers, assignments, playerNumbers, playerNames, gameMode, spyfallOutcome } = route.params;
+  const spyfallUndercover = route.params.spyfallUndercover ?? false;
   const isSpyfall = gameMode === 3;
 
   // Joueur aléatoire qui commence
@@ -158,6 +192,10 @@ export default function ResultScreen({ navigation, route }) {
       customWords: route.params.customWords || [], // ← mots personnalisés conservés
       mimerMode: route.params.mimerMode ?? false, // ← mode MIMER conservé
       spyfallTimer: route.params.spyfallTimer ?? null, // ← timer Spyfall conservé
+      spyfallUndercover: route.params.spyfallUndercover ?? false,
+      numUndercovers: route.params.numUndercovers ?? 1,
+      numMisterWhites: route.params.numMisterWhites ?? 0,
+      easyMode: route.params.easyMode ?? false,
       currentPlayer: 0,
       takenNumbers:  [],
       playerNumbers: new Array(numPlayers).fill(null),
@@ -189,7 +227,7 @@ export default function ResultScreen({ navigation, route }) {
             wordDisplay = wordDisplay.replace('.jpg', '').replace('.png', '');
           }
           // Image lieu pour Spyfall
-          const lieuImg = wordDisplay && LIEUX_IMAGES[wordDisplay] ? LIEUX_IMAGES[wordDisplay] : null;
+          const lieuImg = wordDisplay && (LIEUX_IMAGES[wordDisplay] || GROUPES_IMAGES[wordDisplay]) ? (LIEUX_IMAGES[wordDisplay] || GROUPES_IMAGES[wordDisplay]) : null;
 
           const handleReveal = () => {
             if (!isRev) {
@@ -283,12 +321,13 @@ export default function ResultScreen({ navigation, route }) {
   // Spyfall outcomes
   const spyfallTitle = (() => {
     if (!isSpyfall || !spyfallOutcome) return null;
+    const winsLabel = spyfallUndercover ? t('intruderWinsSpyfall') : t('spyWins');
     switch (spyfallOutcome) {
-      case 'spyWinsTimer': return t('timerExpired') + '\n' + t('spyWins');
-      case 'spyWinsTie': return t('spyWins');
-      case 'spyWinsWrongAccusation': return t('wrongAccusation') + '\n' + t('spyWins');
-      case 'spyGuessRight': return t('spyGuessRight') + '\n' + t('spyWins');
-      case 'spyGuessWrong': return t('spyGuessWrong') + '\n' + t('innocentsWin');
+      case 'spyWinsTimer': return t('timerExpired') + '\n' + winsLabel;
+      case 'spyWinsTie': return winsLabel;
+      case 'spyWinsWrongAccusation': return t('wrongAccusation') + '\n' + winsLabel;
+      case 'spyGuessRight': return (spyfallUndercover ? t('undercoverGuessRight') : t('spyGuessRight')) + '\n' + winsLabel;
+      case 'spyGuessWrong': return (spyfallUndercover ? t('undercoverGuessWrong') : t('spyGuessWrong')) + '\n' + t('innocentsWin');
       default: return null;
     }
   })();
@@ -298,7 +337,7 @@ export default function ResultScreen({ navigation, route }) {
     return (
       <View style={styles.container}>
         <Text style={[styles.commenceLabel, { color: spyWins ? '#ff4444' : '#000000' }]}>
-          {spyWins ? '🕵️' : '🎉'}
+          {spyWins ? (spyfallUndercover ? '🥸' : '🕵️') : '🎉'}
         </Text>
         <Animated.Text style={[styles.winnerName, { transform: [{ scale: scaleAnim }], opacity: opacityAnim }]}>
           {spyfallTitle}

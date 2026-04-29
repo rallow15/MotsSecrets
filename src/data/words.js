@@ -223,6 +223,16 @@ export const CATEGORIES_FR = {
   ],
 
   // ═════════════════════════════════════════════════════════════
+  // 👥 GROUPES (Mode Spyfall - images)
+  // ═════════════════════════════════════════════════════════════
+  GROUPES: [
+    "300 Spartans", "Akatsuki", "Amiraux", "Armée Révolutionnaire", "Avengers",
+    "Chevalier du Zodiaque", "Chevaliers Divins", "Cinq Doyens", "Clan D", "Clan Uchiha",
+    "Expendables", "Jedi", "Justice League", "Power Rangers", "Rang Nation",
+    "Rang S", "Saiyan", "Shichibukai", "X-Men", "Yonko",
+  ],
+
+  // ═════════════════════════════════════════════════════════════
   // ⭐ SPÉCIALE
   // ═════════════════════════════════════════════════════════════
   SPECIALE: [
@@ -483,6 +493,16 @@ export const CATEGORIES_EN = {
     "North Pole", "Desert", "Rainforest", "Desert Island", "Volcano",
     "Market", "Factory", "Laboratory", "Opera", "Olympic Stadium",
     "Spa", "Festival", "Caravan", "Lighthouse", "Castle",
+  ],
+
+  // ═════════════════════════════════════════════════════════════
+  // 👥 GROUPS (Spyfall Mode - images)
+  // ═════════════════════════════════════════════════════════════
+  GROUPS: [
+    "300 Spartans", "Akatsuki", "Warlords", "Revolutionary Army", "Avengers",
+    "Zodiac Knights", "Divine Knights", "Five Elders", "Clan D", "Uchiha Clan",
+    "Expendables", "Jedi", "Justice League", "Power Rangers", "Naruto Nation",
+    "S Rank", "Saiyans", "Shichibukai", "X-Men", "Yonko",
   ],
 
   // ═════════════════════════════════════════════════════════════

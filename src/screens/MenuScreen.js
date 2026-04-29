@@ -6,9 +6,7 @@ import {
   TextInput, KeyboardAvoidingView,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-const WORLD_MAP = require('../../assets/world-map.png');
 import { themes, colors } from '../theme';
 import { t, getLang, setLang } from '../i18n';
 import { CATEGORIES_FR, CATEGORIES_EN } from '../data/words';
@@ -52,6 +50,8 @@ const CATEGORY_EMOJIS = {
   OBJECTS: '📦',
   LIEUX: '🏠',
   LOCATIONS: '🏠',
+  GROUPES: '👥',
+  GROUPS: '👥',
   SPECIALE: '⭐',
   MIMER: '🎭',
 };
@@ -72,6 +72,7 @@ const CATEGORY_NAMES = {
     MANGA: 'MANGA',
     OBJETS: 'OBJETS',
     LIEUX: 'LIEUX',
+    GROUPES: 'GROUPES',
     SPECIALE: 'SPÉCIALE',
     MIMER: 'MIMER',
   },
@@ -90,6 +91,7 @@ const CATEGORY_NAMES = {
     MANGA: 'MANGA',
     OBJECTS: 'OBJECTS',
     LOCATIONS: 'LOCATIONS',
+    GROUPS: 'GROUPS',
     SPECIALE: 'SPECIAL',
     MIMER: 'MIMER',
   },
@@ -159,6 +161,17 @@ const RULES = {
         'Si le temps est écoulé, l\'espion gagne !',
       ],
     },
+    {
+      mode: 'SPYFALL INTRUS',
+      desc: '1 intrus avec un mot différent, devinez ou démasquez.',
+      steps: [
+        'Un joueur est l\'intrus et voit un mot différent. Les autres voient le même mot.',
+        'Les joueurs se posent des questions sur le mot pour identifier l\'intrus.',
+        'À tout moment, on peut voter pour accuser quelqu\'un.',
+        'Si l\'intrus est trouvé au vote, il peut tenter de deviner le mot pour gagner.',
+        'Si le temps est écoulé, l\'intrus gagne !',
+      ],
+    },
   ],
   en: [
     {
@@ -223,6 +236,17 @@ const RULES = {
         'If time runs out, the spy wins!',
       ],
     },
+    {
+      mode: 'SPYFALL UNDERCOVER',
+      desc: '1 undercover with a different word, guess or expose.',
+      steps: [
+        'One player is the undercover and sees a different word. The others see the same word.',
+        'Players ask each other questions about the word to identify the undercover.',
+        'At any time, players can vote to accuse someone.',
+        'If the undercover is caught in a vote, they can try to guess the word to still win.',
+        'If time runs out, the undercover wins!',
+      ],
+    },
   ],
 };
 
@@ -234,77 +258,6 @@ const MODE_IMAGES = {
   spyfall: require('../../assets/mode-spyfall.png'),
   mime: require('../../assets/mode-mime.png'),
 };
-
-
-// Globe terrestre animé avec vraie carte du monde
-function SpinningGlobe({ size = 72 }) {
-  const spinValue = useRef(new Animated.Value(0)).current;
-  const imgWidth = size * 2;
-  const imgHeight = size * 1.2;
-  const radius = size / 2;
-
-  useEffect(() => {
-    spinValue.setValue(0);
-    const anim = Animated.loop(
-      Animated.timing(spinValue, {
-        toValue: 1,
-        duration: 20000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    );
-    anim.start();
-    return () => {
-      anim.stop();
-      spinValue.setValue(0);
-    };
-  }, [size]);
-
-  const translateX = spinValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -imgWidth],
-  });
-
-  return (
-    <View style={{ width: size, height: size, position: 'relative' }}>
-      {/* Atmosphère : lueur bleue autour du globe */}
-      <View style={{
-        position: 'absolute', top: -4, left: -4, width: size + 8, height: size + 8,
-        borderRadius: (size + 8) / 2,
-        backgroundColor: 'rgba(100, 160, 255, 0.25)',
-        shadowColor: '#4a90d9', shadowOffset: { width: 0, height: 0 }, shadowRadius: 12, shadowOpacity: 0.6,
-      }} />
-      {/* Globe avec carte qui défile de droite à gauche */}
-      <View style={{ width: size, height: size, borderRadius: radius, overflow: 'hidden', backgroundColor: '#0d2b50', alignItems: 'center', justifyContent: 'center' }}>
-        <Animated.View style={{ flexDirection: 'row', transform: [{ translateX }] }}>
-          <Image source={WORLD_MAP} style={{ width: imgWidth, height: imgHeight, resizeMode: 'contain' }} />
-          <Image source={WORLD_MAP} style={{ width: imgWidth, height: imgHeight, resizeMode: 'contain' }} />
-        </Animated.View>
-        {/* Ombrage sphérique : bords sombres pour l'effet 3D */}
-        <LinearGradient
-          colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.15)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.15)', 'rgba(0,0,0,0.6)']}
-          locations={[0, 0.15, 0.5, 0.85, 1]}
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: radius }}
-          start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }}
-        />
-        <LinearGradient
-          colors={['rgba(0,0,0,0.45)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.35)']}
-          locations={[0, 0.5, 1]}
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: radius }}
-          start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }}
-        />
-        {/* Reflet spéculaire : tache claire en haut à gauche */}
-        <View style={{
-          position: 'absolute', top: size * 0.12, left: size * 0.1,
-          width: size * 0.35, height: size * 0.22,
-          borderRadius: size * 0.15,
-          backgroundColor: 'rgba(255,255,255,0.18)',
-          transform: [{ rotate: '-25deg' }],
-        }} />
-      </View>
-    </View>
-  );
-}
 
 
 const ROLE_UNDERCOVER = require('../../assets/role-undercover.png');
@@ -345,22 +298,23 @@ export default function MenuScreen({ navigation }) {
   const [specialeNumPlayers, setSpecialeNumPlayers] = useState(3);
   const [specialeGameMode, setSpecialeGameMode] = useState(0); // 0=Normal, 1=MW, 2=MW+Intrus
   const [showGameSetup, setShowGameSetup] = useState(false);
+  const [showOtherModes, setShowOtherModes] = useState(false);
+  const [modePage, setModePage] = useState(0);
   const [gameMode, setGameMode] = useState(0); // 0=Normal, 1=MW, 2=MW+Intrus, 3=Spyfall
   const [mimerMode, setMimerMode] = useState(false);
   const [spyfallTimer, setSpyfallTimer] = useState(8);
   // Toggles pour Intrus et Mister White (mode Normal)
   const [numUndercovers, setNumUndercovers] = useState(1);
   const [numMisterWhites, setNumMisterWhites] = useState(0);
+  const [easyMode, setEasyMode] = useState(false);
+  const [spyfallUndercover, setSpyfallUndercover] = useState(false);
 
-  // Calculer les valeurs par défaut selon le nombre de joueurs
-  const autoUndercovers = Math.floor(numPlayers / 4) || 1;
-  const autoMisterWhites = numPlayers >= 15 ? 2 : 1;
-  // Il doit toujours y avoir plus de joueurs normaux que de rôles spéciaux
-  // => specials <= floor((numPlayers - 1) / 2)
-  const maxTotalSpecials = Math.floor((numPlayers - 1) / 2);
+  // Les rôles spéciaux doivent être 2x moins nombreux que les normaux
+  // => specials ≤ floor(players / 3)
+  const maxTotalSpecials = Math.floor(numPlayers / 3);
 
-  const canAddUC = numUndercovers < autoUndercovers && (numUndercovers + 1 + numMisterWhites) <= maxTotalSpecials;
-  const canAddMW = numMisterWhites < autoMisterWhites && (numUndercovers + numMisterWhites + 1) <= maxTotalSpecials;
+  const canAddUC = (numUndercovers + 1 + numMisterWhites) <= maxTotalSpecials;
+  const canAddMW = (numUndercovers + numMisterWhites + 1) <= maxTotalSpecials;
 
   // Synchroniser gameMode avec les compteurs
   useEffect(() => {
@@ -373,27 +327,14 @@ export default function MenuScreen({ navigation }) {
 
   // Quand le nombre de joueurs change, ajuster les compteurs pour rester cohérent
   useEffect(() => {
-    const maxUC = Math.floor(numPlayers / 4) || 1;
-    const maxMW = numPlayers >= 15 ? 2 : 1;
-    const maxTotal = Math.floor((numPlayers - 1) / 2);
+    const maxTotal = Math.floor(numPlayers / 3);
 
     let newUC = numUndercovers;
     let newMW = numMisterWhites;
 
-    // Règle 1 : undercovers max = floor(players/4) (min 1)
-    if (newUC > maxUC) newUC = maxUC;
-
-    // Règle 2 : mister whites max = 1 (2 si ≥15 joueurs)
-    if (newMW > maxMW) newMW = maxMW;
-
-    // Règle 3 : toujours plus de joueurs normaux que de rôles spéciaux
-    if (newUC + newMW > maxTotal) {
-      const excess = (newUC + newMW) - maxTotal;
-      const reduceUC = Math.min(excess, newUC);
-      newUC -= reduceUC;
-      const remaining = excess - reduceUC;
-      if (remaining > 0) newMW -= Math.min(remaining, newMW);
-    }
+    // Règle : intrus + mister whites ≤ floor(players / 3)
+    while (newUC + newMW > maxTotal && newMW > 0) newMW--;
+    while (newUC + newMW > maxTotal && newUC > 0) newUC--;
 
     if (newUC !== numUndercovers) setNumUndercovers(newUC);
     if (newMW !== numMisterWhites) setNumMisterWhites(newMW);
@@ -513,6 +454,9 @@ export default function MenuScreen({ navigation }) {
       setShowCategories(false);
       setNumUndercovers(1);
       setNumMisterWhites(0);
+      setEasyMode(false);
+      setSpyfallUndercover(false);
+      setShowOtherModes(false);
 
       // Redémarrer l'animation pulse
       startPulseAnimation();
@@ -633,10 +577,13 @@ export default function MenuScreen({ navigation }) {
     }
 
     // En mode MIMER, la catégorie est automatiquement MIMER
-    // En mode SPYFALL, la catégorie est automatiquement LIEUX/LOCATIONS
+    // En mode SPYFALL, la catégorie est LIEUX/GROUPES selon sélection (défaut LIEUX)
     let finalCategory = selectedCategory;
     if (mimerMode) finalCategory = 'MIMER';
-    if (gameMode === 3) finalCategory = lang === 'fr' ? 'LIEUX' : 'LOCATIONS';
+    if (gameMode === 3 && !finalCategory) finalCategory = lang === 'fr' ? 'LIEUX' : 'LOCATIONS';
+    if (gameMode === 3 && finalCategory !== 'LIEUX' && finalCategory !== 'LOCATIONS' && finalCategory !== 'GROUPES' && finalCategory !== 'GROUPS') {
+      finalCategory = lang === 'fr' ? 'LIEUX' : 'LOCATIONS';
+    }
 
     setShowGameSetup(false);
     setIsPlayOpening(false);
@@ -651,6 +598,8 @@ export default function MenuScreen({ navigation }) {
       spyfallTimer: gameMode === 3 ? spyfallTimer : null,
       numUndercovers,
       numMisterWhites,
+      easyMode,
+      spyfallUndercover,
     });
   };
 
@@ -722,11 +671,6 @@ export default function MenuScreen({ navigation }) {
           <View style={styles.overlay}>
             <View style={{ flex: 1 }}>
               <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-
-              {/* Globe animé en arrière-plan */}
-              <View style={styles.globeBackground} pointerEvents="none">
-                <SpinningGlobe />
-              </View>
 
               <ScrollView
                 style={{ flex: 1, zIndex: 1 }}
@@ -1063,90 +1007,116 @@ export default function MenuScreen({ navigation }) {
               <View style={styles.setupSection}>
                 <Text style={styles.setupLabel}>{lang === 'fr' ? 'Mode de jeu' : 'Game mode'}</Text>
 
-                {/* Carte Normal centrée */}
-                <TouchableOpacity
-                  style={[styles.modeCardLarge, (gameMode === 0 || gameMode === 1 || gameMode === 2) && !mimerMode && styles.modeCardActive]}
-                  onPress={() => {
-                    playClick();
-                    if (mimerMode) setMimerMode(false);
-                    // Compute gameMode from toggles
-                    setGameMode(numUndercovers > 0 && numMisterWhites > 0 ? 2 : numMisterWhites > 0 ? 1 : 0);
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <Image source={ROLE_UNDERCOVER} style={styles.modeCardImageLarge} resizeMode="contain" />
-                  <Text style={[styles.modeCardTitle, (gameMode === 0 || gameMode === 1 || gameMode === 2) && !mimerMode && styles.modeCardTitleActive]}>UNDERCOVER</Text>
-                </TouchableOpacity>
+                <View style={styles.modeGrid}>
+                  {/* UNDERCOVER */}
+                  <TouchableOpacity
+                    style={[styles.modeCard, !mimerMode && gameMode !== 3 && styles.modeCardActive]}
+                    onPress={() => {
+                      playClick();
+                      setMimerMode(false);
+                      setGameMode(numUndercovers > 0 && numMisterWhites > 0 ? 2 : numMisterWhites > 0 ? 1 : 0);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Image source={ROLE_UNDERCOVER} style={styles.modeCardImage} resizeMode="contain" />
+                    <Text style={[styles.modeCardTitle, !mimerMode && gameMode !== 3 && styles.modeCardTitleActive]}>UNDERCOVER</Text>
+                    <Text style={[styles.modeCardDesc, !mimerMode && gameMode !== 3 && styles.modeCardDescActive]}>{lang === 'fr' ? 'Intrus + Mister White' : 'Undercover + Mister White'}</Text>
+                  </TouchableOpacity>
 
-                {/* Compteurs Undercover + Mister White */}
-                <View style={styles.roleCounters}>
-                  <View style={styles.roleCounterRow}>
-                    <Image source={MODE_IMAGES.normal} style={styles.roleCounterIcon} resizeMode="contain" />
-                    <View style={styles.roleCounterControls}>
-                      <TouchableOpacity style={styles.roleCounterBtn} onPress={() => { playClick(); setNumUndercovers(v => Math.max(0, v - 1)); }}><Text style={styles.roleCounterBtnText}>−</Text></TouchableOpacity>
-                      <Text style={styles.roleCounterVal}>{numUndercovers}</Text>
-                      <TouchableOpacity style={[styles.roleCounterBtn, !canAddUC && styles.roleCounterBtnDisabled]} onPress={() => { playClick(); if (canAddUC) setNumUndercovers(v => v + 1); }} disabled={!canAddUC}><Text style={styles.roleCounterBtnText}>+</Text></TouchableOpacity>
-                    </View>
-                  </View>
-                  <View style={styles.roleCounterRow}>
-                    <Image source={ROLE_MISTERWHITE} style={styles.roleCounterIcon} resizeMode="contain" />
-                    <View style={styles.roleCounterControls}>
-                      <TouchableOpacity style={styles.roleCounterBtn} onPress={() => { playClick(); setNumMisterWhites(v => Math.max(0, v - 1)); }}><Text style={styles.roleCounterBtnText}>−</Text></TouchableOpacity>
-                      <Text style={styles.roleCounterVal}>{numMisterWhites}</Text>
-                      <TouchableOpacity style={[styles.roleCounterBtn, !canAddMW && styles.roleCounterBtnDisabled]} onPress={() => { playClick(); if (canAddMW) setNumMisterWhites(v => v + 1); }} disabled={!canAddMW}><Text style={styles.roleCounterBtnText}>+</Text></TouchableOpacity>
-                    </View>
-                  </View>
+                  {/* Spyfall */}
+                  <TouchableOpacity
+                    style={[styles.modeCard, gameMode === 3 && styles.modeCardActive]}
+                    onPress={() => {
+                      playClick();
+                      setSelectedCategory(lang === 'fr' ? 'LIEUX' : 'LOCATIONS');
+                      setMimerMode(false);
+                      setNumUndercovers(1);
+                      setNumMisterWhites(0);
+                      setSpyfallUndercover(false);
+                      setSelectedCategory(lang === 'fr' ? 'LIEUX' : 'LOCATIONS');
+                      setGameMode(3);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Image source={MODE_IMAGES.spyfall} style={styles.modeCardImage} resizeMode="contain" />
+                    <Text style={[styles.modeCardTitle, gameMode === 3 && styles.modeCardTitleActive]}>{t('modeSpyfall')}</Text>
+                    <Text style={[styles.modeCardDesc, gameMode === 3 && styles.modeCardDescActive]}>
+                      {spyfallUndercover
+                        ? (lang === 'fr' ? '1 intrus avec un mot différent' : '1 undercover with a different word')
+                        : t('modeSpyfallDesc')}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* MIME */}
+                  <TouchableOpacity
+                    style={[styles.modeCard, mimerMode && styles.modeCardActive]}
+                    onPress={async () => {
+                      if (!mimerMode && !isExpoGo) {
+                        const rewarded = await loadAndShowRewardedAd(() => {});
+                        if (!rewarded) return;
+                      }
+                      playClick();
+                      setMimerMode(!mimerMode);
+                      if (!mimerMode) {
+                        setGameMode(0);
+                        setNumUndercovers(1);
+                        setNumMisterWhites(0);
+                      }
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    {!mimerMode && !isExpoGo ? (
+                      <View style={styles.modeCardAdBadge}>
+                        <Image source={AD_REWARD_ICON} style={styles.modeCardAdIcon} resizeMode="contain" />
+                      </View>
+                    ) : null}
+                    <Image source={MODE_IMAGES.mime} style={styles.modeCardImage} resizeMode="contain" />
+                    <Text style={[styles.modeCardTitle, mimerMode && styles.modeCardTitleActive]}>{t('modeMimer')}</Text>
+                    <Text style={[styles.modeCardDesc, mimerMode && styles.modeCardDescActive]}>{t('modeMimerDesc')}</Text>
+                  </TouchableOpacity>
                 </View>
 
-                {/* Spyfall et MIME */}
-                <View style={styles.modeGridSmall}>
-                  {[
-                    { mode: 3, imageKey: 'spyfall', titleKey: 'modeSpyfall', descKey: 'modeSpyfallDesc' },
-                    { mode: 4, imageKey: 'mime', titleKey: 'modeMimer', descKey: 'modeMimerDesc', isMimer: true },
-                  ].map(({ mode, imageKey, titleKey, descKey, isMimer }) => {
-                    const isActive = isMimer ? mimerMode : gameMode === mode;
-                    return (
-                      <TouchableOpacity
-                        key={mode}
-                        style={[styles.modeCard, isActive && styles.modeCardActive]}
-                        onPress={async () => {
-                          if (isMimer && !mimerMode && !isExpoGo) {
-                            const rewarded = await loadAndShowRewardedAd(() => {});
-                            if (!rewarded) return;
-                            setMimerMode(true);
-                            setGameMode(0);
-                            playClick();
-                          } else if (isMimer) {
-                            setMimerMode(!mimerMode);
-                            if (!mimerMode) setGameMode(0);
-                            playClick();
-                          } else {
-                            playClick();
-                            if (mode === 3) {
-                              setSelectedCategory(lang === 'fr' ? 'LIEUX' : 'LOCATIONS');
-                              setMimerMode(false);
-                              setNumUndercovers(1);
-                              setNumMisterWhites(0);
-                            } else if (mimerMode) {
-                              setMimerMode(false);
-                            }
-                            setGameMode(mode);
-                          }
-                        }}
-                        activeOpacity={0.7}
-                      >
-                        {!isMimer ? null : !mimerMode && !isExpoGo ? (
-                          <View style={styles.modeCardAdBadge}>
-                            <Image source={AD_REWARD_ICON} style={styles.modeCardAdIcon} resizeMode="contain" />
-                          </View>
-                        ) : null}
-                        <Image source={MODE_IMAGES[imageKey]} style={styles.modeCardImage} resizeMode="contain" />
-                        <Text style={[styles.modeCardTitle, isActive && styles.modeCardTitleActive]}>{t(titleKey)}</Text>
-                        <Text style={[styles.modeCardDesc, isActive && styles.modeCardDescActive]}>{t(descKey)}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
+                {/* Compteurs Intrus + Mister White */}
+                {!mimerMode && !(gameMode === 3 && !spyfallUndercover) && selectedCategory !== 'SPECIALE' && (
+                  <View style={styles.roleCounters}>
+                    <View style={styles.roleCounterRow}>
+                      <Image source={MODE_IMAGES.normal} style={styles.roleCounterIcon} resizeMode="contain" />
+                      <Text style={styles.roleCounterLabel}>{lang === 'fr' ? 'Intrus' : 'Undercover'}</Text>
+                      <View style={styles.roleCounterControls}>
+                        <TouchableOpacity style={styles.roleCounterBtn} onPress={() => { playClick(); setNumUndercovers(v => Math.max(0, v - 1)); }}><Text style={styles.roleCounterBtnText}>−</Text></TouchableOpacity>
+                        <Text style={styles.roleCounterVal}>{numUndercovers}</Text>
+                        <TouchableOpacity style={[styles.roleCounterBtn, !canAddUC && styles.roleCounterBtnDisabled]} onPress={() => { playClick(); if (canAddUC) setNumUndercovers(v => v + 1); }} disabled={!canAddUC}><Text style={styles.roleCounterBtnText}>+</Text></TouchableOpacity>
+                      </View>
+                    </View>
+                    {!(gameMode === 3) && (
+                    <View style={styles.roleCounterRow}>
+                      <Image source={ROLE_MISTERWHITE} style={styles.roleCounterIcon} resizeMode="contain" />
+                      <Text style={styles.roleCounterLabel}>Mister White</Text>
+                      <View style={styles.roleCounterControls}>
+                        <TouchableOpacity style={styles.roleCounterBtn} onPress={() => { playClick(); setNumMisterWhites(v => Math.max(0, v - 1)); }}><Text style={styles.roleCounterBtnText}>−</Text></TouchableOpacity>
+                        <Text style={styles.roleCounterVal}>{numMisterWhites}</Text>
+                        <TouchableOpacity style={[styles.roleCounterBtn, !canAddMW && styles.roleCounterBtnDisabled]} onPress={() => { playClick(); if (canAddMW) setNumMisterWhites(v => v + 1); }} disabled={!canAddMW}><Text style={styles.roleCounterBtnText}>+</Text></TouchableOpacity>
+                      </View>
+                    </View>
+                    )}
+                  </View>
+                )}
+
+                {/* Option Facile */}
+                {numMisterWhites > 0 && !mimerMode && gameMode !== 3 && (
+                  <View style={styles.easyModeRow}>
+                    <View style={styles.easyModeInfo}>
+                      <Text style={styles.easyModeLabel}>{lang === 'fr' ? '🪶 Facile' : '🪶 Easy'}</Text>
+                      <Text style={styles.easyModeDesc}>{lang === 'fr' ? 'Mister White connaît la catégorie' : 'Mister White knows the category'}</Text>
+                    </View>
+                    <TouchableOpacity
+                      style={[styles.toggleBtn, easyMode && styles.toggleBtnActive]}
+                      onPress={() => { playClick(); setEasyMode(!easyMode); }}
+                    >
+                      <Text style={styles.toggleBtnText}>{easyMode ? 'ON' : 'OFF'}</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
 
                 {gameMode === 2 && !mimerMode && numPlayers < 4 && (
                   <Text style={styles.warningText}>⚠️ {lang === 'fr' ? '4 joueurs minimum' : '4 players minimum'}</Text>
@@ -1166,6 +1136,28 @@ export default function MenuScreen({ navigation }) {
                         <Text style={[styles.timerChipText, spyfallTimer === m && styles.timerChipTextActive]}>{m} {t('timerLabel')}</Text>
                       </TouchableOpacity>
                     ))}
+                  </View>
+                </View>
+              )}
+
+              {gameMode === 3 && (
+                <View style={styles.setupSection}>
+                  <Text style={styles.setupLabel}>{lang === 'fr' ? 'Mode Espion / Intrus' : 'Spy / Undercover Mode'}</Text>
+                  <View style={styles.spyfallVariantRow}>
+                    <TouchableOpacity
+                      style={[styles.variantBtn, !spyfallUndercover && styles.variantBtnActive]}
+                      onPress={() => { playClick(); setSpyfallUndercover(false); }}
+                    >
+                      <Text style={styles.variantBtnEmoji}>🕵️</Text>
+                      <Text style={[styles.variantBtnText, !spyfallUndercover && styles.variantBtnTextActive]}>{lang === 'fr' ? 'ESPION' : 'SPY'}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.variantBtn, spyfallUndercover && styles.variantBtnActive]}
+                      onPress={() => { playClick(); setSpyfallUndercover(true); setNumUndercovers(1); }}
+                    >
+                      <Text style={styles.variantBtnEmoji}>🥸</Text>
+                      <Text style={[styles.variantBtnText, spyfallUndercover && styles.variantBtnTextActive]}>{lang === 'fr' ? 'INTRUS' : 'UNDERCOVER'}</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
               )}
@@ -1224,11 +1216,19 @@ export default function MenuScreen({ navigation }) {
                   <Text style={styles.setupLabel}>{lang === 'fr' ? 'Catégorie' : 'Category'}</Text>
                   <View style={styles.categoryScrollHorizontal}>
                     <TouchableOpacity
-                      style={[styles.categoryChip, styles.categoryChipActive]}
+                      style={[styles.categoryChip, (selectedCategory === null || selectedCategory === 'LIEUX' || selectedCategory === 'LOCATIONS') && styles.categoryChipActive]}
                       onPress={() => { playClick(); setSelectedCategory(lang === 'fr' ? 'LIEUX' : 'LOCATIONS'); }}
                     >
-                      <Text style={[styles.categoryChipText, styles.categoryChipTextActive]}>
+                      <Text style={[styles.categoryChipText, (selectedCategory === null || selectedCategory === 'LIEUX' || selectedCategory === 'LOCATIONS') && styles.categoryChipTextActive]}>
                         🏠 {CATEGORY_NAMES[lang][lang === 'fr' ? 'LIEUX' : 'LOCATIONS'] || (lang === 'fr' ? 'LIEUX' : 'LOCATIONS')}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.categoryChip, (selectedCategory === 'GROUPES' || selectedCategory === 'GROUPS') && styles.categoryChipActive]}
+                      onPress={() => { playClick(); setSelectedCategory(lang === 'fr' ? 'GROUPES' : 'GROUPS'); }}
+                    >
+                      <Text style={[styles.categoryChipText, (selectedCategory === 'GROUPES' || selectedCategory === 'GROUPS') && styles.categoryChipTextActive]}>
+                        👥 {CATEGORY_NAMES[lang][lang === 'fr' ? 'GROUPES' : 'GROUPS'] || (lang === 'fr' ? 'GROUPES' : 'GROUPS')}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -1251,6 +1251,8 @@ export default function MenuScreen({ navigation }) {
           </Animated.View>
         </Animated.View>
       </Modal>
+
+      {/* Écran de chargement en superposition */}
 
       {/* Écran de chargement en superposition */}
       {showLoading && (
@@ -1281,7 +1283,6 @@ const styles = StyleSheet.create({
   bg: { flex: 1 },
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.1)' },
   scrollContent: { alignItems: 'center', paddingHorizontal: 20, paddingBottom: 10 },
-  globeBackground: { position: 'absolute', top: 310, alignSelf: 'center', zIndex: 1, marginLeft: -8 },
   playContainer: { alignItems: 'center', paddingBottom: 40 },
   playGlowContainer: { shadowColor: '#FFFFFF', shadowOffset: { width: 0, height: 0 }, elevation: 8 },
   topRow: { flexDirection: 'row', gap: 12, marginBottom: 10 },
@@ -1306,18 +1307,18 @@ const styles = StyleSheet.create({
   modeTitleLarge: { fontFamily: 'BebasNeue', fontSize: 20, color: '#fff', letterSpacing: 1 },
   modeDescLarge: { fontFamily: 'SpaceMono', fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 4 },
   warningText: { fontFamily: 'SpaceMono', fontSize: 10, color: '#ff6b6b', marginTop: 6, textAlign: 'center' },
-  modeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center' },
-  modeCardLarge: { width: '55%', backgroundColor: '#F5F5DC', borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.15)', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 6, alignItems: 'center', alignSelf: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5 },
-  modeCardImageLarge: { width: 44, height: 44, marginBottom: 2 },
-  modeGridSmall: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 8 },
-  roleCounters: { width: '100%', gap: 5, marginTop: 8 },
-  roleCounterRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.12)', borderRadius: 8, paddingVertical: 5, paddingHorizontal: 8, gap: 6 },
-  roleCounterIcon: { width: 24, height: 24 },
-  roleCounterControls: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 'auto' },
-  roleCounterBtn: { width: 26, height: 26, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 1.5, borderColor: '#1a1a1a', alignItems: 'center', justifyContent: 'center', borderRadius: 6 },
-  roleCounterBtnDisabled: { opacity: 0.3 },
-  roleCounterBtnText: { fontSize: 14, fontFamily: 'SpaceMono', color: '#1a1a1a' },
-  roleCounterVal: { fontFamily: 'BebasNeue', fontSize: 18, minWidth: 20, textAlign: 'center', color: '#1a1a1a' },
+  modeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 6 },
+  otherModesBtn: { backgroundColor: 'rgba(0,0,0,0.06)', borderWidth: 1, borderColor: 'rgba(0,0,0,0.12)', borderRadius: 8, paddingVertical: 8, alignItems: 'center', marginTop: 6 },
+  otherModesBtnText: { fontFamily: 'BebasNeue', fontSize: 13, color: '#666', letterSpacing: 1 },
+  roleCounters: { width: '100%', gap: 4, marginTop: 6 },
+  roleCounterRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.04)', borderWidth: 1, borderColor: 'rgba(0,0,0,0.08)', borderRadius: 6, paddingVertical: 4, paddingHorizontal: 8, gap: 6 },
+  roleCounterIcon: { width: 20, height: 20 },
+  roleCounterLabel: { fontFamily: 'SpaceMono', fontSize: 10, color: '#666', flex: 1 },
+  roleCounterControls: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  roleCounterBtn: { width: 22, height: 22, backgroundColor: 'rgba(0,0,0,0.08)', borderWidth: 1, borderColor: 'rgba(0,0,0,0.15)', alignItems: 'center', justifyContent: 'center', borderRadius: 4 },
+  roleCounterBtnDisabled: { opacity: 0.25 },
+  roleCounterBtnText: { fontSize: 12, fontFamily: 'SpaceMono', color: '#1a1a1a' },
+  roleCounterVal: { fontFamily: 'BebasNeue', fontSize: 15, minWidth: 16, textAlign: 'center', color: '#1a1a1a' },
   modeCard: { width: '47%', backgroundColor: '#F5F5DC', borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.15)', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 6, alignItems: 'center', gap: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5 },
   modeCardActive: { backgroundColor: '#1a1a1a', borderColor: '#1a1a1a', shadowOpacity: 0.4, shadowRadius: 6, elevation: 8 },
   modeCardEmoji: { fontSize: 22, marginBottom: 1 },
@@ -1417,8 +1418,18 @@ const styles = StyleSheet.create({
   mimerInfoBox: { backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 2, borderColor: '#1a1a1a', paddingVertical: 12, paddingHorizontal: 16, borderRadius: 12, alignItems: 'center' },
   mimerInfoText: { fontFamily: 'BebasNeue', fontSize: 16, color: '#1a1a1a', letterSpacing: 1 },
   toggleBtnDisabled: { opacity: 0.3 },
+  easyModeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.12)', borderRadius: 8, paddingVertical: 8, paddingHorizontal: 10, marginTop: 6 },
+  easyModeInfo: { flex: 1 },
+  easyModeLabel: { fontFamily: 'BebasNeue', fontSize: 14, color: '#1a1a1a', letterSpacing: 1 },
+  easyModeDesc: { fontFamily: 'SpaceMono', fontSize: 9, color: '#666', marginTop: 1 },
   timerChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 16, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 1, borderColor: 'rgba(0,0,0,0.2)' },
   timerChipActive: { backgroundColor: '#1a1a1a', borderColor: '#1a1a1a' },
   timerChipText: { fontFamily: 'BebasNeue', fontSize: 14, color: '#1a1a1a' },
   timerChipTextActive: { color: '#F5F5DC' },
+  spyfallVariantRow: { flexDirection: 'row', gap: 10, justifyContent: 'center', marginTop: 6 },
+  variantBtn: { flex: 1, backgroundColor: 'rgba(0,0,0,0.06)', borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.15)', borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12, alignItems: 'center', gap: 4 },
+  variantBtnActive: { backgroundColor: '#1a1a1a', borderColor: '#1a1a1a' },
+  variantBtnEmoji: { fontSize: 24 },
+  variantBtnText: { fontFamily: 'BebasNeue', fontSize: 13, color: '#1a1a1a', letterSpacing: 1, textAlign: 'center' },
+  variantBtnTextActive: { color: '#F5F5DC' },
 });

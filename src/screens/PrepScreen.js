@@ -50,6 +50,7 @@ export default function PrepScreen({ navigation, route }) {
       customWords: route.params.customWords || [],
       mimerMode: route.params.mimerMode,
       spyfallTimer: route.params.spyfallTimer ?? null,
+      spyfallUndercover: route.params.spyfallUndercover ?? false,
       wordVisible: true,  // Afficher le mot directement
     });
   };

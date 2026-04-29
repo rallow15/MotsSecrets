@@ -5,14 +5,16 @@ import { t, getLang } from '../i18n';
 import { playClick, playWin, playLose } from '../sound';
 
 export default function SpyfallGuessScreen({ navigation, route }) {
-  const { numPlayers, assignments, playerNames, selectedCategory, fromGame, spyfallTimer } = route.params;
+  const { numPlayers, assignments, playerNames, selectedCategory, fromGame, spyfallTimer, spyfallUndercover, votedPlayerIndex } = route.params;
   const [guess, setGuess] = useState('');
   const [showInput, setShowInput] = useState(fromGame ? false : true);
   const lang = getLang();
 
   // Trouver le mot secret (celui des innocents)
   const secretWord = assignments.find(a => a.role === 'normal')?.word || '';
-  const spyName = playerNames?.[assignments.findIndex(a => a.role === 'spy')] || '';
+  const suspectRole = spyfallUndercover ? 'intrus' : 'spy';
+  const suspectIdx = votedPlayerIndex ?? assignments.findIndex(a => a.role === suspectRole);
+  const suspectName = playerNames?.[suspectIdx] || '';
 
   const handleConfirmSpy = () => {
     playClick();
@@ -40,16 +42,17 @@ export default function SpyfallGuessScreen({ navigation, route }) {
       gameMode: 3,
       spyfallOutcome: isCorrect ? 'spyGuessRight' : 'spyGuessWrong',
       spyfallTimer,
+      spyfallUndercover,
     });
   };
 
   return (
     <View style={styles.container}>
       {!showInput ? (
-        // Écran "Passez le téléphone à l'espion"
+        // Écran "Passez le téléphone à l'espion/intrus"
         <>
-          <Text style={styles.emoji}>🕵️</Text>
-          <Text style={styles.title}>{t('passToSpy')}</Text>
+          <Text style={styles.emoji}>{spyfallUndercover ? '🥸' : '🕵️'}</Text>
+          <Text style={styles.title}>{spyfallUndercover ? t('passToUndercover') : t('passToSpy')}</Text>
           <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirmSpy} activeOpacity={0.8}>
             <Text style={styles.confirmBtnText}>{t('spyConfirmGuess')}</Text>
           </TouchableOpacity>
@@ -58,14 +61,14 @@ export default function SpyfallGuessScreen({ navigation, route }) {
         // Écran de devinette
         <>
           <Text style={styles.title}>
-            {fromGame ? t('spyGuess') : t('spyCaught')}
+            {fromGame ? t('spyGuess') : (spyfallUndercover ? t('undercoverCaught') : t('spyCaught'))}
           </Text>
 
           {fromGame ? null : (
             <Text style={styles.subtitle}>
               {lang === 'fr'
-                ? `${spyName} a été découvert ! Devinez le mot pour gagner.`
-                : `${spyName} was caught! Guess the word to win.`}
+                ? `${suspectName} a été découvert ! Devinez le mot pour gagner.`
+                : `${suspectName} was caught! Guess the word to win.`}
             </Text>
           )}
 

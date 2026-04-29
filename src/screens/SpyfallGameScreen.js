@@ -5,7 +5,8 @@ import { t } from '../i18n';
 import { playClick, playReveal } from '../sound';
 
 export default function SpyfallGameScreen({ navigation, route }) {
-  const { numPlayers, assignments, playerNames, spyfallTimer: initialTimer, selectedCategory } = route.params;
+  const { numPlayers, assignments, playerNames, spyfallTimer: initialTimer, selectedCategory, numUndercovers, numMisterWhites, easyMode, mimerMode, customWords, spyfallUndercover: spyfallUC } = route.params;
+  const spyfallUndercover = spyfallUC ?? false;
   const [timeLeft, setTimeLeft] = useState((initialTimer ?? 8) * 60);
   const timerRef = useRef(null);
 
@@ -38,6 +39,12 @@ export default function SpyfallGameScreen({ navigation, route }) {
         gameMode: 3,
         spyfallOutcome: 'spyWinsTimer',
         spyfallTimer: initialTimer,
+        spyfallUndercover,
+        numUndercovers: numUndercovers ?? 1,
+        numMisterWhites: numMisterWhites ?? 0,
+        easyMode: easyMode ?? false,
+        mimerMode: mimerMode ?? false,
+        customWords: customWords || [],
       });
     }
   }, [timeLeft]);
@@ -59,6 +66,12 @@ export default function SpyfallGameScreen({ navigation, route }) {
       selectedCategory,
       gameMode: 3,
       spyfallTimer: initialTimer,
+      spyfallUndercover,
+      numUndercovers: numUndercovers ?? 1,
+      numMisterWhites: numMisterWhites ?? 0,
+      easyMode: easyMode ?? false,
+      mimerMode: mimerMode ?? false,
+      customWords: customWords || [],
     });
   };
 
