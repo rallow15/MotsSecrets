@@ -105,8 +105,8 @@ export function generateAssignments(numPlayers, gameMode = 0, selectedCategory =
       for (let i = 0; i < numUndercovers && roles.length < numPlayers; i++) roles.push('intrus');
       while (roles.length < numPlayers) roles.push('normal');
     } else {
-      // SPYFALL : 1 espion sans mot, les autres ont le même mot
-      roles.push('spy');
+      // SPYFALL : espions sans mot, les autres ont le même mot
+      for (let i = 0; i < numUndercovers && roles.length < numPlayers; i++) roles.push('spy');
       while (roles.length < numPlayers) roles.push('normal');
     }
   } else {

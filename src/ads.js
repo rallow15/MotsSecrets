@@ -2,6 +2,7 @@
 // GESTION DES PUBLICITÉS (AdMob)
 // ═════════════════════════════════════════════════════════════
 
+import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 // Détecter si on est dans Expo Go (appartenance à Expo)
@@ -59,14 +60,16 @@ export async function initAds() {
 // PUBLICITÉ RÉCOMPENSÉE (pour débloquer la catégorie OBJETS)
 // ────────────────────────────────────────────────────────
 
-const REWARDED_AD_UNIT_PROD = 'ca-app-pub-2965679591230669/1666315394';
+const REWARDED_AD_UNIT_PROD = Platform.OS === 'ios' ? 'ca-app-pub-2965679591230669/5719922073' : 'ca-app-pub-2965679591230669/1666315394';
+const REWARDED_AD_UNIT_MIME_PROD = Platform.OS === 'ios' ? 'ca-app-pub-2965679591230669/5855653449' : 'ca-app-pub-2965679591230669/2045589346';
+const REWARDED_AD_UNIT_OBJECTS_PROD = Platform.OS === 'ios' ? 'ca-app-pub-2965679591230669/5435093458' : 'ca-app-pub-2965679591230669/8849548689';
 
 let rewardedAdInstance = null;
 let onAdEarnedRewardCallback = null;
 let isAdLoading = false;
 
 // Charger une pub récompensée
-export async function loadRewardedAd() {
+export async function loadRewardedAd(adType = 'default') {
   if (isExpoGo) {
     console.log('Expo Go - pub récompensée ignorée');
     return null;
@@ -83,7 +86,8 @@ export async function loadRewardedAd() {
 
   isAdLoading = true;
 
-  const adUnitId = __DEV__ ? TestAdIds.REWARDED : REWARDED_AD_UNIT_PROD;
+  const prodId = adType === 'mime' ? REWARDED_AD_UNIT_MIME_PROD : adType === 'objects' ? REWARDED_AD_UNIT_OBJECTS_PROD : REWARDED_AD_UNIT_PROD;
+  const adUnitId = __DEV__ ? TestAdIds.REWARDED : prodId;
 
   try {
     console.log('Chargement pub récompensée:', adUnitId);
@@ -180,9 +184,9 @@ export async function showRewardedAd(onReward) {
 }
 
 // Charger et montrer une pub récompensée (tout-en-un)
-export async function loadAndShowRewardedAd(onReward) {
-  console.log('loadAndShowRewardedAd appelé');
-  const ad = await loadRewardedAd();
+export async function loadAndShowRewardedAd(onReward, adType = 'default') {
+  console.log('loadAndShowRewardedAd appelé, type:', adType);
+  const ad = await loadRewardedAd(adType);
   if (ad) {
     console.log('Pub chargée, affichage...');
     return await showRewardedAd(onReward);

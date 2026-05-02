@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import {
-  View, Text, TouchableOpacity, StyleSheet, StatusBar,
+  View, Text, TouchableOpacity, StyleSheet,
   ScrollView, Modal, Animated, Easing, ImageBackground, Image, Platform,
   TextInput, KeyboardAvoidingView,
 } from 'react-native';
@@ -152,24 +152,13 @@ const RULES = {
     },
     {
       mode: 'SPYFALL',
-      desc: '1 espion sans mot, devinez ou démasquez.',
+      desc: '1 espion sans mot ou 1 intrus avec un mot différent, devinez ou démasquez.',
       steps: [
-        'Un joueur est l\'espion et ne connaît pas le mot secret. Les autres voient le même mot.',
-        'Les joueurs se posent des questions sur le mot pour identifier l\'espion.',
-        'À tout moment, on peut voter pour accuser quelqu\'un ou l\'espion peut deviner le mot.',
-        'Si l\'espion est trouvé au vote, il peut tenter de deviner le mot pour gagner.',
-        'Si le temps est écoulé, l\'espion gagne !',
-      ],
-    },
-    {
-      mode: 'SPYFALL INTRUS',
-      desc: '1 intrus avec un mot différent, devinez ou démasquez.',
-      steps: [
-        'Un joueur est l\'intrus et voit un mot différent. Les autres voient le même mot.',
-        'Les joueurs se posent des questions sur le mot pour identifier l\'intrus.',
-        'À tout moment, on peut voter pour accuser quelqu\'un.',
-        'Si l\'intrus est trouvé au vote, il peut tenter de deviner le mot pour gagner.',
-        'Si le temps est écoulé, l\'intrus gagne !',
+        '2 variantes : Espion (ne connaît pas le mot) ou Intrus (a un mot différent).',
+        'Les joueurs se posent des questions pour identifier l\'espion ou l\'intrus.',
+        'À tout moment, on peut voter pour accuser quelqu\'un. L\'espion peut aussi deviner le mot.',
+        'Si l\'espion/l\'intrus est trouvé au vote, il peut tenter de deviner le mot pour gagner.',
+        'Si le temps est écoulé, l\'espion/l\'intrus gagne !',
       ],
     },
   ],
@@ -227,24 +216,13 @@ const RULES = {
     },
     {
       mode: 'SPYFALL',
-      desc: '1 spy with no word, guess or expose.',
+      desc: '1 spy with no word or 1 undercover with a different word, guess or expose.',
       steps: [
-        'One player is the spy and doesn\'t know the secret word. The others see the same word.',
-        'Players ask each other questions about the word to identify the spy.',
-        'At any time, players can vote to accuse someone, or the spy can guess the word.',
-        'If the spy is caught in a vote, they can try to guess the word to still win.',
-        'If time runs out, the spy wins!',
-      ],
-    },
-    {
-      mode: 'SPYFALL UNDERCOVER',
-      desc: '1 undercover with a different word, guess or expose.',
-      steps: [
-        'One player is the undercover and sees a different word. The others see the same word.',
-        'Players ask each other questions about the word to identify the undercover.',
-        'At any time, players can vote to accuse someone.',
-        'If the undercover is caught in a vote, they can try to guess the word to still win.',
-        'If time runs out, the undercover wins!',
+        '2 variants: Spy (doesn\'t know the word) or Undercover (has a different word).',
+        'Players ask each other questions to identify the spy or undercover.',
+        'At any time, players can vote to accuse someone. The spy can also guess the word.',
+        'If the spy/undercover is caught in a vote, they can try to guess the word to still win.',
+        'If time runs out, the spy/undercover wins!',
       ],
     },
   ],
@@ -629,7 +607,7 @@ export default function MenuScreen({ navigation }) {
       const rewarded = await loadAndShowRewardedAd(() => {
         setObjectsUnlocked(true);
         SecureStore.setItemAsync('objects_category_unlocked', 'true');
-      });
+      }, 'objects');
       if (!rewarded) return;
     }
 
@@ -670,7 +648,6 @@ export default function MenuScreen({ navigation }) {
         <ImageBackground source={require('../../assets/bg-menu.png')} style={styles.bg} resizeMode="cover">
           <View style={styles.overlay}>
             <View style={{ flex: 1 }}>
-              <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
               <ScrollView
                 style={{ flex: 1, zIndex: 1 }}
@@ -835,7 +812,7 @@ export default function MenuScreen({ navigation }) {
                     const rewarded = await loadAndShowRewardedAd(() => {
                       setObjectsUnlocked(true);
                       SecureStore.setItemAsync('objects_category_unlocked', 'true');
-                    });
+                    }, 'objects');
                     if (!rewarded) return;
                   }
                 }}
@@ -1048,42 +1025,42 @@ export default function MenuScreen({ navigation }) {
                   </TouchableOpacity>
 
                   {/* MIME */}
-                  <TouchableOpacity
-                    style={[styles.modeCard, mimerMode && styles.modeCardActive]}
-                    onPress={async () => {
-                      if (!mimerMode && !isExpoGo) {
-                        const rewarded = await loadAndShowRewardedAd(() => {});
-                        if (!rewarded) return;
-                      }
-                      playClick();
-                      setMimerMode(!mimerMode);
-                      if (!mimerMode) {
-                        setGameMode(0);
-                        setNumUndercovers(1);
-                        setNumMisterWhites(0);
-                      }
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    {!mimerMode && !isExpoGo ? (
-                      <View style={styles.modeCardAdBadge}>
-                        <Image source={AD_REWARD_ICON} style={styles.modeCardAdIcon} resizeMode="contain" />
-                      </View>
+                  <View style={styles.modeCardOuter}>
+                    {!mimerMode ? (
+                      <Image source={AD_REWARD_ICON} style={styles.modeCardAdBadge} resizeMode="contain" />
                     ) : null}
-                    <Image source={MODE_IMAGES.mime} style={styles.modeCardImage} resizeMode="contain" />
-                    <Text style={[styles.modeCardTitle, mimerMode && styles.modeCardTitleActive]}>{t('modeMimer')}</Text>
-                    <Text style={[styles.modeCardDesc, mimerMode && styles.modeCardDescActive]}>{t('modeMimerDesc')}</Text>
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.modeCard, { width: '100%' }, mimerMode && styles.modeCardActive]}
+                      onPress={async () => {
+                        if (!mimerMode && !isExpoGo) {
+                          const rewarded = await loadAndShowRewardedAd(() => {}, 'mime');
+                          if (!rewarded) return;
+                        }
+                        playClick();
+                        setMimerMode(!mimerMode);
+                        if (!mimerMode) {
+                          setGameMode(0);
+                          setNumUndercovers(1);
+                          setNumMisterWhites(0);
+                        }
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Image source={MODE_IMAGES.mime} style={styles.modeCardImage} resizeMode="contain" />
+                      <Text style={[styles.modeCardTitle, mimerMode && styles.modeCardTitleActive]}>{t('modeMimer')}</Text>
+                      <Text style={[styles.modeCardDesc, mimerMode && styles.modeCardDescActive]}>{t('modeMimerDesc')}</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
 
-                {/* Compteurs Intrus + Mister White */}
-                {!mimerMode && !(gameMode === 3 && !spyfallUndercover) && selectedCategory !== 'SPECIALE' && (
+                {/* Compteurs Intrus/Espion + Mister White */}
+                {!mimerMode && selectedCategory !== 'SPECIALE' && (
                   <View style={styles.roleCounters}>
                     <View style={styles.roleCounterRow}>
                       <Image source={MODE_IMAGES.normal} style={styles.roleCounterIcon} resizeMode="contain" />
-                      <Text style={styles.roleCounterLabel}>{lang === 'fr' ? 'Intrus' : 'Undercover'}</Text>
+                      <Text style={styles.roleCounterLabel}>{gameMode === 3 && !spyfallUndercover ? (lang === 'fr' ? 'Espion' : 'Spy') : (lang === 'fr' ? 'Intrus' : 'Undercover')}</Text>
                       <View style={styles.roleCounterControls}>
-                        <TouchableOpacity style={styles.roleCounterBtn} onPress={() => { playClick(); setNumUndercovers(v => Math.max(0, v - 1)); }}><Text style={styles.roleCounterBtnText}>−</Text></TouchableOpacity>
+                        <TouchableOpacity style={styles.roleCounterBtn} onPress={() => { playClick(); setNumUndercovers(v => Math.max(gameMode === 3 ? 1 : 0, v - 1)); }}><Text style={styles.roleCounterBtnText}>−</Text></TouchableOpacity>
                         <Text style={styles.roleCounterVal}>{numUndercovers}</Text>
                         <TouchableOpacity style={[styles.roleCounterBtn, !canAddUC && styles.roleCounterBtnDisabled]} onPress={() => { playClick(); if (canAddUC) setNumUndercovers(v => v + 1); }} disabled={!canAddUC}><Text style={styles.roleCounterBtnText}>+</Text></TouchableOpacity>
                       </View>
@@ -1146,7 +1123,7 @@ export default function MenuScreen({ navigation }) {
                   <View style={styles.spyfallVariantRow}>
                     <TouchableOpacity
                       style={[styles.variantBtn, !spyfallUndercover && styles.variantBtnActive]}
-                      onPress={() => { playClick(); setSpyfallUndercover(false); }}
+                      onPress={() => { playClick(); setSpyfallUndercover(false); setNumUndercovers(1); }}
                     >
                       <Text style={styles.variantBtnEmoji}>🕵️</Text>
                       <Text style={[styles.variantBtnText, !spyfallUndercover && styles.variantBtnTextActive]}>{lang === 'fr' ? 'ESPION' : 'SPY'}</Text>
@@ -1327,8 +1304,8 @@ const styles = StyleSheet.create({
   modeCardTitleActive: { color: '#F5F5DC' },
   modeCardDesc: { fontFamily: 'SpaceMono', fontSize: 7, color: '#666', textAlign: 'center', lineHeight: 10 },
   modeCardDescActive: { color: 'rgba(245,245,220,0.7)' },
-  modeCardAdBadge: { position: 'absolute', top: -12, right: -8, zIndex: 1 },
-  modeCardAdIcon: { width: 22, height: 22 },
+  modeCardOuter: { width: '47%', position: 'relative' },
+  modeCardAdBadge: { position: 'absolute', top: 2, right: 2, width: 24, height: 24, zIndex: 10 },
   modalOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
   modalContent: { width: '85%', backgroundColor: '#F5F5DC', borderRadius: 20, padding: 16, borderWidth: 2, borderColor: '#1a1a1a', maxHeight: '85%' },
   modalTitle: { fontFamily: 'BebasNeue', fontSize: 24, color: '#1a1a1a', letterSpacing: 2, textAlign: 'center', marginBottom: 10 },

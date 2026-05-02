@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mots Secrets - Le jeu de déduction</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #F5F5DC;
+    --dark: #1a1a1a;
+    --accent: #e8ff47;
+    --red: #ff4444;
+    --gray: #666;
+  }
+  body { font-family: 'Space Mono', monospace; background: var(--dark); color: var(--bg); overflow-x: hidden; }
+
+  /* HERO - FULL DARK */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 40px 24px; position: relative;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 50%, #1a1a1a 100%);
+  }
+  .hero-glow {
+    position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%);
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,255,71,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-content { position: relative; z-index: 2; }
+  .hero-tag {
+    display: inline-block; font-size: 9px; letter-spacing: 6px;
+    border: 1px solid rgba(232,255,71,0.3); border-radius: 20px;
+    padding: 6px 20px; margin-bottom: 32px; color: var(--accent);
+    text-transform: uppercase;
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif; font-size: clamp(56px, 14vw, 160px);
+    line-height: 0.85; letter-spacing: 6px;
+  }
+  .hero-title .accent { color: var(--accent); }
+  .hero-sub {
+    font-size: 12px; color: rgba(245,245,220,0.5); letter-spacing: 4px;
+    margin-top: 24px; text-transform: uppercase;
+  }
+  .hero-buttons { margin-top: 48px; display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .btn {
+    font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px;
+    padding: 16px 44px; border-radius: 12px; text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;
+    display: inline-block; text-align: center; white-space: nowrap;
+  }
+  .btn:hover { transform: translateY(-3px); }
+  .btn-glow {
+    background: var(--accent); color: var(--dark);
+    box-shadow: 0 0 30px rgba(232,255,71,0.3), 0 4px 20px rgba(232,255,71,0.2);
+  }
+  .btn-glow:hover { box-shadow: 0 0 50px rgba(232,255,71,0.5), 0 8px 40px rgba(232,255,71,0.3); }
+  .btn-outline {
+    background: transparent; color: var(--bg);
+    border: 2px solid rgba(245,245,220,0.3);
+  }
+  .btn-outline:hover { border-color: var(--bg); }
+
+  /* STATS BAR */
+  .stats {
+    display: flex; justify-content: center; gap: 48px; flex-wrap: wrap;
+    padding: 48px 24px; position: relative; z-index: 2;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif; font-size: 48px;
+    color: var(--accent); letter-spacing: 2px;
+  }
+  .stat-label { font-size: 9px; letter-spacing: 3px; color: rgba(245,245,220,0.4); text-transform: uppercase; }
+
+  /* MODE CARDS */
+  .modes-section {
+    padding: 80px 24px 80px; position: relative; z-index: 2;
+  }
+  .modes-header {
+    text-align: center; margin-bottom: 48px;
+  }
+  .modes-header .label {
+    font-size: 10px; letter-spacing: 6px; color: rgba(245,245,220,0.3); text-transform: uppercase;
+  }
+  .modes-header h2 {
+    font-family: 'Bebas Neue', sans-serif; font-size: clamp(32px, 5vw, 52px);
+    letter-spacing: 3px; margin-top: 8px;
+  }
+  .modes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .m-card {
+    background: #FFF8E7; border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 20px; padding: 32px 24px;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .m-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+  .m-emoji { font-size: 48px; margin-bottom: 16px; }
+  .m-name {
+    font-family: 'Bebas Neue', sans-serif; font-size: 28px;
+    color: #1a1a1a; letter-spacing: 2px; margin-bottom: 8px;
+  }
+  .m-desc {
+    font-size: 11px; color: #666; line-height: 1.7; margin-bottom: 20px;
+  }
+  .m-tag {
+    display: inline-block; font-size: 9px; letter-spacing: 2px;
+    border: 1px solid rgba(0,0,0,0.2); border-radius: 12px;
+    padding: 4px 12px; color: #1a1a1a;
+  }
+
+  /* CATEGORIES - LIGHT SECTION */
+  .cat-section {
+    background: var(--bg); color: var(--dark); padding: 80px 24px;
+  }
+  .cat-header { text-align: center; margin-bottom: 40px; }
+  .cat-header .label { font-size: 10px; letter-spacing: 6px; color: var(--gray); text-transform: uppercase; }
+  .cat-header h2 {
+    font-family: 'Bebas Neue', sans-serif; font-size: clamp(32px, 5vw, 52px);
+    letter-spacing: 2px;
+  }
+  .cat-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px; max-width: 800px; margin: 0 auto;
+  }
+  .cat-item {
+    background: #FFF8E7; border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px; padding: 16px 12px; text-align: center;
+    transition: all 0.2s; cursor: default;
+  }
+  .cat-item:hover {
+    background: var(--dark); border-color: var(--dark); transform: scale(1.05);
+  }
+  .cat-item:hover .cat-name { color: var(--bg); }
+  .cat-emoji { font-size: 28px; margin-bottom: 6px; }
+  .cat-name {
+    font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 1px;
+    color: #1a1a1a;
+  }
+
+  /* SPYFALL FEATURE */
+  .spyfall-section {
+    background: var(--dark); padding: 80px 24px; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .spyfall-section::before {
+    content: ''; position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(232,255,71,0.05) 0%, transparent 50%);
+  }
+  .spyfall-content { position: relative; z-index: 2; max-width: 600px; margin: 0 auto; }
+  .spyfall-emoji { font-size: 80px; margin-bottom: 20px; }
+  .spyfall-title {
+    font-family: 'Bebas Neue', sans-serif; font-size: clamp(40px, 8vw, 72px);
+    color: var(--accent); letter-spacing: 4px;
+  }
+  .spyfall-desc {
+    font-size: 12px; color: rgba(245,245,220,0.5); line-height: 1.8;
+    margin-top: 16px; letter-spacing: 0.5px;
+  }
+  .spyfall-locations {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    margin-top: 32px;
+  }
+  .loc-chip {
+    background: rgba(245,245,220,0.06); border: 1px solid rgba(245,245,220,0.12);
+    border-radius: 16px; padding: 8px 16px;
+    font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+  .loc-chip:hover { background: var(--accent); color: var(--dark); border-color: var(--accent); }
+
+  /* CTA */
+  .cta {
+    background: var(--accent); color: var(--dark); padding: 80px 24px; text-align: center;
+  }
+  .cta-title {
+    font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px, 7vw, 64px);
+    letter-spacing: 3px;
+  }
+  .cta-sub { font-size: 12px; color: rgba(26,26,26,0.6); letter-spacing: 3px; margin: 16px 0 32px; }
+  .btn-dark {
+    background: var(--dark); color: var(--bg);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--dark); padding: 40px 24px; text-align: center;
+    border-top: 1px solid rgba(245,245,220,0.06);
+  }
+  footer .f-logo {
+    font-family: 'Bebas Neue', sans-serif; font-size: 24px;
+    color: var(--bg); letter-spacing: 3px;
+  }
+  footer .f-copy { font-size: 9px; color: rgba(245,245,220,0.3); letter-spacing: 2px; margin-top: 8px; }
+
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 600px) {
+    .hero-title { letter-spacing: 3px; }
+    .hero-sub { font-size: 10px; letter-spacing: 2px; }
+    .hero-buttons { gap: 10px; }
+    .btn { font-size: 16px; padding: 14px 24px; letter-spacing: 2px; }
+    .stats { gap: 24px; padding: 32px 16px; }
+    .stat-num { font-size: 36px; }
+    .modes-grid { grid-template-columns: 1fr; }
+    .m-card { padding: 24px 16px; }
+    .m-emoji { font-size: 36px; }
+    .m-name { font-size: 22px; }
+    .m-desc { font-size: 10px; }
+    .cat-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .spyfall-emoji { font-size: 56px; }
+    .spyfall-title { font-size: 36px; }
+    .loc-chip { font-size: 12px; padding: 6px 10px; }
+    .cta-title { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-tag">🎯 PASSEZ LE TÉLÉPHONE</div>
+    <h1 class="hero-title">
+      MOTS<br><span class="accent">SECRETS</span>
+    </h1>
+    <p class="hero-sub">Trouvez l'intrus · Démasquez l'espion · Bluffez pour gagner</p>
+    <div class="hero-buttons">
+      <a class="btn btn-glow" href="https://play.google.com/store/apps/details?id=com.tonnom.motssecrets" target="_blank" rel="noopener">TÉLÉCHARGER</a>
+      <a class="btn btn-outline" href="#modes">VOIR LES MODES</a>
+    </div>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num">5</div><div class="stat-label">MODES DE JEU</div></div>
+  <div class="stat"><div class="stat-num">15+</div><div class="stat-label">CATÉGORIES</div></div>
+  <div class="stat"><div class="stat-num">1000+</div><div class="stat-label">MOTS</div></div>
+  <div class="stat"><div class="stat-num">3-20</div><div class="stat-label">JOUEURS</div></div>
+</div>
+
+<section class="modes-section" id="modes">
+  <div class="modes-header reveal">
+    <p class="label">CHOISISSEZ VOTRE CAMP</p>
+    <h2>MODES DE JEU</h2>
+  </div>
+  <div class="modes-grid">
+    <div class="m-card reveal">
+      <div class="m-emoji">🥸</div>
+      <div class="m-name">UNDERCOVER</div>
+      <div class="m-desc">Un joueur reçoit un mot différent. Les innocents doivent identifier l'intrus avant qu'il ne s'en rende compte.</div>
+      <div class="m-tag">3-20 JOUEURS</div>
+    </div>
+    <div class="m-card reveal">
+      <div class="m-emoji">👻</div>
+      <div class="m-name">MISTER WHITE</div>
+      <div class="m-desc">Un joueur ne reçoit aucun mot et doit bluffer. S'il est découvert, il peut encore gagner en devinant le mot secret.</div>
+      <div class="m-tag">3-20 JOUEURS</div>
+    </div>
+    <div class="m-card reveal">
+      <div class="m-emoji">🕵️</div>
+      <div class="m-name">SPYFALL</div>
+      <div class="m-desc">Un espion ne connaît pas le lieu secret. Questions, accusations et déductions — le temps est limité !</div>
+      <div class="m-tag">TIMER · VOTE · GUESS</div>
+    </div>
+    <div class="m-card reveal">
+      <div class="m-emoji">🎭</div>
+      <div class="m-name">MIME</div>
+      <div class="m-desc">Mimez des images sans parler ! L'intrus a une image différente, et Mister White reçoit un indice texte.</div>
+      <div class="m-tag">IMAGES · SANS PARLER</div>
+    </div>
+    <div class="m-card reveal">
+      <div class="m-emoji">⭐</div>
+      <div class="m-name">SPÉCIALE</div>
+      <div class="m-desc">Créez vos propres mots personnalisés. Chaque joueur ajoute ses mots et la partie se joue avec vos mots à vous.</div>
+      <div class="m-tag">MOTS PERSO · SURPRISE</div>
+    </div>
+  </div>
+</section>
+
+<section class="cat-section">
+  <div class="cat-header reveal">
+    <p class="label">DES MOTS POUR CHAQUE AMBIANCE</p>
+    <h2>CATÉGORIES</h2>
+  </div>
+  <div class="cat-grid reveal">
+    <div class="cat-item"><div class="cat-emoji">⚽</div><div class="cat-name">FOOTBALL</div></div>
+    <div class="cat-item"><div class="cat-emoji">🏀</div><div class="cat-name">BASKETBALL</div></div>
+    <div class="cat-item"><div class="cat-emoji">🎭</div><div class="cat-name">ACTEURS</div></div>
+    <div class="cat-item"><div class="cat-emoji">🗺️</div><div class="cat-name">PAYS</div></div>
+    <div class="cat-item"><div class="cat-emoji">🦁</div><div class="cat-name">ANIMAUX</div></div>
+    <div class="cat-item"><div class="cat-emoji">🎮</div><div class="cat-name">JEUX VIDÉO</div></div>
+    <div class="cat-item"><div class="cat-emoji">🎵</div><div class="cat-name">MUSIQUE</div></div>
+    <div class="cat-item"><div class="cat-emoji">🚗</div><div class="cat-name">VOITURES</div></div>
+    <div class="cat-item"><div class="cat-emoji">👜</div><div class="cat-name">MARQUES</div></div>
+    <div class="cat-item"><div class="cat-emoji">🎬</div><div class="cat-name">FILMS</div></div>
+    <div class="cat-item"><div class="cat-emoji">🍥</div><div class="cat-name">MANGA</div></div>
+    <div class="cat-item"><div class="cat-emoji">📦</div><div class="cat-name">OBJETS</div></div>
+    <div class="cat-item"><div class="cat-emoji">🏠</div><div class="cat-name">LIEUX</div></div>
+    <div class="cat-item"><div class="cat-emoji">👥</div><div class="cat-name">GROUPES</div></div>
+  </div>
+</section>
+
+<section class="spyfall-section">
+  <div class="spyfall-content reveal">
+    <div class="spyfall-emoji">🕵️</div>
+    <div class="spyfall-title">MODE SPYFALL</div>
+    <div class="spyfall-desc">
+      Un lieu secret. Un espion qui ne le connaît pas. Tout le monde pose des questions pour démasquer l'espion — ou l'espion devine le lieu pour gagner.
+    </div>
+    <div class="spyfall-locations">
+      <div class="loc-chip">🏖️ Plage</div>
+      <div class="loc-chip">🚀 Station spatiale</div>
+      <div class="loc-chip">🌋 Volcan</div>
+      <div class="loc-chip">🎪 Cirque</div>
+      <div class="loc-chip">🏦 Banque</div>
+      <div class="loc-chip">🛳️ Bateau de croisière</div>
+      <div class="loc-chip">🏕️ Camp militaire</div>
+      <div class="loc-chip">🔬 Laboratoire</div>
+      <div class="loc-chip">🏟️ Stade olympique</div>
+      <div class="loc-chip">🗼 Phare</div>
+      <div class="loc-chip">🏰 Château</div>
+      <div class="loc-chip">🏜️ Désert</div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2 class="cta-title reveal">PRÊT À JOUER ?</h2>
+  <p class="cta-sub reveal">TÉLÉCHARGEZ MOTS SECRETS GRATUITEMENT</p>
+  <a class="btn btn-dark reveal" href="https://play.google.com/store/apps/details?id=com.tonnom.motssecrets" target="_blank" rel="noopener">TÉLÉCHARGER SUR GOOGLE PLAY</a>
+</section>
+
+<footer>
+  <div class="f-logo">MOTS SECRETS</div>
+  <p class="f-copy">© 2025 MOTS SECRETS — TOUS DROITS RÉSERVÉS</p>
+</footer>
+
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>

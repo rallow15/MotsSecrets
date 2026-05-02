@@ -43,8 +43,8 @@ function loadAdMob() {
 }
 
 const Stack = createNativeStackNavigator();
-const BANNER_TOP_ID    = 'ca-app-pub-2965679591230669/2407188674';
-const BANNER_BOTTOM_ID = 'ca-app-pub-2965679591230669/8830249922';
+const BANNER_TOP_ID    = Platform.OS === 'ios' ? 'ca-app-pub-2965679591230669/1687420131' : 'ca-app-pub-2965679591230669/2407188674';
+const BANNER_BOTTOM_ID = Platform.OS === 'ios' ? 'ca-app-pub-2965679591230669/7168735115' : 'ca-app-pub-2965679591230669/8830249922';
 
 function PrepScreenWrapper({ navigation, route }) {
   const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, customWords, mimerMode, spyfallTimer, numUndercovers, numMisterWhites, easyMode, spyfallUndercover } = route.params;
@@ -199,7 +199,7 @@ export default function App() {
       )}
       <View style={styles.nav}>
         <NavigationContainer>
-          <StatusBar style="light" backgroundColor={colors.bg} />
+          <StatusBar style="light" />
           <Stack.Navigator screenOptions={{ headerShown: false, animation: 'fade', contentStyle: { backgroundColor: colors.bg } }}>
             <Stack.Screen name="Menu"   component={MenuScreen} />
             <Stack.Screen name="Prep"   component={PrepScreenWrapper} />
