@@ -5,7 +5,7 @@ import { t, getLang } from '../i18n';
 import { playClick, playWin, playLose } from '../sound';
 
 export default function SpyfallGuessScreen({ navigation, route }) {
-  const { numPlayers, assignments, playerNames, selectedCategory, fromGame, spyfallTimer, spyfallUndercover, votedPlayerIndex } = route.params;
+  const { numPlayers, assignments, playerNames, selectedCategory, fromGame, spyfallUndercover, votedPlayerIndex } = route.params;
   const [guess, setGuess] = useState('');
   const [showInput, setShowInput] = useState(fromGame ? false : true);
   const lang = getLang();
@@ -41,7 +41,6 @@ export default function SpyfallGuessScreen({ navigation, route }) {
       selectedCategory,
       gameMode: 3,
       spyfallOutcome: isCorrect ? 'spyGuessRight' : 'spyGuessWrong',
-      spyfallTimer,
       spyfallUndercover,
     });
   };

@@ -1,7 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Linking, ActivityIndicator } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Linking, ActivityIndicator, Platform } from 'react-native';
 import Constants from 'expo-constants';
+
+const isWeb = Platform.OS === 'web';
+
+// SecureStore — uniquement mobile
+let SecureStore;
+if (!isWeb) {
+  try { SecureStore = require('expo-secure-store'); } catch (e) {}
+}
+
+const safeSetItem = async (key, value) => {
+  if (!SecureStore) return;
+  try { await SecureStore.setItemAsync(key, value); } catch (e) {}
+};
 
 let AdsConsent = null;
 let initUMP = null;
@@ -50,7 +62,7 @@ export default function ConsentScreen({ onConsentGiven }) {
 
       // Si consentement déjà obtenu ou pas requis, on valide directement
       if (status === 'OBTAINED' || status === 'NOT_REQUIRED') {
-        await SecureStore.setItemAsync('ump_consent_status', 'given');
+        await safeSetItem('ump_consent_status', 'given');
         onConsentGiven('given');
         return;
       }
@@ -60,7 +72,7 @@ export default function ConsentScreen({ onConsentGiven }) {
         const result = await loadAndShowConsentForm();
         const finalStatus = result?.status || 'UNKNOWN';
         if (finalStatus === 'OBTAINED') {
-          await SecureStore.setItemAsync('ump_consent_status', 'given');
+          await safeSetItem('ump_consent_status', 'given');
           onConsentGiven('given');
           return;
         }
@@ -77,7 +89,7 @@ export default function ConsentScreen({ onConsentGiven }) {
     if (!isExpoGo && AdsConsent) {
       try { await AdsConsent.reset(); } catch (e) {}
     }
-    await SecureStore.setItemAsync('ump_consent_status', 'refused');
+    await safeSetItem('ump_consent_status', 'refused');
     onConsentGiven('refused');
   };
 
@@ -97,7 +109,7 @@ export default function ConsentScreen({ onConsentGiven }) {
           const result = await showConsentForm();
           const status = result?.status;
           if (status === 'OBTAINED') {
-            await SecureStore.setItemAsync('ump_consent_status', 'given');
+            await safeSetItem('ump_consent_status', 'given');
             onConsentGiven('given');
             return;
           }
@@ -106,7 +118,7 @@ export default function ConsentScreen({ onConsentGiven }) {
         setUmpError(e.message || String(e));
       }
     }
-    await SecureStore.setItemAsync('ump_consent_status', 'given');
+    await safeSetItem('ump_consent_status', 'given');
     onConsentGiven('given');
   };
 

@@ -2,11 +2,13 @@
 // GESTION DES PUBLICITÉS (AdMob)
 // ═════════════════════════════════════════════════════════════
 
-import { Platform } from 'react-native';
+import { Platform, NativeModules } from 'react-native';
 import Constants from 'expo-constants';
 
-// Détecter si on est dans Expo Go (appartenance à Expo)
+// Détecter si on est dans Expo Go ou sur le web
 const isExpoGo = Constants.appOwnership === 'expo';
+const isWeb = Platform.OS === 'web';
+const hasAdMobNative = !isWeb && !isExpoGo && !!NativeModules.RNGoogleMobileAdsModule;
 
 // Événements pour les pubs récompensées (v16+)
 const REWARDED_EVENT = {
@@ -23,7 +25,7 @@ let MobileAds = null;
 
 // Charger les modules AdMob dynamiquement
 function loadAdMobModules() {
-  if (isExpoGo) return false;
+  if (!hasAdMobNative) return false;
   try {
     const admob = require('react-native-google-mobile-ads');
     RewardedAd = admob.RewardedAd;
@@ -38,8 +40,8 @@ function loadAdMobModules() {
 
 // Initialiser AdMob au démarrage
 export async function initAds() {
-  if (isExpoGo) {
-    console.log('📱 Expo Go détecté - AdMob désactivé');
+  if (!hasAdMobNative) {
+    console.log('📱 AdMob désactivé (module natif absent)');
     return;
   }
   if (!loadAdMobModules()) {
@@ -70,7 +72,7 @@ let isAdLoading = false;
 
 // Charger une pub récompensée
 export async function loadRewardedAd(adType = 'default') {
-  if (isExpoGo) {
+  if (!hasAdMobNative) {
     console.log('Expo Go - pub récompensée ignorée');
     return null;
   }

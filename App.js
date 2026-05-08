@@ -1,53 +1,67 @@
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, Platform, NativeModules } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useFonts } from 'expo-font';
-import { StatusBar } from 'expo-status-bar';
-import * as SecureStore from 'expo-secure-store';
-import { initAds } from './src/ads';
-import Constants from 'expo-constants';
-import { Platform } from 'react-native';
 
-import MenuScreen     from './src/screens/MenuScreen';
-import PrepScreen     from './src/screens/PrepScreen';
-import RevealScreen   from './src/screens/RevealScreen';
-import BlackScreen    from './src/screens/BlackScreen';
-import ResultScreen   from './src/screens/ResultScreen';
-import ConsentScreen  from './src/screens/ConsentScreen';
+const Stack = createNativeStackNavigator();
+const isWeb = Platform.OS === 'web';
+
+import MenuScreen        from './src/screens/MenuScreen';
+import PrepScreen        from './src/screens/PrepScreen';
+import RevealScreen      from './src/screens/RevealScreen';
+import BlackScreen       from './src/screens/BlackScreen';
+import ResultScreen      from './src/screens/ResultScreen';
 import SpyfallGameScreen from './src/screens/SpyfallGameScreen';
+import SpyfallGuessScreen from './src/screens/SpyfallGuessScreen';
+import SpyfallVoteScreen from './src/screens/SpyfallVoteScreen';
 import { generateAssignments } from './src/gameLogic';
-import { colors } from './src/theme';
+import { colors, ThemeProvider, setOnThemeChange } from './src/theme';
 
-// Bannières et consentement - initialisé à null
+// Modules natifs — chargés uniquement sur mobile (pas web)
+let SecureStore, ConsentScreen, StatusBar, Constants;
+
+if (!isWeb) {
+  try {
+    SecureStore = require('expo-secure-store');
+  } catch (e) {}
+  try {
+    ConsentScreen = require('./src/screens/ConsentScreen').default;
+  } catch (e) {}
+  try {
+    StatusBar = require('expo-status-bar').StatusBar;
+  } catch (e) {}
+  try {
+    Constants = require('expo-constants').Constants;
+  } catch (e) {}
+}
+
+const isExpoGo = !isWeb && Constants && Constants.appOwnership === 'expo';
+
+// Vérifier si le module natif AdMob existe AVANT de charger le JS
+const hasAdMobNative = !isWeb && !isExpoGo && !!NativeModules.RNGoogleMobileAdsModule;
+
+// Bannières AdMob — chargées dynamiquement
 let BannerAd = null;
 let BannerAdSize = null;
 
-// Fonction pour charger AdMob dynamiquement (uniquement hors Expo Go)
+const BANNER_TOP_ID    = isWeb ? '' : (Platform.OS === 'ios' ? 'ca-app-pub-2965679591230669/1687420131' : 'ca-app-pub-2965679591230669/2407188674');
+const BANNER_BOTTOM_ID = isWeb ? '' : (Platform.OS === 'ios' ? 'ca-app-pub-2965679591230669/7168735115' : 'ca-app-pub-2965679591230669/8830249922');
+
 function loadAdMob() {
-  if (Constants.appOwnership === 'expo') {
-    console.log('📱 Expo Go détecté - AdMob ignoré');
-    return false;
-  }
+  if (!hasAdMobNative) return false;
   try {
-    console.log('🎯 Chargement AdMob...');
     const admob = require('react-native-google-mobile-ads');
     BannerAd = admob.BannerAd;
     BannerAdSize = admob.BannerAdSize;
-    console.log('✅ AdMob chargé avec succès');
     return true;
   } catch (e) {
-    console.log('❌ AdMob non disponible:', e.message || e);
     return false;
   }
 }
 
-const Stack = createNativeStackNavigator();
-const BANNER_TOP_ID    = Platform.OS === 'ios' ? 'ca-app-pub-2965679591230669/1687420131' : 'ca-app-pub-2965679591230669/2407188674';
-const BANNER_BOTTOM_ID = Platform.OS === 'ios' ? 'ca-app-pub-2965679591230669/7168735115' : 'ca-app-pub-2965679591230669/8830249922';
-
 function PrepScreenWrapper({ navigation, route }) {
-  const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, customWords, mimerMode, spyfallTimer, numUndercovers, numMisterWhites, easyMode, spyfallUndercover } = route.params;
+  const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, customWords, mimerMode, spyfallTimer, numUndercovers, numMisterWhites, easyMode, spyfallUndercover, darkTheme } = route.params;
 
   const _gameMode      = gameMode      ?? 0;
   const _currentPlayer = currentPlayer ?? 0;
@@ -62,8 +76,8 @@ function PrepScreenWrapper({ navigation, route }) {
   const _numMisterWhites = numMisterWhites ?? 0;
   const _easyMode = easyMode ?? false;
   const _spyfallUndercover = spyfallUndercover ?? false;
+  const _darkTheme = darkTheme ?? false;
 
-  // Générer assignments une seule fois (absent = première entrée dans Prep)
   const assignments = route.params.assignments
     ?? generateAssignments(numPlayers, _gameMode, _selectedCategory, _customWords, _mimerMode, _numUndercovers, _numMisterWhites, _easyMode, _spyfallUndercover);
 
@@ -73,21 +87,12 @@ function PrepScreenWrapper({ navigation, route }) {
       route={{
         ...route,
         params: {
-          numPlayers,
-          gameMode:      _gameMode,
-          selectedCategory: _selectedCategory,
-          customWords: _customWords,
-          mimerMode: _mimerMode,
-          spyfallTimer: _spyfallTimer,
-          numUndercovers: _numUndercovers,
-          numMisterWhites: _numMisterWhites,
-          easyMode: _easyMode,
-          spyfallUndercover: _spyfallUndercover,
-          assignments,
-          currentPlayer: _currentPlayer,
-          takenNumbers:  _takenNumbers,
-          playerNumbers: _playerNumbers,
-          playerNames:   _playerNames,
+          numPlayers, gameMode: _gameMode, selectedCategory: _selectedCategory,
+          customWords: _customWords, mimerMode: _mimerMode, spyfallTimer: _spyfallTimer,
+          numUndercovers: _numUndercovers, numMisterWhites: _numMisterWhites,
+          easyMode: _easyMode, spyfallUndercover: _spyfallUndercover, darkTheme: _darkTheme,
+          assignments, currentPlayer: _currentPlayer, takenNumbers: _takenNumbers,
+          playerNumbers: _playerNumbers, playerNames: _playerNames,
         },
       }}
     />
@@ -98,46 +103,57 @@ export default function App() {
   const [fontsLoaded] = useFonts({
     BebasNeue: require('./assets/fonts/BebasNeue-Regular.ttf'),
     SpaceMono: require('./assets/fonts/SpaceMono-Regular.ttf'),
+    ShakeAlone: require('./assets/fonts/ShakeAlone-YqLpj.otf'),
   });
   const [adKey, setAdKey] = useState(0);
-  const [showConsent, setShowConsent] = useState(!__DEV__); // En prod, on affiche par défaut
-  const [consentGiven, setConsentGiven] = useState('pending');
-  const [consentChecked, setConsentChecked] = useState(false);
+  const [showConsent, setShowConsent] = useState(isWeb ? false : !__DEV__);
+  const [consentGiven, setConsentGiven] = useState(isWeb ? 'given' : 'pending');
+  const [consentChecked, setConsentChecked] = useState(isWeb);
   const [adMobLoaded, setAdMobLoaded] = useState(false);
+  const [darkTheme, setDarkTheme] = useState(false);
 
-  // Détecter si on est dans Expo Go (appartenance à Expo)
-  const isExpoGo = Constants.appOwnership === 'expo';
+  setOnThemeChange(setDarkTheme);
 
-  // Charger AdMob au démarrage (uniquement si pas Expo Go)
+  // Charger le thème depuis SecureStore au démarrage
   useEffect(() => {
+    if (isWeb || !SecureStore) return;
+    (async () => {
+      try {
+        const saved = await SecureStore.getItemAsync('dark_theme');
+        if (saved === 'true') setDarkTheme(true);
+      } catch (e) {}
+    })();
+  }, []);
+
+  // Charger AdMob au démarrage (mobile natif avec module natif uniquement)
+  useEffect(() => {
+    if (!hasAdMobNative) return;
     setAdMobLoaded(loadAdMob());
   }, []);
 
-  // Vérifier le consentement avec UMP
+  // Vérifier le consentement UMP (mobile uniquement)
   useEffect(() => {
+    if (isWeb) return;
     const checkConsent = async () => {
       if (__DEV__) {
         setConsentGiven('given');
         setConsentChecked(true);
         return;
       }
-
-      // En Expo Go, on utilise le stockage local
       if (isExpoGo) {
-        const savedConsent = await SecureStore.getItemAsync('ump_consent_status');
-        if (savedConsent) {
-          setConsentGiven(savedConsent);
-          setShowConsent(false);
+        if (SecureStore) {
+          const savedConsent = await SecureStore.getItemAsync('ump_consent_status');
+          if (savedConsent) {
+            setConsentGiven(savedConsent);
+            setShowConsent(false);
+          }
         }
         setConsentChecked(true);
         return;
       }
-
       try {
         const { initUMP } = await import('./src/consent/umpConfig');
-
         const { status, isFormAvailable } = await initUMP();
-
         if (status === 'OBTAINED' || status === 'NOT_REQUIRED') {
           setConsentGiven('given');
           setShowConsent(false);
@@ -145,14 +161,13 @@ export default function App() {
           setConsentGiven('pending');
           setShowConsent(false);
         }
-        // Si isFormAvailable && status === REQUIRED → showConsent reste true
       } catch (e) {
-        console.log('UMP init error:', e);
-        // Fallback: vérifier le stockage local
-        const savedConsent = await SecureStore.getItemAsync('ump_consent_status');
-        if (savedConsent) {
-          setConsentGiven(savedConsent);
-          setShowConsent(false);
+        if (SecureStore) {
+          const savedConsent = await SecureStore.getItemAsync('ump_consent_status');
+          if (savedConsent) {
+            setConsentGiven(savedConsent);
+            setShowConsent(false);
+          }
         }
       }
       setConsentChecked(true);
@@ -160,14 +175,18 @@ export default function App() {
     checkConsent();
   }, [isExpoGo]);
 
-  // Initialiser AdMob (en parallèle, ne bloque pas le consentement)
+  // Initialiser AdMob + rafraîchir les bannières
   useEffect(() => {
-    if (!__DEV__ && !isExpoGo && adMobLoaded) {
-      initAds();
+    if (!hasAdMobNative) return;
+    if (!__DEV__ && adMobLoaded) {
+      try {
+        const { initAds } = require('./src/ads');
+        initAds();
+      } catch (e) {}
     }
     const id = setInterval(() => setAdKey(k => k + 1), 30000);
     return () => clearInterval(id);
-  }, [adMobLoaded, isExpoGo]);
+  }, [adMobLoaded]);
 
   const handleConsentGiven = (status) => {
     setConsentGiven(status);
@@ -178,14 +197,13 @@ export default function App() {
     return <View style={styles.loading}><ActivityIndicator color={colors.accent} size="large" /></View>;
   }
 
-  // Afficher l'écran de consentement
-  if (showConsent) {
+  if (showConsent && ConsentScreen) {
     return <ConsentScreen onConsentGiven={handleConsentGiven} />;
   }
 
   return (
     <View style={styles.root}>
-      {!__DEV__ && !isExpoGo && adMobLoaded && BannerAd && (
+      {hasAdMobNative && !__DEV__ && adMobLoaded && BannerAd && (
         <View style={styles.banner}>
           <BannerAd
             key={adKey}
@@ -198,19 +216,23 @@ export default function App() {
         </View>
       )}
       <View style={styles.nav}>
-        <NavigationContainer>
-          <StatusBar style="light" />
-          <Stack.Navigator screenOptions={{ headerShown: false, animation: 'fade', contentStyle: { backgroundColor: colors.bg } }}>
-            <Stack.Screen name="Menu"   component={MenuScreen} />
-            <Stack.Screen name="Prep"   component={PrepScreenWrapper} />
-            <Stack.Screen name="Reveal" component={RevealScreen} />
-            <Stack.Screen name="Black"  component={BlackScreen} />
-            <Stack.Screen name="Result" component={ResultScreen} />
-            <Stack.Screen name="SpyfallGame"  component={SpyfallGameScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
+        <ThemeProvider value={darkTheme}>
+          <NavigationContainer>
+            {!isWeb && StatusBar && <StatusBar style="light" />}
+            <Stack.Navigator screenOptions={{ headerShown: false, animation: 'fade', contentStyle: { backgroundColor: colors.bg } }}>
+              <Stack.Screen name="Menu"        component={MenuScreen} />
+              <Stack.Screen name="Prep"        component={PrepScreenWrapper} />
+              <Stack.Screen name="Reveal"      component={RevealScreen} />
+              <Stack.Screen name="Black"       component={BlackScreen} />
+              <Stack.Screen name="Result"      component={ResultScreen} />
+              <Stack.Screen name="SpyfallGame" component={SpyfallGameScreen} />
+              <Stack.Screen name="SpyfallGuess" component={SpyfallGuessScreen} />
+              <Stack.Screen name="SpyfallVote" component={SpyfallVoteScreen} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </ThemeProvider>
       </View>
-      {!__DEV__ && !isExpoGo && adMobLoaded && BannerAd && (
+      {hasAdMobNative && !__DEV__ && adMobLoaded && BannerAd && (
         <View style={styles.banner}>
           <BannerAd
             key={adKey + 1}

@@ -2,8 +2,21 @@
 // GESTION DES SONS (expo-audio — remplace expo-av déprécié)
 // ═════════════════════════════════════════════════════════════
 
-import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import { AppState, Platform } from 'react-native';
+
+const isWeb = Platform.OS === 'web';
+
+// Charger expo-audio dynamiquement (pas disponible sur web)
+let createAudioPlayer, setAudioModeAsync;
+if (!isWeb) {
+  try {
+    const audio = require('expo-audio');
+    createAudioPlayer = audio.createAudioPlayer;
+    setAudioModeAsync = audio.setAudioModeAsync;
+  } catch (e) {
+    console.log('⚠️ expo-audio non disponible');
+  }
+}
 
 let isInitialized = false;
 
@@ -126,6 +139,7 @@ async function playTone(frequency, duration, type = 'sine', volume = 0.5) {
 }
 
 export async function initSounds() {
+  if (isWeb || !setAudioModeAsync) return;
   if (isInitialized) return;
   try {
     await setAudioModeAsync({

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions } from 'react-native';
-import { colors } from '../theme';
+import { colors, screenThemes, useDarkTheme } from '../theme';
 import { t, getLang } from '../i18n';
 import { playClick, playReveal } from '../sound';
 
@@ -141,6 +141,9 @@ const getJoImages = () => ({
 
 export default function RevealScreen({ navigation, route }) {
   const { numPlayers, assignments, currentPlayer, playerNumbers, playerNames, wordVisible: initialWordVisible, mimerMode } = route.params;
+  const darkTheme = useDarkTheme();
+  const theme = darkTheme ? screenThemes.dark : screenThemes.light;
+
   const [wordVisible, setWordVisible] = useState(initialWordVisible || false);
   const [imageError, setImageError] = useState(false);
   const lang = getLang();
@@ -198,7 +201,7 @@ export default function RevealScreen({ navigation, route }) {
     return (
       <Image
         source={imgSource}
-        style={styles.mimerImage}
+        style={[styles.mimerImage, darkTheme ? { borderColor: theme.mimerBorder } : null]}
         resizeMode="contain"
         onError={() => setImageError(true)}
       />
@@ -214,26 +217,29 @@ export default function RevealScreen({ navigation, route }) {
     playClick();
     const next = currentPlayer + 1;
 
+    const nextParams = {
+      darkTheme,
+      numUndercovers: route.params.numUndercovers ?? 1,
+      numMisterWhites: route.params.numMisterWhites ?? 0,
+      easyMode: route.params.easyMode ?? false,
+      mimerMode: route.params.mimerMode ?? false,
+      customWords: route.params.customWords || [],
+      spyfallUndercover,
+    };
+
     if (next >= numPlayers) {
       playReveal();
       if (gameMode === 3) {
         navigation.navigate('SpyfallGame', {
           numPlayers, assignments, playerNames,
           selectedCategory: route.params.selectedCategory,
-          spyfallTimer: route.params.spyfallTimer ?? 8,
-          spyfallUndercover,
-          numUndercovers: route.params.numUndercovers ?? 1,
-          numMisterWhites: route.params.numMisterWhites ?? 0,
-          easyMode: route.params.easyMode ?? false,
-          mimerMode: route.params.mimerMode ?? false,
-          customWords: route.params.customWords || [],
+          ...nextParams,
         });
       } else {
         navigation.navigate('Result', {
           numPlayers, assignments, playerNumbers, playerNames,
           selectedCategory: route.params.selectedCategory,
-          customWords: route.params.customWords || [],
-          mimerMode: route.params.mimerMode,
+          ...nextParams,
         });
       }
     } else {
@@ -247,8 +253,7 @@ export default function RevealScreen({ navigation, route }) {
         customWords: route.params.customWords || [],
         mimerMode: route.params.mimerMode,
         gameMode,
-        spyfallTimer: route.params.spyfallTimer ?? 8,
-        spyfallUndercover,
+        ...nextParams,
       });
     }
   };
@@ -256,116 +261,146 @@ export default function RevealScreen({ navigation, route }) {
   // Phase 1 : "Touche l'écran"
   if (!wordVisible) {
     return (
-      <TouchableOpacity style={styles.passContainer} activeOpacity={1} onPress={() => setWordVisible(true)}>
-        <Text style={styles.playerBadge}>{t('playerLabel', currentPlayer + 1)}</Text>
-        {playerName ? <Text style={styles.playerName}>{playerName}</Text> : null}
-        <Text style={styles.passPrompt}>{t('touchScreen')}</Text>
-        <Text style={styles.tapIcon}>👆</Text>
-      </TouchableOpacity>
+      <View style={[styles.root, { backgroundColor: theme.bg }]}>
+        {!isSpyfall && (
+          <>
+            <Image
+              source={darkTheme ? require('../../assets/bg-sombre.jpg') : require('../../assets/bg-white.jpg')}
+              style={styles.bgImage}
+              resizeMode="cover"
+            />
+            <View style={darkTheme ? styles.bgGradientDark : styles.bgGradientLight} />
+          </>
+        )}
+        <View style={styles.passContainer}>
+          <Text style={[styles.playerBadge, { color: theme.textMuted }]}>{t('playerLabel', currentPlayer + 1)}</Text>
+          {playerName ? <Text style={[styles.playerName, { color: theme.text }]}>{playerName}</Text> : null}
+          <Text style={[styles.passPrompt, { color: theme.text }]}>{t('touchScreen')}</Text>
+          <Text style={styles.tapIcon}>👆</Text>
+        </View>
+      </View>
     );
   }
 
   // Phase 2 : mot/image visible
   const isSpyfallInnocent = isSpyfall && !isSpy && lieuImage;
   return (
-    <View style={isSpyfallInnocent ? styles.containerSpyfall : styles.container}>
-      <Text style={[styles.playerBadge, isSpyfallInnocent && styles.textLight]}>{t('playerLabel', currentPlayer + 1)}</Text>
-      {playerName ? <Text style={[styles.playerName, isSpyfallInnocent && styles.textLight]}>{playerName}</Text> : null}
-
-      {isMimer && !isMister ? (
-        // Mode MIMER : afficher l'image + le nom
-        <View style={styles.mimerContainer}>
-          {getImageSource(word)}
-          <Text style={styles.mimerWord}>{word}</Text>
-          <Text style={styles.mimerInstruction}>{t('mimeInstruction')}</Text>
-        </View>
-      ) : isSpy ? (
-        // Mode SPYFALL : afficher ESPION
-        <View style={styles.spyContainer}>
-          <Text style={styles.spyEmoji}>🕵️</Text>
-          <Text style={styles.spyTitle}>{t('roleSpy')}</Text>
-          <Text style={styles.spyInstruction}>{t('spyInstruction')}</Text>
-        </View>
-      ) : isSpyfall && lieuImage ? (
-        // Mode SPYFALL innocent : image plein écran
-        <View style={styles.spyfallFullscreen}>
-          <Image source={lieuImage} style={styles.spyfallBgImage} resizeMode="cover" />
-          <View style={styles.spyfallOverlay} />
-          <View style={styles.spyfallContent}>
-            <Text style={styles.spyfallLieuWord}>{word}</Text>
-          </View>
-        </View>
-      ) : (
-        // Mode normal : afficher le mot
+    <View style={[styles.root, { backgroundColor: isSpyfallInnocent ? '#000000' : theme.bg }]}>
+      {!isSpyfallInnocent && (
         <>
-          {isMister && easyMode && category ? (
-            // Mister White en mode facile : titre jaune + indice catégorie
-            <>
-              <Text style={styles.misterTitle}>TU ES</Text>
-              <Text style={styles.misterYellow}>MISTER WHITE</Text>
-              <View style={styles.easyHint}>
-                <Text style={styles.easyHintText}>💡 {lang === 'fr' ? 'Indice : la catégorie est' : 'Hint: the category is'} <Text style={styles.easyHintCategory}>{category}</Text></Text>
-              </View>
-            </>
-          ) : (
-            <>
-              {!isMister && category && typeof category === 'string' ? (
-                <View style={styles.catBadge}>
-                  <Text style={styles.catText}>{category}</Text>
-                </View>
-              ) : null}
-            </>
-          )}
-
-          <Text style={[styles.word, isMister && !easyMode && styles.wordMister, { fontSize: isMister && easyMode ? 0 : wordFontSize }]}>
-            {isMister && easyMode ? '' : (typeof word === 'string' ? word : '')}
-          </Text>
+          <Image
+            source={darkTheme ? require('../../assets/bg-sombre.jpg') : require('../../assets/bg-white.jpg')}
+            style={styles.bgImage}
+            resizeMode="cover"
+          />
+          <View style={darkTheme ? styles.bgGradientDark : styles.bgGradientLight} />
         </>
       )}
+      <View style={isSpyfallInnocent ? styles.containerSpyfall : styles.container}>
+        <Text style={[styles.playerBadge, isSpyfallInnocent ? styles.textLight : { color: theme.textMuted }]}>{t('playerLabel', currentPlayer + 1)}</Text>
+        {playerName ? <Text style={[styles.playerName, isSpyfallInnocent ? styles.textLight : { color: theme.text }]}>{playerName}</Text> : null}
 
-      {isMimer && isMister && mimerHint && (
-        <View style={styles.misterHint}>
-          <Text style={styles.misterHintText}>💡 {mimerHint}</Text>
-        </View>
-      )}
+        {isMimer && !isMister ? (
+          // Mode MIMER : afficher l'image + le nom
+          <View style={styles.mimerContainer}>
+            {getImageSource(word)}
+            <Text style={[styles.mimerWord, { color: theme.text }]}>{word}</Text>
+            <Text style={[styles.mimerInstruction, { color: theme.textMuted }]}>{t('mimeInstruction')}</Text>
+          </View>
+        ) : isSpy ? (
+          // Mode SPYFALL : afficher ESPION
+          <View style={styles.spyContainer}>
+            <Text style={styles.spyEmoji}>🕵️</Text>
+            <Text style={[styles.spyTitle, { color: theme.text }]}>{t('roleSpy')}</Text>
+            <Text style={[styles.spyInstruction, { color: theme.textMuted }]}>{t('spyInstruction')}</Text>
+          </View>
+        ) : isSpyfall && lieuImage ? (
+          // Mode SPYFALL innocent : image plein écran
+          <View style={styles.spyfallFullscreen}>
+            <Image source={lieuImage} style={styles.spyfallBgImage} resizeMode="cover" />
+            <View style={styles.spyfallOverlay} />
+            <View style={styles.spyfallContent}>
+              <Text style={styles.spyfallLieuWord}>{word}</Text>
+            </View>
+          </View>
+        ) : (
+          // Mode normal : afficher le mot
+          <>
+            {isMister && easyMode && category ? (
+              // Mister White en mode facile : titre jaune + indice catégorie
+              <>
+                <Text style={[styles.misterTitle, { color: theme.textMuted }]}>{lang === 'fr' ? 'TU ES' : 'YOU ARE'}</Text>
+                <Text style={styles.misterYellow}>MISTER WHITE</Text>
+                <View style={[styles.easyHint, { backgroundColor: theme.easyHintBg, borderColor: theme.easyHintBorder }]}>
+                  <Text style={[styles.easyHintText, { color: theme.text }]}>💡 {lang === 'fr' ? 'Indice : la catégorie est' : 'Hint: the category is'} <Text style={[styles.easyHintCategory, { color: theme.text }]}>{category}</Text></Text>
+                </View>
+              </>
+            ) : (
+              <>
+                {!isMister && category && typeof category === 'string' ? (
+                  <View style={[styles.catBadge, { backgroundColor: theme.catBadgeBg, borderColor: theme.catBadgeBorder }]}>
+                    <Text style={[styles.catText, { color: theme.text }]}>{category}</Text>
+                  </View>
+                ) : null}
+              </>
+            )}
 
-      <Text style={[styles.hint, isSpyfallInnocent && styles.hintLight]}>{isSpyfall ? t('memorizeLieu') : t('memorize')}</Text>
+            <Text style={[
+              styles.word,
+              isMister && !easyMode ? [styles.wordMister, { color: theme.misterYellow }] : null,
+              { fontSize: isMister && easyMode ? 0 : wordFontSize, color: theme.wordColor },
+            ]}>
+              {isMister && easyMode ? '' : (typeof word === 'string' ? word : '')}
+            </Text>
+          </>
+        )}
 
-      <TouchableOpacity style={isSpyfallInnocent ? styles.okBtnLight : styles.okBtn} onPress={() => handleNext()} activeOpacity={0.8}>
-        <Text style={isSpyfallInnocent ? styles.okBtnTextLight : styles.okBtnText}>OK 👆</Text>
-      </TouchableOpacity>
+        {isMimer && isMister && mimerHint && (
+          <View style={[styles.misterHint, { backgroundColor: theme.easyHintBg, borderColor: theme.easyHintBorder }]}>
+            <Text style={[styles.misterHintText, { color: theme.text }]}>💡 {mimerHint}</Text>
+          </View>
+        )}
+
+        <Text style={[styles.hint, isSpyfallInnocent ? styles.hintLight : { color: theme.hintColor }]}>{isSpyfall ? t('memorizeLieu') : t('memorize')}</Text>
+
+        <TouchableOpacity style={isSpyfallInnocent ? styles.okBtnLight : [styles.okBtn, { backgroundColor: theme.okBtnBg, borderColor: theme.okBtnBorder }]} onPress={() => handleNext()} activeOpacity={0.8}>
+          <Text style={[styles.okBtnText, { color: theme.okBtnText }]}>OK 👆</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  passContainer: { flex: 1, backgroundColor: '#F5F5DC', alignItems: 'center', justifyContent: 'center', gap: 12, paddingTop: 40 },
-  passPrompt: { fontFamily: 'BebasNeue', fontSize: 64, color: '#000000', textAlign: 'center', lineHeight: 60 },
+  root: { flex: 1 },
+  bgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
+  bgGradientDark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.15)' },
+  bgGradientLight: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(180,150,80,0.10)' },
+  passContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingTop: 40 },
+  passPrompt: { fontFamily: 'BebasNeue', fontSize: 64, textAlign: 'center', lineHeight: 60 },
   tapIcon: { fontSize: 52 },
-  container: { flex: 1, backgroundColor: '#F5F5DC', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28, gap: 12 },
-  playerBadge: { fontFamily: 'SpaceMono', fontSize: 10, color: '#000000', letterSpacing: 5 },
-  playerName: { fontFamily: 'BebasNeue', fontSize: 44, color: '#000000', letterSpacing: 2 },
-  catBadge: { borderWidth: 1, borderColor: 'rgba(0,0,0,0.2)', paddingHorizontal: 14, paddingVertical: 4, borderRadius: 8 },
-  catText: { fontFamily: 'SpaceMono', fontSize: 12, color: '#000000', letterSpacing: 2 },
-  word: { fontFamily: 'BebasNeue', color: '#000000', textAlign: 'center', letterSpacing: 1 },
-  wordMister: { color: '#000000', fontSize: 52 },
-  hint: { fontFamily: 'SpaceMono', fontSize: 11, color: '#000000', letterSpacing: 3 },
-  okBtn: { marginTop: 20, backgroundColor: '#1a1a1a', paddingVertical: 16, paddingHorizontal: 48, borderRadius: 12, borderWidth: 2, borderColor: 'rgba(0,0,0,0.3)' },
-  okBtnText: { fontFamily: 'BebasNeue', fontSize: 26, color: '#F5F5DC', letterSpacing: 3 },
-  // Styles pour le mode MIMER
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28, gap: 12 },
+  playerBadge: { fontFamily: 'SpaceMono', fontSize: 10, letterSpacing: 5 },
+  playerName: { fontFamily: 'BebasNeue', fontSize: 44, letterSpacing: 2 },
+  catBadge: { borderWidth: 1, paddingHorizontal: 14, paddingVertical: 4, borderRadius: 8 },
+  catText: { fontFamily: 'SpaceMono', fontSize: 12, letterSpacing: 2 },
+  word: { fontFamily: 'BebasNeue', textAlign: 'center', letterSpacing: 1 },
+  wordMister: { fontSize: 52 },
+  hint: { fontFamily: 'SpaceMono', fontSize: 11, letterSpacing: 3 },
+  okBtn: { marginTop: 20, paddingVertical: 16, paddingHorizontal: 48, borderRadius: 12, borderWidth: 2 },
+  okBtnText: { fontFamily: 'BebasNeue', fontSize: 26, letterSpacing: 3 },
+  // MIMER
   mimerContainer: { alignItems: 'center', gap: 16 },
   mimerImage: { width: 220, height: 220, borderRadius: 16, borderWidth: 3, borderColor: '#1a1a1a', backgroundColor: '#fff' },
-  mimerWord: { fontFamily: 'BebasNeue', fontSize: 32, color: '#000000', textAlign: 'center', letterSpacing: 1 },
-  mimerInstruction: { fontFamily: 'SpaceMono', fontSize: 11, color: '#666', textAlign: 'center' },
-  misterHint: { backgroundColor: 'rgba(232,255,71,0.3)', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: '#e8ff47' },
-  misterHintText: { fontFamily: 'SpaceMono', fontSize: 11, color: '#1a1a1a' },
+  mimerWord: { fontFamily: 'BebasNeue', fontSize: 32, textAlign: 'center', letterSpacing: 1 },
+  mimerInstruction: { fontFamily: 'SpaceMono', fontSize: 11, textAlign: 'center' },
+  misterHint: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10, borderWidth: 1 },
+  misterHintText: { fontFamily: 'SpaceMono', fontSize: 11 },
+  // SPY
   spyContainer: { alignItems: 'center', gap: 12 },
   spyEmoji: { fontSize: 64 },
-  spyTitle: { fontFamily: 'BebasNeue', fontSize: 52, color: '#000000', letterSpacing: 2 },
-  spyInstruction: { fontFamily: 'SpaceMono', fontSize: 11, color: '#666', textAlign: 'center' },
-  lieuContainer: { alignItems: 'center', gap: 12, backgroundColor: 'rgba(0,0,0,0.06)', paddingHorizontal: 32, paddingVertical: 24, borderRadius: 20, borderWidth: 2, borderColor: 'rgba(0,0,0,0.15)' },
-  lieuImage: { width: 220, height: 220, borderRadius: 16, borderWidth: 3, borderColor: '#1a1a1a', backgroundColor: '#fff' },
-  lieuWord: { fontFamily: 'BebasNeue', fontSize: 44, color: '#000000', textAlign: 'center', letterSpacing: 2 },
+  spyTitle: { fontFamily: 'BebasNeue', fontSize: 52, letterSpacing: 2 },
+  spyInstruction: { fontFamily: 'SpaceMono', fontSize: 11, textAlign: 'center' },
   // Spyfall fullscreen
   spyfallFullscreen: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   spyfallBgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: undefined, height: undefined },
@@ -376,10 +411,9 @@ const styles = StyleSheet.create({
   textLight: { color: '#FFFFFF' },
   hintLight: { color: 'rgba(255,255,255,0.7)' },
   okBtnLight: { marginTop: 20, backgroundColor: 'rgba(255,255,255,0.2)', paddingVertical: 16, paddingHorizontal: 48, borderRadius: 12, borderWidth: 2, borderColor: 'rgba(255,255,255,0.5)' },
-  okBtnTextLight: { fontFamily: 'BebasNeue', fontSize: 26, color: '#FFFFFF', letterSpacing: 3 },
-  easyHint: { backgroundColor: 'rgba(232,255,71,0.3)', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: '#e8ff47', marginTop: 4 },
-  easyHintText: { fontFamily: 'SpaceMono', fontSize: 12, color: '#1a1a1a' },
-  easyHintCategory: { fontFamily: 'BebasNeue', fontSize: 16, color: '#1a1a1a', letterSpacing: 1 },
-  misterTitle: { fontFamily: 'SpaceMono', fontSize: 14, color: '#666', letterSpacing: 3 },
+  easyHint: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10, borderWidth: 1, marginTop: 4 },
+  easyHintText: { fontFamily: 'SpaceMono', fontSize: 12 },
+  easyHintCategory: { fontFamily: 'BebasNeue', fontSize: 16, letterSpacing: 1 },
+  misterTitle: { fontFamily: 'SpaceMono', fontSize: 14, letterSpacing: 3 },
   misterYellow: { fontFamily: 'BebasNeue', fontSize: 48, color: '#e8ff47', letterSpacing: 3, textShadowColor: '#000', textShadowOffset: { width: 2, height: 2 }, textShadowRadius: 4 },
 });

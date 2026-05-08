@@ -233,6 +233,66 @@ export const CATEGORIES_FR = {
   ],
 
   // ═════════════════════════════════════════════════════════════
+  // 🏰 AGE OF EMPIRE 4
+  // ═════════════════════════════════════════════════════════════
+  AGE_OF_EMPIRE_4: {
+    _subcategories: {
+      'Civilisations': [
+        "Dynastie Jin", "Horde d'Or", "Dynastie macédonienne", "Sengoku Daimyo",
+        "Dynastie Tughlaq", "Maison de Lancastre", "Templiers", "Ayyoubides",
+        "Jeanne d'Arc", "Ordre du Dragon", "Héritage de Zhu Xi", "Byzantins",
+        "Japonais", "Anglais", "Français", "Saint-Empire romain germanique",
+        "Rus", "Mongols", "Chinois", "Sultanat de Delhi",
+        "Dynastie abbasside", "Ottomans", "Maliens",
+      ],
+      'Unités piquier': [
+        "Lancier", "Limitanei", "Donso", "Lancier doré", "Atgeirmaðr",
+      ],
+      'Cavalerie': [
+        "Éclaireur", "Cavalier", "Chevalier", "Pilleur Ghazi", "Chevalier Royal",
+        "Cataphracte", "Lancier de Feu", "Cavalier chameau", "Archer chameau",
+        "Éléphant de guerre", "Éléphant tour", "Mangudai", "Keshik", "Khan",
+        "Archer à cheval", "Moine Guerrier", "Sipahi", "Akinji", "Éclaireur Guerrier",
+        "Sofa", "Samouraï Monté", "Cavalier Doré", "Chevalier Doré",
+        "Hobelar", "Demilancier", "Garde du Comte", "Chevalier Confrère",
+        "Frère Templier", "Jinete", "Cavalier Noir", "Pilleur du Désert",
+        "Lancier Chamelier", "Derviche", "Torguud", "Archer Kipchak",
+        "Cavalerie Yari", "Daimyo", "Pilleur Yuan", "Éléphant de combat",
+        "Cavalier de Jeanne",
+      ],
+      'Bâtiments': [
+        "Hôtel de ville", "Maison", "Moulin", "Camp de bûcherons", "Campement minier",
+        "Dock", "Caserne", "Palissade", "Avant-poste", "Camp de tir à l'arc",
+        "Écurie", "Forge", "Marché", "Muraille de pierre", "Tour",
+        "Forteresse", "Atelier de siège", "Monastère", "Université", "Ferme",
+        "Merveille", "Comptoir commercial", "Site sacré", "Porte de palissade",
+        "Porte de muraille", "Muraille",
+        "Maison de la Sagesse", "Aqueduc", "Citerne", "Maison de mercenaires", "Olivierie",
+        "Village", "Grenier", "Pagode", "Feu de camp",
+        "Tente dorée", "Ovoo", "Yourte", "Parc à bétail", "Campement de bergers",
+        "Manoir", "Temple bouddhiste", "Temple shintoïste", "Château japonais",
+        "Forge japonaise", "Domaine du Daimyo", "Matsuri",
+        "Quartier général templier", "Forteresse templier", "Port templier",
+        "Arsenal varègue", "Bastion varègue", "Camp de guerre varègue",
+        "Ranch bovin", "Mine à ciel ouvert", "École militaire",
+        "Cabane de chasse", "Forteresse en bois", "Palissade fortifiée",
+        "Fort Tughlaqabad", "Éléphant ouvrier",
+        "Council Hall", "Abbey of Kings", "White Tower", "King's Palace",
+        "Berkshire Palace", "Wynguard Palace", "Barbican of the Sun", "Imperial Academy",
+        "Imperial Palace", "Astronomical Clocktower", "Great Wall Gatehouse", "Spirit Way",
+        "School of Cavalry", "Chamber of Commerce", "Royal Institute", "Guild Hall",
+        "Red Palace", "College of Artillery", "Meinwerk Palace", "Aachen Chapel",
+        "Burgrave Palace", "Regnitz Cathedral", "Palace of Swabia", "Elzbach Palace",
+        "Deer Stones", "Silver Tree", "Kurultai", "Steppe Redoubt",
+        "Khaganate Palace", "White Stupa", "Golden Gate", "Kremlin",
+        "High Trade House", "Abbey of the Trinity", "Spasskaya Tower", "High Armory",
+        "Tower of Victory", "Dome of the Faith", "House of Learning",
+        "Compound of the Defender", "Palace of the Sultan", "Hisar Academy",
+      ],
+    },
+  },
+
+  // ═════════════════════════════════════════════════════════════
   // ⭐ SPÉCIALE
   // ═════════════════════════════════════════════════════════════
   SPECIALE: [
@@ -504,6 +564,66 @@ export const CATEGORIES_EN = {
     "Expendables", "Jedi", "Justice League", "Power Rangers", "Naruto Nation",
     "S Rank", "Saiyans", "Shichibukai", "X-Men", "Yonko",
   ],
+
+  // ═════════════════════════════════════════════════════════════
+  // 🏰 AGE OF EMPIRE 4
+  // ═════════════════════════════════════════════════════════════
+  AGE_OF_EMPIRE_4: {
+    _subcategories: {
+      'Civilizations': [
+        "Jin Dynasty", "Golden Horde", "Macedonian Dynasty", "Sengoku Daimyo",
+        "Tughlaq Dynasty", "House of Lancaster", "Knights Templar", "Ayyubids",
+        "Joan of Arc", "Order of the Dragon", "Zhu Xi's Legacy", "Byzantines",
+        "Japanese", "English", "French", "Holy Roman Empire",
+        "Rus", "Mongols", "Chinese", "Delhi Sultanate",
+        "Abbasid Dynasty", "Ottomans", "Malians",
+      ],
+      'Pikeman Units': [
+        "Spearman", "Limitanei", "Donso", "Gilded Spearman", "Atgeirmaðr",
+      ],
+      'Cavalry': [
+        "Scout", "Horseman", "Knight", "Ghazi Raider", "Royal Knight",
+        "Cataphract", "Fire Lancer", "Camel Rider", "Camel Archer",
+        "War Elephant", "Tower Elephant", "Mangudai", "Keshik", "Khan",
+        "Horse Archer", "Warrior Monk", "Sipahi", "Akinji", "Warrior Scout",
+        "Sofa", "Mounted Samurai", "Gilded Horseman", "Gilded Knight",
+        "Hobelar", "Demilancer", "Earl's Guard", "Chevalier Confrere",
+        "Templar Brother", "Genitour", "Black Rider", "Desert Raider",
+        "Camel Lancer", "Dervish", "Torguud", "Kipchak Archer",
+        "Yari Cavalry", "Daimyo", "Yuan Raider", "Raider Elephant",
+        "Jeanne's Rider",
+      ],
+      'Buildings': [
+        "Town Center", "House", "Mill", "Lumber Camp", "Mining Camp",
+        "Dock", "Barracks", "Palisade Wall", "Outpost", "Archery Range",
+        "Stable", "Blacksmith", "Market", "Stone Wall", "Tower",
+        "Keep", "Siege Workshop", "Monastery", "University", "Farm",
+        "Wonder", "Trade Post", "Sacred Site", "Palisade Gate",
+        "Stone Wall Gate", "Stone Wall Tower",
+        "House of Wisdom", "Aqueduct", "Cistern", "Mercenary House", "Olive Grove",
+        "Village", "Granary", "Pagoda", "Campfire",
+        "Golden Tent", "Ovoo", "Ger", "Pasture", "Livestock Pen",
+        "Manor", "Buddhist Temple", "Shinto Shrine", "Japanese Castle",
+        "Forge", "Daimyo Estate", "Matsuri",
+        "Templar Headquarters", "Fortress", "Harbor",
+        "Varangian Arsenal", "Varangian Stronghold", "Varangian Warcamp",
+        "Cattle Ranch", "Pit Mine", "Military School",
+        "Hunting Cabin", "Wooden Fortress", "Fortified Palisade Gate",
+        "Tughlaqabad Fort", "Worker Elephant",
+        "Council Hall", "Abbey of Kings", "White Tower", "King's Palace",
+        "Berkshire Palace", "Wynguard Palace", "Barbican of the Sun", "Imperial Academy",
+        "Imperial Palace", "Astronomical Clocktower", "Great Wall Gatehouse", "Spirit Way",
+        "School of Cavalry", "Chamber of Commerce", "Royal Institute", "Guild Hall",
+        "Red Palace", "College of Artillery", "Meinwerk Palace", "Aachen Chapel",
+        "Burgrave Palace", "Regnitz Cathedral", "Palace of Swabia", "Elzbach Palace",
+        "Deer Stones", "Silver Tree", "Kurultai", "Steppe Redoubt",
+        "Khaganate Palace", "White Stupa", "Golden Gate", "Kremlin",
+        "High Trade House", "Abbey of the Trinity", "Spasskaya Tower", "High Armory",
+        "Tower of Victory", "Dome of the Faith", "House of Learning",
+        "Compound of the Defender", "Palace of the Sultan", "Hisar Academy",
+      ],
+    },
+  },
 
   // ═════════════════════════════════════════════════════════════
   // ⭐ SPECIAL

@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated, TextInput, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, TextInput, Keyboard, Image } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { colors } from '../theme';
+import { colors, screenThemes, useDarkTheme } from '../theme';
 import { t } from '../i18n';
 
 export default function PrepScreen({ navigation, route }) {
   const { numPlayers, assignments, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, gameMode } = route.params;
+  const darkTheme = useDarkTheme();
+  const theme = darkTheme ? screenThemes.dark : screenThemes.light;
 
-  // Pré-remplir avec le nom existant s'il y en a un (cas rejouer)
   const existingName = Array.isArray(playerNames) ? (playerNames[currentPlayer] || '') : '';
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -15,7 +16,6 @@ export default function PrepScreen({ navigation, route }) {
   const inputRef = useRef(null);
 
   useEffect(() => {
-    // Mettre le nom existant, pas vide
     const n = Array.isArray(playerNames) ? (playerNames[currentPlayer] || '') : '';
     setName(n);
 
@@ -26,7 +26,6 @@ export default function PrepScreen({ navigation, route }) {
       ])
     ).start();
 
-    // Focus seulement si pas de nom pré-rempli
     if (!n) {
       setTimeout(() => inputRef.current?.focus(), 200);
     }
@@ -37,10 +36,8 @@ export default function PrepScreen({ navigation, route }) {
     const newNames = Array.isArray(playerNames)
       ? [...playerNames]
       : new Array(numPlayers).fill('');
-    // Garder le nom tapé ou l'existant si l'input est vide
     newNames[currentPlayer] = name.trim().toUpperCase() || existingName;
 
-    // Passer directement à l'écran de révélation du mot (wordVisible: true)
     navigation.navigate('Reveal', {
       numPlayers, assignments, currentPlayer,
       takenNumbers, playerNumbers,
@@ -49,65 +46,76 @@ export default function PrepScreen({ navigation, route }) {
       gameMode,
       customWords: route.params.customWords || [],
       mimerMode: route.params.mimerMode,
-      spyfallTimer: route.params.spyfallTimer ?? null,
       spyfallUndercover: route.params.spyfallUndercover ?? false,
-      wordVisible: true,  // Afficher le mot directement
+      wordVisible: true,
+      darkTheme,
     });
   };
 
   return (
-    <TouchableOpacity style={styles.container} activeOpacity={1} onPress={handleTap}>
-      <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()} activeOpacity={0.7}>
-        <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-          <Path d="M15 18l-6-6 6-6" />
-        </Svg>
+    <View style={[styles.root, { backgroundColor: theme.bg }]}>
+      <Image
+        source={darkTheme ? require('../../assets/bg-sombre.jpg') : require('../../assets/bg-white.jpg')}
+        style={styles.bgImage}
+        resizeMode="cover"
+      />
+      <View style={darkTheme ? styles.bgGradientDark : styles.bgGradientLight} />
+      <TouchableOpacity style={styles.container} activeOpacity={1} onPress={handleTap}>
+        <TouchableOpacity style={[styles.backBtn, { backgroundColor: theme.backBtnBg, borderColor: theme.backBtnBorder }]} onPress={() => navigation.goBack()} activeOpacity={0.7}>
+          <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={darkTheme ? '#e8d5ff' : '#1a1a1a'} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <Path d="M15 18l-6-6 6-6" />
+          </Svg>
+        </TouchableOpacity>
+
+        <Text style={[styles.playerBadge, { color: theme.textMuted }]}>{t('playerLabel', currentPlayer + 1)}</Text>
+
+        <View style={styles.nameWrap} onStartShouldSetResponder={() => true}>
+          <TextInput
+            ref={inputRef}
+            style={[styles.nameInput, { color: theme.text, borderBottomColor: theme.inputBorder }]}
+            value={name}
+            onChangeText={setName}
+            onSubmitEditing={handleTap}
+            placeholder={t('namePlaceholder')}
+            placeholderTextColor={darkTheme ? 'rgba(232,213,255,0.4)' : '#999'}
+            maxLength={14}
+            autoCorrect={false}
+            returnKeyType="done"
+            autoCapitalize="characters"
+          />
+        </View>
+
+        <Text style={[styles.prompt, { color: theme.text }]}>{t('touchScreen')}</Text>
+
+        <View style={styles.dotsRow}>
+          {Array.from({ length: numPlayers }, (_, i) => (
+            <View key={i} style={[
+              styles.dot,
+              i < currentPlayer  ? { backgroundColor: theme.dotDone } : null,
+              i === currentPlayer ? { backgroundColor: theme.dotCurrent } : null,
+              i > currentPlayer ? { backgroundColor: theme.border } : null,
+            ]} />
+          ))}
+        </View>
+
+        <Animated.Text style={[styles.tapIcon, { opacity: pulseAnim }]}>👆</Animated.Text>
       </TouchableOpacity>
-
-      <Text style={styles.playerBadge}>{t('playerLabel', currentPlayer + 1)}</Text>
-
-      <View style={styles.nameWrap} onStartShouldSetResponder={() => true}>
-        <TextInput
-          ref={inputRef}
-          style={styles.nameInput}
-          value={name}
-          onChangeText={setName}
-          onSubmitEditing={handleTap}
-          placeholder={t('namePlaceholder')}
-          placeholderTextColor="#666"
-          maxLength={14}
-          autoCorrect={false}
-          returnKeyType="done"
-          autoCapitalize="characters"
-        />
-      </View>
-
-      <Text style={styles.prompt}>{t('touchScreen')}</Text>
-
-      <View style={styles.dotsRow}>
-        {Array.from({ length: numPlayers }, (_, i) => (
-          <View key={i} style={[
-            styles.dot,
-            i < currentPlayer  && styles.dotDone,
-            i === currentPlayer && styles.dotCurrent,
-          ]} />
-        ))}
-      </View>
-
-      <Animated.Text style={[styles.tapIcon, { opacity: pulseAnim }]}>👆</Animated.Text>
-    </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container:  { flex: 1, backgroundColor: '#F5F5DC', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, gap: 8, paddingTop: 50 },
-  backBtn: { position: 'absolute', top: 50, left: 20, width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 2, borderColor: 'rgba(0,0,0,0.2)', alignItems: 'center', justifyContent: 'center' },
-  playerBadge:{ fontFamily: 'SpaceMono', fontSize: 11, color: '#333', letterSpacing: 5 },
+  root: { flex: 1 },
+  bgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
+  bgGradientDark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.15)' },
+  bgGradientLight: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(180,150,80,0.10)' },
+  container:  { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, gap: 8, paddingTop: 50 },
+  backBtn: { position: 'absolute', top: 50, left: 20, width: 44, height: 44, borderRadius: 22, borderWidth: 2, alignItems: 'center', justifyContent: 'center', zIndex: 10 },
+  playerBadge:{ fontFamily: 'SpaceMono', fontSize: 11, letterSpacing: 5 },
   nameWrap:   { width: '100%', alignItems: 'center', gap: 2 },
-  nameInput:  { fontFamily: 'BebasNeue', fontSize: 36, color: '#000000', borderBottomWidth: 2, borderBottomColor: 'rgba(0,0,0,0.3)', textAlign: 'center', width: '80%', paddingVertical: 4, letterSpacing: 2 },
-  prompt:     { fontFamily: 'BebasNeue', fontSize: 56, color: '#1a1a1a', textAlign: 'center', lineHeight: 52 },
+  nameInput:  { fontFamily: 'BebasNeue', fontSize: 36, borderBottomWidth: 2, textAlign: 'center', width: '80%', paddingVertical: 4, letterSpacing: 2 },
+  prompt:     { fontFamily: 'BebasNeue', fontSize: 56, textAlign: 'center', lineHeight: 52 },
   dotsRow:    { flexDirection: 'row', gap: 8 },
-  dot:        { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(0,0,0,0.2)' },
-  dotDone:    { backgroundColor: '#1a1a1a' },
-  dotCurrent: { backgroundColor: '#4FC3F7' },
+  dot:        { width: 8, height: 8, borderRadius: 4 },
   tapIcon:    { fontSize: 40, marginTop: 8 },
 });

@@ -1,12 +1,13 @@
 import Constants from 'expo-constants';
+import { NativeModules } from 'react-native';
 
 const isExpoGo = Constants.appOwnership === 'expo';
 
 let AdsConsent = null;
 
 function loadAdsConsent() {
-  if (isExpoGo) {
-    console.log('Expo Go - AdsConsent désactivé');
+  if (isExpoGo || !NativeModules.RNGoogleMobileAdsModule) {
+    console.log('AdsConsent désactivé (Expo Go ou module natif absent)');
     return false;
   }
   try {

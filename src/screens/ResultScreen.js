@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated, ScrollView, Pressable, Image } from 'react-native';
-import { colors } from '../theme';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, ScrollView, Pressable, Image, NativeModules } from 'react-native';
+import { colors, screenThemes, useDarkTheme } from '../theme';
 import { t } from '../i18n';
 import { playClick, playWin, playLose, playIntruderReveal, playInnocentReveal, playMisterWhite, vibrate, vibrateIntruderFound } from '../sound';
 
@@ -122,10 +122,11 @@ const GROUPES_IMAGES = {
 };
 import Constants from 'expo-constants';
 
-// Détecter si on est dans Expo Go
+// Détecter si on est dans Expo Go ou sur le web
 const isExpoGo = Constants.appOwnership === 'expo';
+const isWebResult = typeof window !== 'undefined' && typeof document !== 'undefined';
 
-// InterstitialAd - chargé dynamiquement uniquement si pas Expo Go
+// InterstitialAd - chargé dynamiquement uniquement si pas Expo Go ni web
 let InterstitialAd = null;
 // TODO: remplace par ton vrai ad unit ID interstitiel dans AdMob
 const INTERSTITIAL_AD_UNIT_PROD = null;
@@ -134,7 +135,7 @@ const AD_UNIT = __DEV__
   : INTERSTITIAL_AD_UNIT_PROD;
 
 function loadInterstitialAd() {
-  if (isExpoGo) return false;
+  if (isWebResult || isExpoGo || !NativeModules.RNGoogleMobileAdsModule) return false;
   try {
     const admob = require('react-native-google-mobile-ads');
     InterstitialAd = admob.InterstitialAd;
@@ -149,6 +150,8 @@ export default function ResultScreen({ navigation, route }) {
   const { numPlayers, assignments, playerNumbers, playerNames, gameMode, spyfallOutcome } = route.params;
   const spyfallUndercover = route.params.spyfallUndercover ?? false;
   const isSpyfall = gameMode === 3;
+  const darkTheme = useDarkTheme();
+  const theme = darkTheme ? screenThemes.dark : screenThemes.light;
 
   // Joueur aléatoire qui commence
   const [starterIdx] = useState(() => Math.floor(Math.random() * numPlayers));
@@ -191,7 +194,6 @@ export default function ResultScreen({ navigation, route }) {
       selectedCategory: route.params.selectedCategory, // ← catégorie conservée
       customWords: route.params.customWords || [], // ← mots personnalisés conservés
       mimerMode: route.params.mimerMode ?? false, // ← mode MIMER conservé
-      spyfallTimer: route.params.spyfallTimer ?? null, // ← timer Spyfall conservé
       spyfallUndercover: route.params.spyfallUndercover ?? false,
       numUndercovers: route.params.numUndercovers ?? 1,
       numMisterWhites: route.params.numMisterWhites ?? 0,
@@ -204,18 +206,18 @@ export default function ResultScreen({ navigation, route }) {
   );
 
   const getRoleBadge = (role) => {
-    if (role === 'intrus') return { label: t('roleIntrus'),   color: colors.danger, bg: 'rgba(255,68,68,0.12)' };
+    if (role === 'intrus') return { label: t('roleIntrus'),   color: theme.danger, bg: 'rgba(255,68,68,0.12)' };
     if (role === 'mister') return { label: t('roleMister'),   color: colors.accent, bg: 'rgba(232,255,71,0.1)' };
-    if (role === 'spy')    return { label: t('roleSpy'),       color: '#ff4444',    bg: 'rgba(255,68,68,0.15)' };
-    return                        { label: t('roleInnocent'), color: '#000000',   bg: 'rgba(255,255,255,0.06)' };
+    if (role === 'spy')    return { label: t('roleSpy'),       color: theme.danger, bg: 'rgba(255,68,68,0.15)' };
+    return                        { label: t('roleInnocent'), color: theme.text, bg: darkTheme ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' };
   };
 
   // ── RECAP ──────────────────────────────────────────────────
   if (showRecap) {
     return (
-      <ScrollView style={{ flex: 1, backgroundColor: colors.bg }} contentContainerStyle={styles.recapContainer}>
-        <Text style={styles.recapTitle}>{t('whoHadWhat')}</Text>
-        <Text style={styles.recapSub}>{t('tapToReveal')}</Text>
+      <ScrollView style={{ flex: 1, backgroundColor: theme.bg }} contentContainerStyle={[styles.recapContainer, { backgroundColor: theme.bg }]}>
+        <Text style={[styles.recapTitle, { color: theme.text }]}>{t('whoHadWhat')}</Text>
+        <Text style={[styles.recapSub, { color: theme.textMuted }]}>{t('tapToReveal')}</Text>
 
         {safeAsgn.map((a, i) => {
           const isRev       = !!revealed[i];
@@ -251,23 +253,24 @@ export default function ResultScreen({ navigation, route }) {
               onPress={() => { playClick(); handleReveal(); }}
               style={[
                 styles.card,
-                isRev && a.role === 'intrus' && styles.cardIntrus,
-                isRev && a.role === 'mister' && styles.cardMister,
-                isRev && a.role === 'spy' && styles.cardSpy,
-                isRev && a.role === 'normal' && styles.cardNormal,
+                { backgroundColor: darkTheme ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', borderColor: theme.border },
+                isRev && a.role === 'intrus' ? styles.cardIntrus : null,
+                isRev && a.role === 'mister' ? styles.cardMister : null,
+                isRev && a.role === 'spy' ? styles.cardSpy : null,
+                isRev && a.role === 'normal' ? { borderColor: theme.border } : null,
               ]}
             >
               <View style={styles.cardLeft}>
-                <Text style={styles.cardPlayer}>{name}</Text>
+                <Text style={[styles.cardPlayer, { color: theme.text }]}>{name}</Text>
                 {isRev && lieuImg ? (
                   <View style={styles.cardLieuRow}>
                     <Image source={lieuImg} style={styles.cardLieuImage} resizeMode="contain" />
                     <Text style={[
                       styles.cardWord,
-                      a.role === 'intrus' && { color: colors.danger },
-                      a.role === 'mister' && { color: colors.accent },
-                      a.role === 'spy' && { color: '#ff4444' },
-                      a.role === 'normal' && { color: '#000000' },
+                      a.role === 'intrus' ? { color: theme.danger } : null,
+                      a.role === 'mister' ? { color: colors.accent } : null,
+                      a.role === 'spy' ? { color: theme.danger } : null,
+                      a.role === 'normal' ? { color: theme.text } : null,
                     ]}>
                       {wordDisplay}
                     </Text>
@@ -275,10 +278,11 @@ export default function ResultScreen({ navigation, route }) {
                 ) : (
                   <Text style={[
                     styles.cardWord,
-                    isRev && a.role === 'intrus' && { color: colors.danger },
-                    isRev && a.role === 'mister' && { color: colors.accent },
-                    isRev && a.role === 'spy' && { color: '#ff4444' },
-                    isRev && a.role === 'normal' && { color: '#000000' },
+                    { color: darkTheme ? 'rgba(232,213,255,0.4)' : '#999' },
+                    isRev && a.role === 'intrus' ? { color: theme.danger } : null,
+                    isRev && a.role === 'mister' ? { color: colors.accent } : null,
+                    isRev && a.role === 'spy' ? { color: theme.danger } : null,
+                    isRev && a.role === 'normal' ? { color: theme.text } : null,
                   ]}>
                     {isRev ? wordDisplay : '● ● ● ● ●'}
                   </Text>
@@ -287,12 +291,12 @@ export default function ResultScreen({ navigation, route }) {
 
               <View style={styles.cardRight}>
                 {!isRev ? (
-                  <Text style={styles.cardTap}>👆 {t('tapToReveal')}</Text>
+                  <Text style={[styles.cardTap, { color: theme.textMuted }]}>👆 {t('tapToReveal')}</Text>
                 ) : (
                   <View style={styles.badgesCol}>
                     {i === starterIdx && (
-                      <View style={[styles.badge, { borderColor: '#666' }]}>
-                        <Text style={[styles.badgeText, { color: '#000000' }]}>{t('roleStarts')}</Text>
+                      <View style={[styles.badge, { borderColor: darkTheme ? '#666' : '#999' }]}>
+                        <Text style={[styles.badgeText, { color: theme.textMuted }]}>{t('roleStarts')}</Text>
                       </View>
                     )}
                     <View style={[styles.badge, { borderColor: badge.color, backgroundColor: badge.bg }]}>
@@ -306,11 +310,11 @@ export default function ResultScreen({ navigation, route }) {
         })}
 
         <View style={styles.recapBtns}>
-          <TouchableOpacity style={styles.replayBtn} onPress={handleReplay}>
-            <Text style={styles.replayBtnText}>{t('replay')}</Text>
+          <TouchableOpacity style={[styles.replayBtn, { backgroundColor: theme.okBtnBg }]} onPress={handleReplay}>
+            <Text style={[styles.replayBtnText, { color: theme.okBtnText }]}>{t('replay')}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.newBtn} onPress={handleNewGame}>
-            <Text style={styles.newBtnText}>{t('newGame')}</Text>
+          <TouchableOpacity style={[styles.newBtn, { borderColor: theme.text }]} onPress={handleNewGame}>
+            <Text style={[styles.newBtnText, { color: theme.text }]}>{t('newGame')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -335,60 +339,59 @@ export default function ResultScreen({ navigation, route }) {
   if (isSpyfall && spyfallOutcome) {
     const spyWins = spyfallOutcome === 'spyWinsTimer' || spyfallOutcome === 'spyWinsTie' || spyfallOutcome === 'spyWinsWrongAccusation' || spyfallOutcome === 'spyGuessRight';
     return (
-      <View style={styles.container}>
-        <Text style={[styles.commenceLabel, { color: spyWins ? '#ff4444' : '#000000' }]}>
+      <View style={[styles.container, { backgroundColor: theme.bg }]}>
+        <Text style={[styles.commenceLabel, { color: spyWins ? theme.danger : theme.text }]}>
           {spyWins ? (spyfallUndercover ? '🥸' : '🕵️') : '🎉'}
         </Text>
-        <Animated.Text style={[styles.winnerName, { transform: [{ scale: scaleAnim }], opacity: opacityAnim }]}>
+        <Animated.Text style={[styles.winnerName, { transform: [{ scale: scaleAnim }], opacity: opacityAnim, color: theme.text }]}>
           {spyfallTitle}
         </Animated.Text>
-        <TouchableOpacity style={styles.revealBtn} onPress={() => setShowRecap(true)}>
-          <Text style={styles.revealBtnText}>{t('revealPlayers')}</Text>
+        <TouchableOpacity style={[styles.revealBtn, { backgroundColor: theme.okBtnBg }]} onPress={() => setShowRecap(true)}>
+          <Text style={[styles.revealBtnText, { color: theme.okBtnText }]}>{t('revealPlayers')}</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.commenceLabel}>{t('startsFirst')}</Text>
-      <Animated.Text style={[styles.winnerName, { transform: [{ scale: scaleAnim }], opacity: opacityAnim }]}>
+    <View style={[styles.container, { backgroundColor: theme.bg }]}>
+      <Text style={[styles.commenceLabel, { color: theme.textMuted }]}>{t('startsFirst')}</Text>
+      <Animated.Text style={[styles.winnerName, { transform: [{ scale: scaleAnim }], opacity: opacityAnim, color: theme.text }]}>
         {starterName}
       </Animated.Text>
-      <TouchableOpacity style={styles.revealBtn} onPress={() => setShowRecap(true)}>
-        <Text style={styles.revealBtnText}>{t('revealPlayers')}</Text>
+      <TouchableOpacity style={[styles.revealBtn, { backgroundColor: theme.okBtnBg }]} onPress={() => setShowRecap(true)}>
+        <Text style={[styles.revealBtnText, { color: theme.okBtnText }]}>{t('revealPlayers')}</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container:     { flex: 1, backgroundColor: '#F5F5DC', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28, gap: 16 },
-  commenceLabel: { fontFamily: 'SpaceMono', fontSize: 10, color: '#666', letterSpacing: 3 },
-  winnerName:    { fontFamily: 'BebasNeue', fontSize: 88, color: '#1a1a1a', textAlign: 'center', lineHeight: 84, letterSpacing: 2 },
-  revealBtn:     { width: '100%', backgroundColor: '#1a1a1a', paddingVertical: 18, alignItems: 'center', marginTop: 8, borderRadius: 12 },
-  revealBtnText: { fontFamily: 'BebasNeue', fontSize: 22, color: '#F5F5DC', letterSpacing: 2 },
-  recapContainer:{ backgroundColor: '#F5F5DC', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40, gap: 8 },
-  recapTitle:    { fontFamily: 'BebasNeue', fontSize: 48, color: '#1a1a1a', letterSpacing: 2, textAlign: 'center' },
-  recapSub:      { fontFamily: 'SpaceMono', fontSize: 9, color: '#666', letterSpacing: 3, textAlign: 'center', marginBottom: 10 },
-  card:          { borderWidth: 1, borderColor: 'rgba(0,0,0,0.15)', padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: 10, backgroundColor: 'rgba(0,0,0,0.05)' },
+  container:     { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28, gap: 16 },
+  commenceLabel: { fontFamily: 'SpaceMono', fontSize: 10, letterSpacing: 3 },
+  winnerName:    { fontFamily: 'BebasNeue', fontSize: 88, textAlign: 'center', lineHeight: 84, letterSpacing: 2 },
+  revealBtn:     { width: '100%', paddingVertical: 18, alignItems: 'center', marginTop: 8, borderRadius: 12 },
+  revealBtnText: { fontFamily: 'BebasNeue', fontSize: 22, letterSpacing: 2 },
+  recapContainer:{ paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40, gap: 8 },
+  recapTitle:    { fontFamily: 'BebasNeue', fontSize: 48, letterSpacing: 2, textAlign: 'center' },
+  recapSub:      { fontFamily: 'SpaceMono', fontSize: 9, letterSpacing: 3, textAlign: 'center', marginBottom: 10 },
+  card:          { borderWidth: 1, padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: 10 },
   cardIntrus:    { borderColor: 'rgba(255,68,68,0.4)',   backgroundColor: 'rgba(255,68,68,0.1)' },
   cardSpy:       { borderColor: 'rgba(255,68,68,0.5)',   backgroundColor: 'rgba(255,68,68,0.12)' },
-  cardMister:    { borderColor: 'rgba(0,0,0,0.3)',  backgroundColor: 'rgba(0,0,0,0.08)' },
-  cardNormal:    { borderColor: 'rgba(0,0,0,0.15)' },
+  cardMister:    { borderColor: 'rgba(232,255,71,0.5)', backgroundColor: 'rgba(232,255,71,0.08)' },
   cardLeft:      { flex: 1, gap: 4 },
-  cardPlayer:    { fontFamily: 'SpaceMono', fontSize: 9, color: '#000000', letterSpacing: 2 },
+  cardPlayer:    { fontFamily: 'SpaceMono', fontSize: 9, letterSpacing: 2 },
   cardLieuRow:   { flexDirection: 'row', alignItems: 'center', gap: 6 },
   cardLieuImage: { width: 36, height: 36, borderRadius: 4 },
-  cardWord:      { fontFamily: 'BebasNeue', fontSize: 28, color: '#000000', letterSpacing: 1 },
+  cardWord:      { fontFamily: 'BebasNeue', fontSize: 28, letterSpacing: 1 },
   cardRight:     { alignItems: 'flex-end', gap: 4 },
-  cardTap:       { fontFamily: 'SpaceMono', fontSize: 9, color: '#666', letterSpacing: 1 },
+  cardTap:       { fontFamily: 'SpaceMono', fontSize: 9, letterSpacing: 1 },
   badgesCol:     { alignItems: 'flex-end', gap: 4 },
   badge:         { borderWidth: 1, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
   badgeText:     { fontFamily: 'SpaceMono', fontSize: 8, letterSpacing: 1 },
   recapBtns:     { gap: 10, marginTop: 20 },
-  replayBtn:     { backgroundColor: '#1a1a1a', paddingVertical: 16, alignItems: 'center', borderRadius: 12 },
-  replayBtnText: { fontFamily: 'BebasNeue', fontSize: 22, color: '#F5F5DC', letterSpacing: 2 },
-  newBtn:        { borderWidth: 1, borderColor: '#1a1a1a', paddingVertical: 16, alignItems: 'center', borderRadius: 12 },
-  newBtnText:    { fontFamily: 'BebasNeue', fontSize: 22, color: '#1a1a1a', letterSpacing: 2 },
+  replayBtn:     { paddingVertical: 16, alignItems: 'center', borderRadius: 12 },
+  replayBtnText: { fontFamily: 'BebasNeue', fontSize: 22, letterSpacing: 2 },
+  newBtn:        { borderWidth: 1, paddingVertical: 16, alignItems: 'center', borderRadius: 12 },
+  newBtnText:    { fontFamily: 'BebasNeue', fontSize: 22, letterSpacing: 2 },
 });

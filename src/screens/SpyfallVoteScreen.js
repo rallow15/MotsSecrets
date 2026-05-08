@@ -5,7 +5,7 @@ import { t, getLang } from '../i18n';
 import { playClick } from '../sound';
 
 export default function SpyfallVoteScreen({ navigation, route }) {
-  const { numPlayers, assignments, playerNames, selectedCategory, spyfallTimer, currentVoter, votes, timeLeft, spyfallUndercover } = route.params;
+  const { numPlayers, assignments, playerNames, selectedCategory, currentVoter, votes, timeLeft, spyfallUndercover } = route.params;
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const lang = getLang();
 
@@ -42,7 +42,6 @@ export default function SpyfallVoteScreen({ navigation, route }) {
           selectedCategory,
           gameMode: 3,
           spyfallOutcome: 'spyWinsTie',
-          spyfallTimer,
           spyfallUndercover,
         });
         return;
@@ -59,7 +58,6 @@ export default function SpyfallVoteScreen({ navigation, route }) {
           assignments,
           playerNames,
           selectedCategory,
-          spyfallTimer,
           fromGame: false,
           spyfallUndercover,
           votedPlayerIndex: mostVoted,
@@ -74,7 +72,6 @@ export default function SpyfallVoteScreen({ navigation, route }) {
           selectedCategory,
           gameMode: 3,
           spyfallOutcome: 'spyWinsWrongAccusation',
-          spyfallTimer,
           spyfallUndercover,
         });
       }
@@ -85,7 +82,6 @@ export default function SpyfallVoteScreen({ navigation, route }) {
         assignments,
         playerNames,
         selectedCategory,
-        spyfallTimer,
         currentVoter: currentVoter + 1,
         votes: newVotes,
         timeLeft,
