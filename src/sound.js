@@ -2,7 +2,7 @@
 // GESTION DES SONS (expo-audio — remplace expo-av déprécié)
 // ═════════════════════════════════════════════════════════════
 
-import { AppState, Platform } from 'react-native';
+import { AppState, Platform, Vibration } from 'react-native';
 
 const isWeb = Platform.OS === 'web';
 
@@ -244,11 +244,20 @@ export async function playClick() {
 }
 
 export function vibrate(pattern = 50) {
-  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(pattern);
+  if (Platform.OS === 'web') {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(pattern);
+  } else {
+    Vibration.vibrate(pattern);
+  }
 }
 
 export function vibrateIntruderFound() {
-  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+  const pattern = [100, 50, 100, 50, 200];
+  if (Platform.OS === 'web') {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(pattern);
+  } else {
+    Vibration.vibrate(pattern);
+  }
 }
 
 export async function playStart() {

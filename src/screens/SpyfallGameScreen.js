@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { t } from '../i18n';
 import { playClick, playReveal } from '../sound';
+import { useScaleIn, triggerHaptic } from '../animations';
+import BouncePress from '../components/BouncePress';
 
 export default function SpyfallGameScreen({ navigation, route }) {
   const { numPlayers, assignments, playerNames, selectedCategory, numUndercovers, numMisterWhites, easyMode, mimerMode, customWords, spyfallUndercover: spyfallUC } = route.params;
@@ -10,10 +12,16 @@ export default function SpyfallGameScreen({ navigation, route }) {
   const safeNames = Array.isArray(playerNames) ? playerNames : new Array(numPlayers).fill('');
   const [starterIdx] = useState(() => Math.floor(Math.random() * numPlayers));
   const starterName = safeNames[starterIdx] || t('playerFallback', starterIdx + 1);
+  const { animatedStyle: scaleStyle, start: startScaleIn } = useScaleIn();
+
+  React.useEffect(() => {
+    startScaleIn();
+  }, []);
 
   const handleReveal = () => {
     playClick();
     playReveal();
+    triggerHaptic('medium');
     navigation.navigate('Result', {
       numPlayers,
       assignments,
@@ -32,16 +40,16 @@ export default function SpyfallGameScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.starterRow}>
+      <Animated.View style={[styles.starterRow, scaleStyle]}>
         <Text style={styles.starterLabel}>{t('startsFirst')}</Text>
         <Text style={styles.starterName}>{starterName}</Text>
-      </View>
+      </Animated.View>
 
       <View style={styles.divider} />
 
-      <TouchableOpacity style={styles.revealBtn} onPress={handleReveal} activeOpacity={0.8}>
+      <BouncePress onPress={handleReveal} style={styles.revealBtn}>
         <Text style={styles.revealBtnText}>{t('revealPlayers')}</Text>
-      </TouchableOpacity>
+      </BouncePress>
 
       <Text style={styles.hint}>{t('voteInstruction')}</Text>
     </View>

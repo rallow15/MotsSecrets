@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Animated } from 'react-native';
 import { colors } from '../theme';
 import { t, getLang } from '../i18n';
 import { playClick } from '../sound';
+import { useScaleIn, triggerHaptic } from '../animations';
+import BouncePress from '../components/BouncePress';
 
 export default function SpyfallVoteScreen({ navigation, route }) {
   const { numPlayers, assignments, playerNames, selectedCategory, currentVoter, votes, timeLeft, spyfallUndercover } = route.params;
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const selectedScale = React.useRef(new Animated.Value(1)).current;
   const lang = getLang();
 
   const safeNames = Array.isArray(playerNames) ? playerNames : new Array(numPlayers).fill('');
@@ -14,10 +17,15 @@ export default function SpyfallVoteScreen({ navigation, route }) {
 
   const handleSelect = (index) => {
     setSelectedPlayer(index);
+    triggerHaptic('light');
+    Animated.spring(selectedScale, { toValue: 0.95, friction: 3, tension: 300, useNativeDriver: true }).start(
+      () => Animated.spring(selectedScale, { toValue: 1, friction: 3, tension: 300, useNativeDriver: true }).start()
+    );
   };
 
   const handleConfirm = () => {
     if (selectedPlayer === null) return;
+    triggerHaptic('medium');
     playClick();
 
     const newVotes = [...votes, selectedPlayer];
@@ -112,13 +120,13 @@ export default function SpyfallVoteScreen({ navigation, route }) {
         ))}
       </ScrollView>
 
-      <TouchableOpacity
-        style={[styles.confirmBtn, selectedPlayer === null && styles.confirmBtnDisabled]}
+      <BouncePress
         onPress={handleConfirm}
+        style={[styles.confirmBtn, selectedPlayer === null && styles.confirmBtnDisabled]}
         disabled={selectedPlayer === null}
       >
         <Text style={styles.confirmBtnText}>{lang === 'fr' ? 'CONFIRMER' : 'CONFIRM'}</Text>
-      </TouchableOpacity>
+      </BouncePress>
     </View>
   );
 }

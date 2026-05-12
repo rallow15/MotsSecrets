@@ -3,6 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import { colors } from '../theme';
 import { t, getLang } from '../i18n';
 import { playClick, playWin, playLose } from '../sound';
+import { triggerHaptic } from '../animations';
+import BouncePress from '../components/BouncePress';
 
 export default function SpyfallGuessScreen({ navigation, route }) {
   const { numPlayers, assignments, playerNames, selectedCategory, fromGame, spyfallUndercover, votedPlayerIndex } = route.params;
@@ -18,11 +20,13 @@ export default function SpyfallGuessScreen({ navigation, route }) {
 
   const handleConfirmSpy = () => {
     playClick();
+    triggerHaptic('medium');
     setShowInput(true);
   };
 
   const handleSubmit = () => {
     if (!guess.trim()) return;
+    triggerHaptic('medium');
     playClick();
 
     const isCorrect = guess.trim().toLowerCase() === secretWord.toLowerCase();
@@ -52,9 +56,9 @@ export default function SpyfallGuessScreen({ navigation, route }) {
         <>
           <Text style={styles.emoji}>{spyfallUndercover ? '🥸' : '🕵️'}</Text>
           <Text style={styles.title}>{spyfallUndercover ? t('passToUndercover') : t('passToSpy')}</Text>
-          <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirmSpy} activeOpacity={0.8}>
+          <BouncePress onPress={handleConfirmSpy} style={styles.confirmBtn}>
             <Text style={styles.confirmBtnText}>{t('spyConfirmGuess')}</Text>
-          </TouchableOpacity>
+          </BouncePress>
         </>
       ) : (
         // Écran de devinette
@@ -85,13 +89,13 @@ export default function SpyfallGuessScreen({ navigation, route }) {
             />
           </View>
 
-          <TouchableOpacity
-            style={[styles.submitBtn, !guess.trim() && styles.submitBtnDisabled]}
+          <BouncePress
             onPress={handleSubmit}
+            style={[styles.submitBtn, !guess.trim() && styles.submitBtnDisabled]}
             disabled={!guess.trim()}
           >
             <Text style={styles.submitBtnText}>{t('spyGuessConfirm')}</Text>
-          </TouchableOpacity>
+          </BouncePress>
         </>
       )}
     </View>

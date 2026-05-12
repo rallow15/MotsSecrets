@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions, Animated } from 'react-native';
 import { colors, screenThemes, useDarkTheme } from '../theme';
 import { t, getLang } from '../i18n';
 import { playClick, playReveal } from '../sound';
+import { GROUPES_MANGA } from '../data/words';
+import { useScaleIn, triggerHaptic } from '../animations';
 
 // Images LIEUX - require statiques pour Metro
 const LIEUX_IMAGES = {
@@ -146,6 +148,7 @@ export default function RevealScreen({ navigation, route }) {
 
   const [wordVisible, setWordVisible] = useState(initialWordVisible || false);
   const [imageError, setImageError] = useState(false);
+  const { animatedStyle: revealStyle, start: startReveal } = useScaleIn();
   const lang = getLang();
   const spyfallUndercover = route.params.spyfallUndercover ?? false;
 
@@ -168,10 +171,21 @@ export default function RevealScreen({ navigation, route }) {
   const wordLen = word ? word.length : 0;
   const wordFontSize = wordLen > 14 ? 44 : wordLen > 10 ? 58 : wordLen > 7 ? 72 : 88;
 
-  // Reset image error state when player changes
+  // Reset image error state when player changes + trigger reveal animation
   React.useEffect(() => {
     setImageError(false);
+    if (wordVisible) {
+      startReveal();
+    }
   }, [currentPlayer]);
+
+  // Animate when word becomes visible
+  React.useEffect(() => {
+    if (wordVisible) {
+      startReveal();
+      triggerHaptic('light');
+    }
+  }, [wordVisible]);
 
   // Obtenir la source de l'image pour le mode MIMER
   const getImageSource = (wordName) => {
@@ -296,9 +310,15 @@ export default function RevealScreen({ navigation, route }) {
           <View style={darkTheme ? styles.bgGradientDark : styles.bgGradientLight} />
         </>
       )}
-      <View style={isSpyfallInnocent ? styles.containerSpyfall : styles.container}>
-        <Text style={[styles.playerBadge, isSpyfallInnocent ? styles.textLight : { color: theme.textMuted }]}>{t('playerLabel', currentPlayer + 1)}</Text>
-        {playerName ? <Text style={[styles.playerName, isSpyfallInnocent ? styles.textLight : { color: theme.text }]}>{playerName}</Text> : null}
+      <Animated.View style={[isSpyfallInnocent ? styles.containerSpyfall : styles.container, revealStyle]}>
+        <Text style={[
+          { fontFamily: 'BebasNeue', color: '#FFFFFF', letterSpacing: 2 },
+          isSpyfall && lieuImage ? { fontSize: 32 } : { fontSize: 26 },
+        ]}>{t('playerLabel', currentPlayer + 1)}</Text>
+        {playerName ? <Text style={[
+          { fontFamily: 'BebasNeue', color: '#FFFFFF', letterSpacing: 2 },
+          isSpyfall && lieuImage ? { fontSize: 32 } : { fontSize: 26 },
+        ]}>{playerName}</Text> : null}
 
         {isMimer && !isMister ? (
           // Mode MIMER : afficher l'image + le nom
@@ -321,6 +341,7 @@ export default function RevealScreen({ navigation, route }) {
             <View style={styles.spyfallOverlay} />
             <View style={styles.spyfallContent}>
               <Text style={styles.spyfallLieuWord}>{word}</Text>
+              {GROUPES_MANGA[word] && <Text style={styles.spyfallMangaLabel}>{GROUPES_MANGA[word]}</Text>}
             </View>
           </View>
         ) : (
@@ -352,6 +373,9 @@ export default function RevealScreen({ navigation, route }) {
             ]}>
               {isMister && easyMode ? '' : (typeof word === 'string' ? word : '')}
             </Text>
+            {word && GROUPES_MANGA[word] && (
+              <Text style={[styles.mangaLabel, { color: '#FFFFFF' }]}>{GROUPES_MANGA[word]}</Text>
+            )}
           </>
         )}
 
@@ -361,12 +385,15 @@ export default function RevealScreen({ navigation, route }) {
           </View>
         )}
 
-        <Text style={[styles.hint, isSpyfallInnocent ? styles.hintLight : { color: theme.hintColor }]}>{isSpyfall ? t('memorizeLieu') : t('memorize')}</Text>
+        <Text style={[
+          { fontFamily: 'BebasNeue', letterSpacing: 2, color: '#FFFFFF' },
+          isSpyfall && lieuImage ? { fontSize: 32 } : { fontSize: 26 },
+        ]}>{isSpyfall ? (category === 'GROUPES' || category === 'GROUPS' ? t('memorizeGroupe') : t('memorizeLieu')) : t('memorize')}</Text>
 
         <TouchableOpacity style={isSpyfallInnocent ? styles.okBtnLight : [styles.okBtn, { backgroundColor: theme.okBtnBg, borderColor: theme.okBtnBorder }]} onPress={() => handleNext()} activeOpacity={0.8}>
           <Text style={[styles.okBtnText, { color: theme.okBtnText }]}>OK 👆</Text>
         </TouchableOpacity>
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -385,6 +412,7 @@ const styles = StyleSheet.create({
   catBadge: { borderWidth: 1, paddingHorizontal: 14, paddingVertical: 4, borderRadius: 8 },
   catText: { fontFamily: 'SpaceMono', fontSize: 12, letterSpacing: 2 },
   word: { fontFamily: 'BebasNeue', textAlign: 'center', letterSpacing: 1 },
+  mangaLabel: { fontFamily: 'BebasNeue', fontSize: 26, textAlign: 'center', letterSpacing: 2, marginTop: 4 },
   wordMister: { fontSize: 52 },
   hint: { fontFamily: 'SpaceMono', fontSize: 11, letterSpacing: 3 },
   okBtn: { marginTop: 20, paddingVertical: 16, paddingHorizontal: 48, borderRadius: 12, borderWidth: 2 },
@@ -407,6 +435,7 @@ const styles = StyleSheet.create({
   spyfallOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },
   spyfallContent: { flex: 1, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 100 },
   spyfallLieuWord: { fontFamily: 'BebasNeue', fontSize: 56, color: '#FFFFFF', textAlign: 'center', letterSpacing: 3, textShadowColor: 'rgba(0,0,0,0.75)', textShadowOffset: { width: 2, height: 2 }, textShadowRadius: 6 },
+  spyfallMangaLabel: { fontFamily: 'BebasNeue', fontSize: 32, color: '#FFFFFF', textAlign: 'center', letterSpacing: 2, marginTop: 8, textShadowColor: 'rgba(0,0,0,0.75)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 4 },
   containerSpyfall: { flex: 1, backgroundColor: '#000000', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28, gap: 12 },
   textLight: { color: '#FFFFFF' },
   hintLight: { color: 'rgba(255,255,255,0.7)' },

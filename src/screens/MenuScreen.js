@@ -13,6 +13,8 @@ import { generateAssignments } from '../gameLogic';
 import { setGlobalDarkTheme } from '../theme';
 import { initSounds, playClick, playStart, startBackgroundMusic, stopBackgroundMusic, setMusicEnabled, setSfxEnabled, musicEnabled, sfxEnabled } from '../sound';
 import { loadAndShowRewardedAd } from '../ads';
+import { triggerHaptic } from '../animations';
+import BouncePress from '../components/BouncePress';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
@@ -335,6 +337,8 @@ export default function MenuScreen({ navigation }) {
   const maxTotalSpecials = Math.floor(numPlayers / 3);
 
   const canAddUC = (numUndercovers + 1 + numMisterWhites) <= maxTotalSpecials;
+  const canAddSpy = (numSpies + 1 + numUndercovers) <= maxTotalSpecials;
+  const canAddSpyfallUC = (numUndercovers + 1 + numSpies) <= maxTotalSpecials;
   const canAddMW = (numUndercovers + numMisterWhites + 1) <= maxTotalSpecials;
 
   // Synchroniser gameMode avec les compteurs
@@ -588,6 +592,7 @@ export default function MenuScreen({ navigation }) {
 
   const handleStart = () => {
     playClick();
+    triggerHaptic('medium');
     setIsPlayOpening(true);
     if (pulseAnimRef.current) { pulseAnimRef.current.stop(); }
 
@@ -606,6 +611,7 @@ export default function MenuScreen({ navigation }) {
 
   const closeGameSetup = () => {
     playClick();
+    triggerHaptic('light');
     safeScale.setValue(1);
     playOpenAnim.setValue(0);
     setIsPlayOpening(false);
@@ -617,11 +623,13 @@ export default function MenuScreen({ navigation }) {
       setShowGameSetup(false);
       gameSetupAnim.setValue(0);
       startPulseAnimation();
+      startPulseAnimation();
     });
   };
 
   const handleLaunchGame = async () => {
     playClick();
+    triggerHaptic('medium');
 
     // Vérifier si la catégorie SPÉCIALE est sélectionnée sans mots
     const isSpecialeSelected = selectedCategory === 'SPECIALE';
@@ -659,11 +667,10 @@ export default function MenuScreen({ navigation }) {
       selectedCategory: finalCategory,
       customWords,
       mimerMode,
-      numUndercovers: gameMode === 3 ? (numSpies > 0 ? numSpies : numUndercovers) : numUndercovers,
-      spyfallUndercover: gameMode === 3 ? (numUndercovers > 0 && numSpies === 0) : false,
+      numUndercovers: gameMode === 3 ? (numUndercovers > 0 ? numUndercovers : numSpies) : numUndercovers,
+      spyfallUndercover: gameMode === 3 ? (numUndercovers > 0) : false,
       numMisterWhites,
       easyMode,
-      spyfallUndercover,
       darkTheme,
     });
   };
@@ -868,18 +875,17 @@ export default function MenuScreen({ navigation }) {
                 : 1,
             },
           ]}>
-            <TouchableOpacity style={[styles.bottomBtn, { backgroundColor: theme.btnBg, borderColor: theme.border }]} onPress={() => { setRulesPage(0); setShowRules(true); }}>
+            <BouncePress style={[styles.bottomBtn, { backgroundColor: theme.btnBg, borderColor: theme.border }]} onPress={() => { setRulesPage(0); setShowRules(true); }}>
               {darkTheme ? <ReglesIcon width={28} height={28} /> : <ReglesIconLight width={28} height={28} />}
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.bottomBtn, { backgroundColor: theme.btnBg, borderColor: theme.border }]} onPress={() => setShowSettings(true)}>
+            </BouncePress>
+            <BouncePress style={[styles.bottomBtn, { backgroundColor: theme.btnBg, borderColor: theme.border }]} onPress={() => setShowSettings(true)}>
               {darkTheme ? <ParametreIcon width={28} height={28} /> : <ParametreIconLight width={28} height={28} />}
-            </TouchableOpacity>
+            </BouncePress>
             <View style={styles.bottomBtnWrapper}>
               <View style={styles.adIconSmallContainer}>
                 <Image source={AD_REWARD_ICON} style={styles.adIconSmall} resizeMode="contain" />
               </View>
-              <TouchableOpacity style={[styles.bottomBtn, { backgroundColor: theme.btnBg, borderColor: theme.border }]} onPress={async () => {
-                playClick();
+              <BouncePress style={[styles.bottomBtn, { backgroundColor: theme.btnBg, borderColor: theme.border }]} onPress={async () => {
                 if (!isExpoGo) {
                   const rewarded = await loadAndShowRewardedAd(() => {});
                   if (!rewarded) return;
@@ -889,11 +895,11 @@ export default function MenuScreen({ navigation }) {
                 setShowSpecialeMode(true);
               }}>
                 {darkTheme ? <SpecialeIcon width={28} height={28} /> : <SpecialeIconLight width={28} height={28} />}
-              </TouchableOpacity>
+              </BouncePress>
             </View>
-            <TouchableOpacity style={[styles.bottomBtn, { backgroundColor: theme.btnBg, borderColor: theme.border }]} onPress={() => setShowUnlockShop(true)}>
+            <BouncePress style={[styles.bottomBtn, { backgroundColor: theme.btnBg, borderColor: theme.border }]} onPress={() => setShowUnlockShop(true)}>
               {darkTheme ? <BoutiqueIcon width={28} height={28} /> : <BoutiqueIconLight width={28} height={28} />}
-            </TouchableOpacity>
+            </BouncePress>
           </Animated.View>
 
           {/* Version */}
@@ -1250,7 +1256,7 @@ export default function MenuScreen({ navigation }) {
 
       <Modal visible={showGameSetup} animationType="slide" transparent onRequestClose={closeGameSetup}>
         <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]} collapsable={false}>
-          <View style={[styles.modalContent, { maxHeight: '90%', backgroundColor: theme.modalBg, borderColor: theme.modalBorder }]} collapsable={false}>
+          <Animated.View style={[styles.modalContent, { maxHeight: '90%', backgroundColor: theme.modalBg, borderColor: theme.modalBorder }, { transform: [{ scale: gameSetupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1] }) }], opacity: gameSetupAnim }]} collapsable={false}>
             <Text style={[styles.modalTitle, { color: theme.text }]}>{lang === 'fr' ? 'CONFIGURATION' : 'CONFIGURATION'}</Text>
 
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -1289,10 +1295,9 @@ export default function MenuScreen({ navigation }) {
                       playClick();
                       setSelectedCategory(lang === 'fr' ? 'LIEUX' : 'LOCATIONS');
                       setMimerMode(false);
-                      setNumUndercovers(1);
-                      setNumMisterWhites(0);
                       setNumSpies(1);
                       setNumUndercovers(0);
+                      setNumMisterWhites(0);
                       setSpyfallUndercover(false);
                       setSelectedCategory(lang === 'fr' ? 'LIEUX' : 'LOCATIONS');
                       setGameMode(3);
@@ -1342,7 +1347,7 @@ export default function MenuScreen({ navigation }) {
                           <View style={styles.roleCounterControls}>
                             <TouchableOpacity style={[styles.roleCounterBtn, { backgroundColor: theme.counterBtnBg, borderColor: theme.counterBtnBorder }]} onPress={() => { playClick(); setNumSpies(v => Math.max(0, v - 1)); }}><Text style={[styles.roleCounterBtnText, { color: theme.text }]}>-</Text></TouchableOpacity>
                             <Text style={[styles.roleCounterVal, { color: theme.neon }]}>{numSpies}</Text>
-                            <TouchableOpacity style={[styles.roleCounterBtn, !canAddUC && styles.roleCounterBtnDisabled, { backgroundColor: theme.counterBtnBg, borderColor: theme.counterBtnBorder }]} onPress={() => { playClick(); if (canAddUC) setNumSpies(v => v + 1); }} disabled={!canAddUC}><Text style={[styles.roleCounterBtnText, { color: theme.text }]}>+</Text></TouchableOpacity>
+                            <TouchableOpacity style={[styles.roleCounterBtn, !canAddSpy && styles.roleCounterBtnDisabled, { backgroundColor: theme.counterBtnBg, borderColor: theme.counterBtnBorder }]} onPress={() => { playClick(); if (canAddSpy) setNumSpies(v => v + 1); }} disabled={!canAddSpy}><Text style={[styles.roleCounterBtnText, { color: theme.text }]}>+</Text></TouchableOpacity>
                           </View>
                         </View>
                         <View style={[styles.roleCounterRow, { backgroundColor: theme.counterBg, borderColor: theme.counterBorder }]}>
@@ -1351,7 +1356,7 @@ export default function MenuScreen({ navigation }) {
                           <View style={styles.roleCounterControls}>
                             <TouchableOpacity style={[styles.roleCounterBtn, { backgroundColor: theme.counterBtnBg, borderColor: theme.counterBtnBorder }]} onPress={() => { playClick(); setNumUndercovers(v => Math.max(0, v - 1)); }}><Text style={[styles.roleCounterBtnText, { color: theme.text }]}>-</Text></TouchableOpacity>
                             <Text style={[styles.roleCounterVal, { color: theme.neon }]}>{numUndercovers}</Text>
-                            <TouchableOpacity style={[styles.roleCounterBtn, !canAddUC && styles.roleCounterBtnDisabled, { backgroundColor: theme.counterBtnBg, borderColor: theme.counterBtnBorder }]} onPress={() => { playClick(); if (canAddUC) setNumUndercovers(v => v + 1); }} disabled={!canAddUC}><Text style={[styles.roleCounterBtnText, { color: theme.text }]}>+</Text></TouchableOpacity>
+                            <TouchableOpacity style={[styles.roleCounterBtn, !canAddSpyfallUC && styles.roleCounterBtnDisabled, { backgroundColor: theme.counterBtnBg, borderColor: theme.counterBtnBorder }]} onPress={() => { playClick(); if (canAddSpyfallUC) setNumUndercovers(v => v + 1); }} disabled={!canAddSpyfallUC}><Text style={[styles.roleCounterBtnText, { color: theme.text }]}>+</Text></TouchableOpacity>
                           </View>
                         </View>
                       </View>
@@ -1427,7 +1432,7 @@ export default function MenuScreen({ navigation }) {
                           >
                             <Text style={styles.categoryChipEmoji}>{emoji}</Text>
                             <Text style={[styles.categoryChipText, selectedCategory === cat && { color: '#fff' }, selectedCategory !== cat && { color: theme.text }]}>
-                              {CATEGORY_NAMES[lang][cat] || cat}
+                              {CATEGORY_NAMES[lang][cat] || cat.replace(/_/g, ' ')}
                             </Text>
                           </TouchableOpacity>
                         </View>
@@ -1500,7 +1505,7 @@ export default function MenuScreen({ navigation }) {
                 <ImageBackground source={LAUNCH_BTN_LIGHT} style={styles.launchBtnImage} resizeMode="stretch"><Text style={styles.launchBtnOverlayText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text></ImageBackground>
               </TouchableOpacity>
             )}
-          </View>
+          </Animated.View>
         </View>
       </Modal>
 

@@ -219,15 +219,15 @@ export default function App() {
         <ThemeProvider value={darkTheme}>
           <NavigationContainer>
             {!isWeb && StatusBar && <StatusBar style="light" />}
-            <Stack.Navigator screenOptions={{ headerShown: false, animation: 'fade', contentStyle: { backgroundColor: colors.bg } }}>
-              <Stack.Screen name="Menu"        component={MenuScreen} />
-              <Stack.Screen name="Prep"        component={PrepScreenWrapper} />
-              <Stack.Screen name="Reveal"      component={RevealScreen} />
-              <Stack.Screen name="Black"       component={BlackScreen} />
-              <Stack.Screen name="Result"      component={ResultScreen} />
-              <Stack.Screen name="SpyfallGame" component={SpyfallGameScreen} />
-              <Stack.Screen name="SpyfallGuess" component={SpyfallGuessScreen} />
-              <Stack.Screen name="SpyfallVote" component={SpyfallVoteScreen} />
+            <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
+              <Stack.Screen name="Menu"        component={MenuScreen} options={{ animation: 'fade' }} />
+              <Stack.Screen name="Prep"        component={PrepScreenWrapper} options={{ animation: 'slide_from_right' }} />
+              <Stack.Screen name="Reveal"      component={RevealScreen} options={{ animation: 'fade_from_bottom' }} />
+              <Stack.Screen name="Black"       component={BlackScreen} options={{ animation: 'fade' }} />
+              <Stack.Screen name="Result"      component={ResultScreen} options={{ animation: 'fade_from_bottom' }} />
+              <Stack.Screen name="SpyfallGame" component={SpyfallGameScreen} options={{ animation: 'fade_from_bottom' }} />
+              <Stack.Screen name="SpyfallGuess" component={SpyfallGuessScreen} options={{ animation: 'slide_from_right' }} />
+              <Stack.Screen name="SpyfallVote" component={SpyfallVoteScreen} options={{ animation: 'slide_from_right' }} />
             </Stack.Navigator>
           </NavigationContainer>
         </ThemeProvider>

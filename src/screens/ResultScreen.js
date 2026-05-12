@@ -3,6 +3,8 @@ import { View, Text, TouchableOpacity, StyleSheet, Animated, ScrollView, Pressab
 import { colors, screenThemes, useDarkTheme } from '../theme';
 import { t } from '../i18n';
 import { playClick, playWin, playLose, playIntruderReveal, playInnocentReveal, playMisterWhite, vibrate, vibrateIntruderFound } from '../sound';
+import { GROUPES_MANGA } from '../data/words';
+import { triggerHaptic } from '../animations';
 
 // Images LIEUX - pour l'affichage Spyfall
 const LIEUX_IMAGES = {
@@ -160,6 +162,7 @@ export default function ResultScreen({ navigation, route }) {
 
   const scaleAnim   = useRef(new Animated.Value(0.2)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
+  const cardPulseAnim = useRef(new Animated.Value(1)).current;
   const adRef       = useRef(null);
 
   // Sécuriser
@@ -237,19 +240,33 @@ export default function ResultScreen({ navigation, route }) {
               if (a.role === 'intrus' || a.role === 'spy') {
                 playIntruderReveal();
                 vibrateIntruderFound();
+                triggerHaptic('heavy');
               } else if (a.role === 'mister') {
                 playMisterWhite();
                 vibrate([50, 30, 50]);
+                triggerHaptic('medium');
               } else {
                 playInnocentReveal();
+                triggerHaptic('light');
               }
+              // Pulse animation on card reveal
+              cardPulseAnim.setValue(0.92);
+              Animated.spring(cardPulseAnim, {
+                toValue: 1,
+                friction: 4,
+                tension: 140,
+                useNativeDriver: true,
+              }).start();
             }
             setRevealed(prev => ({ ...prev, [i]: !prev[i] }));
           };
 
           return (
-            <Pressable
+            <Animated.View
               key={i}
+              style={{ transform: [{ scale: isRev ? cardPulseAnim : 1 }] }}
+            >
+            <Pressable
               onPress={() => { playClick(); handleReveal(); }}
               style={[
                 styles.card,
@@ -265,6 +282,21 @@ export default function ResultScreen({ navigation, route }) {
                 {isRev && lieuImg ? (
                   <View style={styles.cardLieuRow}>
                     <Image source={lieuImg} style={styles.cardLieuImage} resizeMode="contain" />
+                    <View style={{ flexShrink: 1 }}>
+                      <Text style={[
+                        styles.cardWord,
+                        a.role === 'intrus' ? { color: theme.danger } : null,
+                        a.role === 'mister' ? { color: colors.accent } : null,
+                        a.role === 'spy' ? { color: theme.danger } : null,
+                        a.role === 'normal' ? { color: theme.text } : null,
+                      ]}>
+                        {wordDisplay}
+                      </Text>
+                      {GROUPES_MANGA[wordDisplay] && <Text style={[styles.cardMangaLabel, { color: theme.textMuted }]}>{GROUPES_MANGA[wordDisplay]}</Text>}
+                    </View>
+                  </View>
+                ) : isRev && GROUPES_MANGA[wordDisplay] ? (
+                  <View>
                     <Text style={[
                       styles.cardWord,
                       a.role === 'intrus' ? { color: theme.danger } : null,
@@ -274,6 +306,7 @@ export default function ResultScreen({ navigation, route }) {
                     ]}>
                       {wordDisplay}
                     </Text>
+                    <Text style={[styles.cardMangaLabel, { color: theme.textMuted }]}>{GROUPES_MANGA[wordDisplay]}</Text>
                   </View>
                 ) : (
                   <Text style={[
@@ -306,6 +339,7 @@ export default function ResultScreen({ navigation, route }) {
                 )}
               </View>
             </Pressable>
+            </Animated.View>
           );
         })}
 
@@ -384,6 +418,7 @@ const styles = StyleSheet.create({
   cardLieuRow:   { flexDirection: 'row', alignItems: 'center', gap: 6 },
   cardLieuImage: { width: 36, height: 36, borderRadius: 4 },
   cardWord:      { fontFamily: 'BebasNeue', fontSize: 28, letterSpacing: 1 },
+  cardMangaLabel: { fontFamily: 'BebasNeue', fontSize: 20, letterSpacing: 1, marginTop: 2, color: '#FFFFFF' },
   cardRight:     { alignItems: 'flex-end', gap: 4 },
   cardTap:       { fontFamily: 'SpaceMono', fontSize: 9, letterSpacing: 1 },
   badgesCol:     { alignItems: 'flex-end', gap: 4 },
