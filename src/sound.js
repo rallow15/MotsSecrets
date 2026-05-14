@@ -149,8 +149,8 @@ export async function initSounds() {
   try {
     await setAudioModeAsync({
       allowsRecording: false,
-      playsInSilentMode: false,
-      shouldPlayInBackground: true,
+      playsInSilentMode: true,
+      shouldPlayInBackground: false,
       interruptionMode: 'doNotMix',
     });
     isInitialized = true;

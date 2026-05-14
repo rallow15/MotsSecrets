@@ -756,7 +756,7 @@ export default function MenuScreen({ navigation }) {
       if (!rewarded) return;
     }
 
-    setSelectedCategory(cat);
+    setSelectedCategories([cat]);
     setShowCategories(false);
   };
 
@@ -1346,13 +1346,12 @@ export default function MenuScreen({ navigation }) {
                     style={[styles.modeCard, { backgroundColor: gameMode === 3 ? theme.cardActiveBg : theme.cardBg, borderColor: gameMode === 3 ? theme.cardActiveBorder : theme.cardBorder }]}
                     onPress={() => {
                       playClick();
-                      setSelectedCategory(lang === 'fr' ? 'LIEUX' : 'LOCATIONS');
+                      setSelectedCategories([lang === 'fr' ? 'LIEUX' : 'LOCATIONS']);
                       setMimerMode(false);
                       setNumSpies(1);
                       setNumUndercovers(0);
                       setNumMisterWhites(0);
                       setSpyfallUndercover(false);
-                      setSelectedCategory(lang === 'fr' ? 'LIEUX' : 'LOCATIONS');
                       setGameMode(3);
                     }}
                     activeOpacity={0.7}
