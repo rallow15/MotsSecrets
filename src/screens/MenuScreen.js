@@ -699,25 +699,31 @@ export default function MenuScreen({ navigation }) {
       finalCategory = null; // aléatoire parmi toutes
     }
 
-    navigation.navigate('Prep', {
-      numPlayers,
-      gameMode,
-      selectedCategory: finalCategory,
-      selectedCategories,
-      customWords,
-      mimerMode,
-      numUndercovers: gameMode === 3 ? (numUndercovers > 0 ? numUndercovers : numSpies) : numUndercovers,
-      spyfallUndercover: gameMode === 3 ? (numUndercovers > 0) : false,
-      numMisterWhites,
-      easyMode,
-      darkTheme,
-    });
+    // Animation de sortie : le game setup disparaît en fondu
+    Animated.timing(gameSetupAnim, {
+      toValue: 0,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
+      gameSetupAnim.setValue(0);
+      playOpenAnim.setValue(0);
+      setIsPlayOpening(false);
+      setShowGameSetup(false);
 
-    // Fermer le modal proprement après la navigation
-    gameSetupAnim.setValue(0);
-    playOpenAnim.setValue(0);
-    setIsPlayOpening(false);
-    setShowGameSetup(false);
+      navigation.navigate('Prep', {
+        numPlayers,
+        gameMode,
+        selectedCategory: finalCategory,
+        selectedCategories,
+        customWords,
+        mimerMode,
+        numUndercovers: gameMode === 3 ? (numUndercovers > 0 ? numUndercovers : numSpies) : numUndercovers,
+        spyfallUndercover: gameMode === 3 ? (numUndercovers > 0) : false,
+        numMisterWhites,
+        easyMode,
+        darkTheme,
+      });
+    });
   };
 
   const handleCategorySelect = async (cat) => {
