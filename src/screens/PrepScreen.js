@@ -24,16 +24,20 @@ export default function PrepScreen({ navigation, route }) {
     const n = Array.isArray(playerNames) ? (playerNames[currentPlayer] || '') : '';
     setName(n);
 
-    Animated.loop(
+    const pulse = Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, { toValue: 0.3, duration: 800, useNativeDriver: true }),
         Animated.timing(pulseAnim, { toValue: 1,   duration: 800, useNativeDriver: true }),
       ])
-    ).start();
+    );
+    pulse.start();
 
     if (!n) {
-      setTimeout(() => inputRef.current?.focus(), 200);
+      const timer = setTimeout(() => inputRef.current?.focus(), 200);
+      return () => { pulse.stop(); clearTimeout(timer); };
     }
+
+    return () => { pulse.stop(); };
   }, [currentPlayer]);
 
   const handleTap = () => {
@@ -52,6 +56,10 @@ export default function PrepScreen({ navigation, route }) {
       customWords: route.params.customWords || [],
       mimerMode: route.params.mimerMode,
       spyfallUndercover: route.params.spyfallUndercover ?? false,
+      numUndercovers: route.params.numUndercovers ?? 1,
+      numMisterWhites: route.params.numMisterWhites ?? 0,
+      easyMode: route.params.easyMode ?? false,
+      selectedCategories: route.params.selectedCategories,
       wordVisible: true,
       darkTheme,
     });
@@ -65,8 +73,8 @@ export default function PrepScreen({ navigation, route }) {
         resizeMode="cover"
       />
       <View style={darkTheme ? styles.bgGradientDark : styles.bgGradientLight} />
-      <Animated.View style={[styles.container, fadeInStyle, { paddingTop: Math.max(insets.top + 16, 60) }]} onStartShouldSetResponder={() => true} onTouchEnd={handleTap}>
-        <TouchableOpacity style={[styles.backBtn, { top: insets.top + 12, backgroundColor: theme.backBtnBg, borderColor: theme.backBtnBorder }]} onPress={() => { triggerHaptic('light'); navigation.goBack(); }} activeOpacity={0.7}>
+      <TouchableOpacity style={[styles.container, fadeInStyle]} activeOpacity={1} onPress={handleTap}>
+        <TouchableOpacity style={[styles.backBtn, { top: insets.top + 12, backgroundColor: theme.backBtnBg, borderColor: theme.backBtnBorder }]} onPress={(e) => { e.stopPropagation(); triggerHaptic('light'); navigation.goBack(); }} activeOpacity={0.7}>
           <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={darkTheme ? '#e8d5ff' : '#1a1a1a'} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <Path d="M15 18l-6-6 6-6" />
           </Svg>
@@ -74,7 +82,7 @@ export default function PrepScreen({ navigation, route }) {
 
         <Text style={[styles.playerBadge, { color: theme.textMuted }]}>{t('playerLabel', currentPlayer + 1)}</Text>
 
-        <View style={styles.nameWrap} onStartShouldSetResponder={() => true}>
+        <View style={styles.nameWrap}>
           <TextInput
             ref={inputRef}
             style={[styles.nameInput, { color: theme.text, borderBottomColor: theme.inputBorder }]}
@@ -104,7 +112,7 @@ export default function PrepScreen({ navigation, route }) {
         </View>
 
         <Animated.Text style={[styles.tapIcon, { opacity: pulseAnim }]}>👆</Animated.Text>
-      </Animated.View>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -114,7 +122,7 @@ const styles = StyleSheet.create({
   bgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
   bgGradientDark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.15)' },
   bgGradientLight: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(180,150,80,0.10)' },
-  container:  { flex: 1, alignItems: 'center', paddingHorizontal: 32, gap: 8 },
+  container:  { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, gap: 8 },
   backBtn: { position: 'absolute', left: 20, width: 44, height: 44, borderRadius: 22, borderWidth: 2, alignItems: 'center', justifyContent: 'center', zIndex: 10 },
   playerBadge:{ fontFamily: 'SpaceMono', fontSize: 11, letterSpacing: 5, overflow: 'visible' },
   nameWrap:   { width: '100%', alignItems: 'center', gap: 2 },

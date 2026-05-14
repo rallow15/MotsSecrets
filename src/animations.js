@@ -26,9 +26,9 @@ export function useBouncePress() {
 
   const onPressIn = useCallback(() => {
     Animated.spring(scale, {
-      toValue: 0.92,
-      friction: 8,
-      tension: 300,
+      toValue: 0.9,
+      friction: 7,
+      tension: 400,
       useNativeDriver: true,
     }).start();
   }, [scale]);
@@ -36,8 +36,8 @@ export function useBouncePress() {
   const onPressOut = useCallback(() => {
     Animated.spring(scale, {
       toValue: 1,
-      friction: 8,
-      tension: 300,
+      friction: 4,
+      tension: 400,
       useNativeDriver: true,
     }).start();
   }, [scale]);
@@ -93,6 +93,48 @@ export function useScaleIn() {
   const animatedStyle = { transform: [{ scale }], opacity };
 
   return { animatedStyle, start };
+}
+
+// ─── useModalAnimation ───
+// Returns animated style + trigger() for a smooth modal entrance (scale + fade)
+export function useModalAnimation(visible) {
+  const scale = useRef(new Animated.Value(0.9)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.spring(scale, {
+          toValue: 1,
+          friction: 7,
+          tension: 180,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(scale, {
+          toValue: 0.95,
+          duration: 120,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0,
+          duration: 120,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [visible]);
+
+  const animatedStyle = { transform: [{ scale }], opacity };
+
+  return animatedStyle;
 }
 
 // ─── useShimmer ───

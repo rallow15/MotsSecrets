@@ -4,6 +4,7 @@ import { colors, screenThemes, useDarkTheme } from '../theme';
 import { t, getLang } from '../i18n';
 import { playClick, playReveal } from '../sound';
 import { GROUPES_MANGA } from '../data/words';
+import { generateAssignments } from '../gameLogic';
 import { useScaleIn, triggerHaptic } from '../animations';
 
 // Images LIEUX - require statiques pour Metro
@@ -161,6 +162,7 @@ export default function RevealScreen({ navigation, route }) {
   const easyMode = assignment.easyMode || route.params.easyMode || false;
   const playerName = playerNames?.[currentPlayer] ?? '';
   const isSpyfall = gameMode === 3;
+  const spyHint = assignment.spyHint || null;
 
   // Récupérer les données MIMER (paire d'images + indice)
   const mimerData = assignment.mimerData;
@@ -239,6 +241,7 @@ export default function RevealScreen({ navigation, route }) {
       mimerMode: route.params.mimerMode ?? false,
       customWords: route.params.customWords || [],
       spyfallUndercover,
+      selectedCategories: route.params.selectedCategories,
     };
 
     if (next >= numPlayers) {
@@ -270,6 +273,36 @@ export default function RevealScreen({ navigation, route }) {
         ...nextParams,
       });
     }
+  };
+
+  const handleSkip = () => {
+    playClick();
+    triggerHaptic('light');
+    const newAssignments = generateAssignments(
+      numPlayers, gameMode, route.params.selectedCategory,
+      route.params.customWords || [], mimerMode,
+      route.params.numUndercovers ?? 1, route.params.numMisterWhites ?? 0,
+      easyMode, spyfallUndercover
+    );
+    setWordVisible(false);
+    navigation.navigate('Prep', {
+      numPlayers,
+      assignments: newAssignments,
+      currentPlayer,
+      takenNumbers: [],
+      playerNumbers,
+      playerNames,
+      selectedCategory: route.params.selectedCategory,
+      selectedCategories: route.params.selectedCategories,
+      customWords: route.params.customWords || [],
+      mimerMode,
+      gameMode,
+      numUndercovers: route.params.numUndercovers ?? 1,
+      numMisterWhites: route.params.numMisterWhites ?? 0,
+      easyMode,
+      spyfallUndercover,
+      darkTheme,
+    });
   };
 
   // Phase 1 : "Touche l'écran"
@@ -333,6 +366,11 @@ export default function RevealScreen({ navigation, route }) {
             <Text style={styles.spyEmoji}>🕵️</Text>
             <Text style={[styles.spyTitle, { color: theme.text }]}>{t('roleSpy')}</Text>
             <Text style={[styles.spyInstruction, { color: theme.textMuted }]}>{t('spyInstruction')}</Text>
+            {spyHint && easyMode && (
+              <View style={[styles.easyHint, { backgroundColor: theme.easyHintBg, borderColor: theme.easyHintBorder }]}>
+                <Text style={[styles.easyHintText, { color: theme.text }]}>💡 {lang === 'fr' ? 'Indice :' : 'Hint:'} <Text style={[styles.easyHintCategory, { color: theme.text }]}>{spyHint}</Text></Text>
+              </View>
+            )}
           </View>
         ) : isSpyfall && lieuImage ? (
           // Mode SPYFALL innocent : image plein écran
@@ -374,7 +412,7 @@ export default function RevealScreen({ navigation, route }) {
               {isMister && easyMode ? '' : (typeof word === 'string' ? word : '')}
             </Text>
             {word && GROUPES_MANGA[word] && (
-              <Text style={[styles.mangaLabel, { color: '#FFFFFF' }]}>{GROUPES_MANGA[word]}</Text>
+              <Text style={[styles.mangaLabel, { color: darkTheme ? '#FFFFFF' : '#1a1a1a' }]}>{GROUPES_MANGA[word]}</Text>
             )}
           </>
         )}
@@ -393,6 +431,12 @@ export default function RevealScreen({ navigation, route }) {
         <TouchableOpacity style={isSpyfallInnocent ? styles.okBtnLight : [styles.okBtn, { backgroundColor: theme.okBtnBg, borderColor: theme.okBtnBorder }]} onPress={() => handleNext()} activeOpacity={0.8}>
           <Text style={[styles.okBtnText, { color: theme.okBtnText }]}>OK 👆</Text>
         </TouchableOpacity>
+
+        {!isMimer && currentPlayer === 0 && !isMister && !isSpy && (
+          <TouchableOpacity style={[styles.skipBtn, { borderColor: theme.border }]} onPress={handleSkip} activeOpacity={0.7}>
+            <Text style={[styles.skipBtnText, { color: theme.textMuted }]}>{lang === 'fr' ? '🔄 CHANGER' : '🔄 CHANGE'}</Text>
+          </TouchableOpacity>
+        )}
       </Animated.View>
     </View>
   );
@@ -417,6 +461,8 @@ const styles = StyleSheet.create({
   hint: { fontFamily: 'SpaceMono', fontSize: 11, letterSpacing: 3 },
   okBtn: { marginTop: 20, paddingVertical: 16, paddingHorizontal: 48, borderRadius: 12, borderWidth: 2 },
   okBtnText: { fontFamily: 'BebasNeue', fontSize: 26, letterSpacing: 3 },
+  skipBtn: { marginTop: 10, paddingVertical: 14, paddingHorizontal: 32, borderWidth: 2, borderRadius: 12 },
+  skipBtnText: { fontFamily: 'BebasNeue', fontSize: 26, letterSpacing: 2 },
   // MIMER
   mimerContainer: { alignItems: 'center', gap: 16 },
   mimerImage: { width: 220, height: 220, borderRadius: 16, borderWidth: 3, borderColor: '#1a1a1a', backgroundColor: '#fff' },

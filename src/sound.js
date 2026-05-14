@@ -64,12 +64,16 @@ const playingSounds = {};
 // Écouter les changements d'état de l'application
 if (AppState) {
   AppState.addEventListener('change', (state) => {
-    if (state === 'background' && backgroundMusic) {
-      backgroundMusic.pause();
-      isMusicPlaying = false;
-    } else if (state === 'active' && backgroundMusic && musicEnabled && soundEnabled) {
-      backgroundMusic.play();
-      isMusicPlaying = true;
+    try {
+      if (state === 'background' && backgroundMusic) {
+        backgroundMusic.pause();
+        isMusicPlaying = false;
+      } else if (state === 'active' && backgroundMusic && musicEnabled && soundEnabled) {
+        backgroundMusic.play();
+        isMusicPlaying = true;
+      }
+    } catch (e) {
+      console.log('Erreur AppState musique:', e);
     }
   });
 }
@@ -80,7 +84,7 @@ async function playAsset(soundKey, isMusic = false) {
   if (!asset) return false;
   try {
     if (playingSounds[soundKey]) {
-      playingSounds[soundKey].remove();
+      try { playingSounds[soundKey].remove(); } catch (e) { /* already removed */ }
     }
     const player = createAudioPlayer(asset);
     player.volume = isMusic ? musicVolume : sfxVolume;
@@ -89,6 +93,7 @@ async function playAsset(soundKey, isMusic = false) {
     player.play();
     return true;
   } catch (error) {
+    delete playingSounds[soundKey];
     return false;
   }
 }

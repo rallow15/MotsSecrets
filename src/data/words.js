@@ -39,7 +39,7 @@ export const CATEGORIES_FR = {
   // ═════════════════════════════════════════════════════════════
   ACTEURS: {
     _subcategories: {
-      'Action/Heroes': ["Tom Cruise", "Will Smith", "Dwayne Johnson", "Jason Statham", "Vin Diesel", "Keanu Reeves", "Robert Downey Jr.", "Hugh Jackman", "Tom Holland", "Michael B. Jordan"],
+      'Action/Heroes': ["Tom Cruise", "Will Smith", "Dwayne Johnson", "Jason Statham", "Vin Diesel", "Keanu Reeves", "Robert Downey Jr.", "Hugh Jackman", "Tom Holland", "Michael B. Jordan", "Bruce Willis", "Arnold Schwarzenegger", "Sylvester Stallone"],
       'Drame classiques': ["Leonardo DiCaprio", "Tom Hanks", "Morgan Freeman", "Robert De Niro", "Al Pacino", "Denzel Washington", "Brad Pitt", "Johnny Depp", "Samuel L. Jackson"],
       'Arts martiaux': ["Jackie Chan", "Bruce Lee", "Jet Li", "Chuck Norris", "Wesley Snipes"],
       'Thriller/Conduite': ["Matt Damon", "Ben Affleck", "Mark Wahlberg", "Christian Bale"],
@@ -54,6 +54,24 @@ export const CATEGORIES_FR = {
     _subcategories: {
       'Action/Heroines': ["Scarlett Johansson", "Angelina Jolie", "Gal Gadot", "Margot Robbie", "Zendaya", "Charlize Theron"],
       'Drame/Prestige': ["Jennifer Lawrence", "Meryl Streep", "Natalie Portman", "Emma Watson", "Emma Stone", "Cate Blanchett"],
+    },
+  },
+
+  // ═════════════════════════════════════════════════════════════
+  // 👷 MÉTIERS
+  // ═════════════════════════════════════════════════════════════
+  METIERS: {
+    _subcategories: {
+      'Médical': ["Médecin", "Infirmier", "Chirurgien", "Pharmacien", "Dentiste", "Vétérinaire", "Kinésithérapeute", "Sage-femme", "Ambulancier", "Psychiatre"],
+      'Éducation': ["Professeur", "Instituteur", "Directeur d\'école", "Surveillant", "Animateur", "Éducateur", "Documentaliste"],
+      'Justice/Sécurité': ["Policier", "Pompier", "Avocat", "Juge", "Gendarme", "Détective", "Garde du corps", "Agent de sécurité", "Douanier"],
+      'Cuisine': ["Chef cuisinier", "Pâtissier", "Boulanger", "Boucher", "Sommelier", "Barman", "Serveur"],
+      'BTP/Manuel': ["Plombier", "Électricien", "Menuisier", "Peintre", "Couturier", "Soudeur", "Carreleur", "Maçon", "Couvreur", "Mécanicien"],
+      'Art/Média': ["Journaliste", "Photographe", "Réalisateur", "Acteur", "Musicien", "Dessinateur", "Tatoueur", "Styliste", "Architecte"],
+      'Commerce/Finance': ["Vendeur", "Commercial", "Banquier", "Comptable", "Chef d\'entreprise", "Agent immobilier", "Assureur", "Négociant"],
+      'Tech/Science': ["Ingénieur", "Informaticien", "Développeur", "Chercheur", "Astronaute", "Pilote", "Météorologue", "Archéologue"],
+      'Transport': ["Chauffeur", "Pilote", "Marin", "Contrôleur", "Livreur", "Conducteur de train"],
+      'Agriculture': ["Agriculteur", "Éleveur", "Pêcheur", "Vigneron", "Paysagiste", "Bûcheron"],
     },
   },
 
@@ -86,18 +104,21 @@ export const CATEGORIES_FR = {
   // ═════════════════════════════════════════════════════════════
   ANIMAUX: {
     _subcategories: {
-      'Félins': ["Lion", "Tigre", "Léopard", "Guépard", "Jaguar", "Puma"],
-      'Primates': ["Singe", "Gorille", "Chimpanzé", "Orang-outan", "Babouin"],
-      'Animaux de maison': ["Chat", "Chien", "Lapin", "Hamster", "Cochon d'Inde"],
-      'Ferme': ["Cheval", "Âne", "Vache", "Taureau", "Mouton", "Brebis", "Chèvre", "Bouc", "Cochon", "Poule", "Coq", "Canard", "Oie", "Dinde", "Bœuf"],
-      'Forêt': ["Loup", "Renard", "Ours", "Sanglier", "Cerf", "Biche", "Chevreuil", "Écureuil", "Hérisson"],
-      'Savane': ["Éléphant", "Rhinocéros", "Hippopotame", "Girafe", "Zèbre", "Gnou", "Gazelle", "Antilope", "Buffle"],
-      'Oiseaux': ["Aigle", "Faucon", "Hibou", "Chouette", "Corbeau", "Pigeon", "Moineau", "Perroquet", "Mouette", "Pingouin"],
-      'Marins': ["Requin", "Dauphin", "Baleine", "Orque", "Phoque", "Otarie"],
-      'Mer': ["Crabe", "Langouste", "Homard", "Crevette", "Poulpe", "Calamar", "Étoile de mer", "Oursin"],
-      'Reptiles': ["Tortue", "Lézard", "Caméléon", "Iguane", "Serpent", "Python", "Cobra", "Vipère", "Crocodile", "Alligator", "Caïman"],
-      'Étang': ["Grenouille", "Crapaud", "Rat", "Souris", "Lièvre", "Castor", "Loutre"],
-      'Exotiques': ["Kangourou", "Koala", "Panda", "Dingo"],
+      'Équidés': ["Cheval", "Âne", "Zèbre", "Poney"],
+      'Félins': ["Lion", "Tigre", "Léopard", "Guépard", "Jaguar", "Puma", "Chat"],
+      'Canidés': ["Chien", "Loup", "Renard", "Coyote", "Chacal"],
+      'Oiseaux de proie': ["Aigle", "Faucon", "Vautour", "Hibou", "Chouette", "Corbeau"],
+      'Oiseaux communs': ["Pigeon", "Moineau", "Perroquet"],
+      'Oiseaux d\'eau': ["Mouette", "Flamant rose", "Cygne", "Pélican", "Pingouin"],
+      'Troupeau': ["Vache", "Taureau", "Mouton", "Chèvre", "Buffle", "Bison"],
+      'Ferme': ["Poule", "Canard", "Oie"],
+      'Maison': ["Lapin", "Hamster", "Cochon d'Inde", "Écureuil", "Hérisson"],
+      'Savane': ["Éléphant", "Girafe", "Rhinocéros", "Hippopotame"],
+      'Forêt': ["Sanglier", "Cerf", "Chevreuil", "Cochon", "Gazelle"],
+      'Marins': ["Dauphin", "Baleine", "Orque", "Phoque", "Otarie", "Requin"],
+      'Mer': ["Crabe", "Homard", "Crevette", "Poulpe", "Calamar", "Étoile de mer"],
+      'Reptiles': ["Crocodile", "Serpent", "Lézard", "Caméléon", "Iguane", "Tortue"],
+      'Singes': ["Singe", "Gorille", "Orang-outan", "Chimpanzé", "Babouin", "Ours", "Kangourou", "Koala", "Panda"],
     },
   },
 
@@ -192,9 +213,10 @@ export const CATEGORIES_FR = {
       'Ustensiles de table': ["Fourchette", "Cuillère", "Couteau", "Assiette", "Verre", "Tasse", "Bouteille"],
       'Cuisine & Cuisson': ["Poêle", "Casserole", "Micro-ondes", "Grille-pain", "Cafetière", "Bouilloire", "Mixeur", "Robot culinaire"],
       'Meubles': ["Canapé", "Table", "Chaise", "Lit", "Armoire", "Commode", "Bureau", "Étagère"],
-      'Literie & Déco': ["Coussin", "Couverture", "Drap", "Oreiller", "Matelas", "Tapis", "Vase", "Cadre", "Miroir", "Rideau", "Lampe", "Horloge", "Réveil"],
-      'Sacs & Affaires': ["Clé", "Portefeuille", "Sac", "Valise", "Parapluie", "Lunettes", "Montre"],
-      'Écriture & Bureau': ["Stylo", "Cahier", "Livre", "Serviette"],
+      'Literie': ["Coussin", "Couverture", "Drap", "Oreiller", "Matelas", "Cadre de lit"],
+      'Déco': ["Tapis", "Vase", "Miroir", "Rideau", "Lampe", "Horloge", "Réveil"],
+      'Sacs & Affaires': ["Clé", "Portefeuille", "Sac à main", "Valise", "Parapluie", "Lunettes", "Montre"],
+      'Écriture & Bureau': ["Stylo", "Cahier", "Livre", "Serviette en papier"],
       'Nettoyage': ["Balai", "Aspirateur", "Seau", "Chiffon", "Produit ménager", "Torchon", "Éponge"],
       'Bricolage & Divers': ["Bougie", "Allumette", "Briquet", "Ciseaux", "Colle", "Ruban adhésif"],
     },
@@ -367,7 +389,7 @@ export const CATEGORIES_EN = {
   // ═════════════════════════════════════════════════════════════
   ACTORS: {
     _subcategories: {
-      'Action/Heroes': ["Tom Cruise", "Will Smith", "Dwayne Johnson", "Jason Statham", "Vin Diesel", "Keanu Reeves", "Robert Downey Jr.", "Hugh Jackman", "Tom Holland", "Michael B. Jordan"],
+      'Action/Heroes': ["Tom Cruise", "Will Smith", "Dwayne Johnson", "Jason Statham", "Vin Diesel", "Keanu Reeves", "Robert Downey Jr.", "Hugh Jackman", "Tom Holland", "Michael B. Jordan", "Bruce Willis", "Arnold Schwarzenegger", "Sylvester Stallone"],
       'Drama Classics': ["Leonardo DiCaprio", "Tom Hanks", "Morgan Freeman", "Robert De Niro", "Al Pacino", "Denzel Washington", "Brad Pitt", "Johnny Depp", "Samuel L. Jackson"],
       'Martial Arts': ["Jackie Chan", "Bruce Lee", "Jet Li", "Chuck Norris", "Wesley Snipes"],
       'Thriller/Driving': ["Matt Damon", "Ben Affleck", "Mark Wahlberg", "Christian Bale"],
@@ -382,6 +404,24 @@ export const CATEGORIES_EN = {
     _subcategories: {
       'Action/Heroines': ["Scarlett Johansson", "Angelina Jolie", "Gal Gadot", "Margot Robbie", "Zendaya", "Charlize Theron"],
       'Drama/Prestige': ["Jennifer Lawrence", "Meryl Streep", "Natalie Portman", "Emma Watson", "Emma Stone", "Cate Blanchett"],
+    },
+  },
+
+  // ═════════════════════════════════════════════════════════════
+  // 👷 PROFESSIONS
+  // ═════════════════════════════════════════════════════════════
+  PROFESSIONS: {
+    _subcategories: {
+      'Medical': ["Doctor", "Nurse", "Surgeon", "Pharmacist", "Dentist", "Veterinarian", "Physiotherapist", "Midwife", "Paramedic", "Psychiatrist"],
+      'Education': ["Teacher", "Primary School Teacher", "Principal", "Supervisor", "Youth Worker", "Educator", "Librarian"],
+      'Law/Security': ["Police Officer", "Firefighter", "Lawyer", "Judge", "Military Police", "Detective", "Bodyguard", "Security Guard", "Customs Officer"],
+      'Culinary': ["Chef", "Pastry Chef", "Baker", "Butcher", "Sommelier", "Bartender", "Waiter"],
+      'Trades/Manual': ["Plumber", "Electrician", "Carpenter", "Painter", "Tailor", "Welder", "Tiler", "Bricklayer", "Roofer", "Mechanic"],
+      'Art/Media': ["Journalist", "Photographer", "Director", "Actor", "Musician", "Illustrator", "Tattoo Artist", "Fashion Designer", "Architect"],
+      'Business/Finance': ["Salesperson", "Sales Rep", "Banker", "Accountant", "Entrepreneur", "Real Estate Agent", "Insurance Agent", "Trader"],
+      'Tech/Science': ["Engineer", "IT Specialist", "Developer", "Researcher", "Astronaut", "Pilot", "Meteorologist", "Archaeologist"],
+      'Transport': ["Driver", "Pilot", "Sailor", "Ticket Inspector", "Delivery Driver", "Train Driver"],
+      'Agriculture': ["Farmer", "Breeder", "Fisherman", "Winemaker", "Landscaper", "Lumberjack"],
     },
   },
 
@@ -414,18 +454,21 @@ export const CATEGORIES_EN = {
   // ═════════════════════════════════════════════════════════════
   ANIMALS: {
     _subcategories: {
-      'Felines': ["Lion", "Tiger", "Leopard", "Cheetah", "Jaguar", "Puma"],
-      'Primates': ["Monkey", "Gorilla", "Chimpanzee", "Orangutan", "Baboon"],
-      'Pets': ["Cat", "Dog", "Rabbit", "Hamster", "Guinea Pig"],
-      'Farm': ["Horse", "Donkey", "Cow", "Bull", "Sheep", "Goat", "Pig", "Chicken", "Rooster", "Duck", "Goose", "Turkey", "Ox"],
-      'Forest': ["Wolf", "Fox", "Bear", "Boar", "Deer", "Squirrel", "Hedgehog"],
-      'Safari': ["Elephant", "Rhinoceros", "Hippopotamus", "Giraffe", "Zebra", "Wildebeest", "Gazelle", "Antelope", "Buffalo"],
-      'Birds': ["Eagle", "Falcon", "Owl", "Crow", "Pigeon", "Sparrow", "Parrot", "Seagull", "Penguin"],
-      'Marine': ["Shark", "Dolphin", "Whale", "Orca", "Seal", "Sea Lion"],
-      'Seafood': ["Crab", "Lobster", "Shrimp", "Octopus", "Squid", "Starfish", "Sea Urchin"],
-      'Reptiles': ["Turtle", "Lizard", "Chameleon", "Iguana", "Snake", "Python", "Cobra", "Viper", "Crocodile", "Alligator", "Caiman"],
-      'Pond': ["Frog", "Toad", "Rat", "Mouse", "Hare", "Beaver", "Otter"],
-      'Exotic': ["Kangaroo", "Koala", "Panda", "Dingo"],
+      'Equines': ["Horse", "Donkey", "Zebra", "Pony"],
+      'Felines': ["Lion", "Tiger", "Leopard", "Cheetah", "Jaguar", "Puma", "Cat"],
+      'Canines': ["Dog", "Wolf", "Fox", "Dingo"],
+      'Birds of Prey': ["Phoenix", "Eagle", "Falcon", "Vulture", "Owl", "Horned Owl", "Crow"],
+      'Common Birds': ["Pigeon", "Sparrow", "Parrot"],
+      'Water Birds': ["Seagull", "Flamingo", "Swan", "Pelican", "Penguin"],
+      'Herd': ["Cow", "Bull", "Sheep", "Goat", "Buffalo", "Bison"],
+      'Farm': ["Chicken", "Duck", "Goose"],
+      'Pets': ["Rabbit", "Hamster", "Guinea Pig", "Squirrel", "Hedgehog"],
+      'Safari': ["Elephant", "Giraffe", "Rhinoceros", "Hippopotamus"],
+      'Forest': ["Boar", "Deer", "Pig", "Gazelle"],
+      'Marine': ["Dolphin", "Whale", "Orca", "Seal", "Sea Lion", "Shark"],
+      'Seafood': ["Crab", "Lobster", "Shrimp", "Octopus", "Squid", "Starfish"],
+      'Reptiles': ["Crocodile", "Snake", "Lizard", "Chameleon", "Iguana", "Turtle"],
+      'Primates': ["Monkey", "Gorilla", "Orangutan", "Chimpanzee", "Baboon", "Bear", "Kangaroo", "Koala", "Panda"],
     },
   },
 
@@ -519,9 +562,10 @@ export const CATEGORIES_EN = {
       'Tableware': ["Fork", "Spoon", "Knife", "Plate", "Glass", "Mug", "Bottle"],
       'Cooking': ["Pan", "Pot", "Microwave", "Toaster", "Coffee Maker", "Kettle", "Blender", "Food Processor"],
       'Furniture': ["Sofa", "Table", "Chair", "Bed", "Wardrobe", "Dresser", "Desk", "Shelf"],
-      'Bedding & Decor': ["Cushion", "Blanket", "Sheet", "Pillow", "Mattress", "Rug", "Vase", "Frame", "Mirror", "Curtain", "Lamp", "Clock", "Alarm Clock"],
-      'Bags & Personal': ["Key", "Wallet", "Bag", "Suitcase", "Umbrella", "Glasses", "Watch"],
-      'Writing & Office': ["Pen", "Notebook", "Book", "Napkin"],
+      'Bedding': ["Cushion", "Blanket", "Sheet", "Pillow", "Mattress", "Bed Frame"],
+      'Decor': ["Rug", "Vase", "Mirror", "Curtain", "Lamp", "Clock", "Alarm Clock"],
+      'Bags & Personal': ["Key", "Wallet", "Handbag", "Suitcase", "Umbrella", "Glasses", "Watch"],
+      'Writing & Office': ["Pen", "Notebook", "Book", "Paper Napkin"],
       'Cleaning': ["Broom", "Vacuum", "Bucket", "Rag", "Cleaning Product", "Dishcloth", "Sponge"],
       'DIY & Misc': ["Candle", "Match", "Lighter", "Scissors", "Glue", "Duct Tape"],
     },
@@ -732,3 +776,144 @@ Object.keys(CATEGORIES_FR).forEach(cat => {
     WORD_CLUES[word] = [];
   });
 });
+
+// ─── Indices pour le mode Facile Spyfall ───
+export const SPYFALL_HINTS_FR = {
+  // Urbain
+  'Restaurant': 'Service',
+  'Cinéma': 'Obscurité',
+  'Supermarché': 'Rayon',
+  'Banque': 'Compte',
+  'Bibliothèque': 'Retour',
+  'Musée': 'Cadre',
+  'Hôtel': 'Clé',
+  'Théâtre': 'Rideau',
+  'Opéra': 'Vibrations',
+  'Marché': 'Étiquette',
+  // Transport
+  'Gare': 'Quai',
+  'Aéroport': 'Transit',
+  'Avion': 'Cabine',
+  'Bateau de croisière': 'Pont',
+  'Sous-marin': 'Pression',
+  'Caravane': 'Étape',
+  // Nature
+  'Plage': 'Coquillage',
+  'Pôle Nord': 'Nuit',
+  'Désert': 'Mirage',
+  'Forêt tropicale': 'Canopée',
+  'Île déserte': 'Signal',
+  'Volcan': 'Cendres',
+  // Institutions publiques
+  'École': 'Sonnette',
+  'Église': 'Vitrail',
+  'Prison': 'Matricule',
+  'Ambassade': 'Passeport',
+  'Camp militaire': 'Rangement',
+  // Scientifique/Industriel
+  'Hôpital': 'Blouse',
+  'Laboratoire': 'Gel',
+  'Usine': 'Chaîne',
+  'Station spatiale': 'Orbite',
+  // Loisirs
+  "Parc d'attractions": 'File',
+  'Stade': 'Vague',
+  'Casino': 'Jeton',
+  'Cirque': 'Filet',
+  'Stade olympique': 'Podium',
+  'Spa': 'Bougie',
+  'Festival': 'Bracelet',
+  'Phare': 'Signal',
+  'Château': 'Douves',
+  // GROUPES
+  'Amiraux': 'Justice',
+  'Armée Révolutionnaire': 'Rébellion',
+  'Chevaliers Divins': 'Sanctuaire',
+  'Cinq Doyens': 'Conseil',
+  'Clan D': 'Héritage',
+  'Rang S': 'Bounty',
+  'Shichibukai': 'Pacte',
+  'Yonko': 'Territoire',
+  'Akatsuki': 'Nuage',
+  'Clan Uchiha': 'Iris',
+  'Saiyan': 'Queue',
+  'Avengers': 'Assemblée',
+  'Justice League': 'Lanterne',
+  'X-Men': 'Gène',
+  '300 Spartans': 'Bouclier',
+  'Expendables': 'Mercenaire',
+  'Jedi': 'Ordre',
+  'Power Rangers': 'Zord',
+  'Rang Nation': 'Examen',
+  'Chevalier du Zodiaque': 'Cosmos',
+};
+
+export const SPYFALL_HINTS_EN = {
+  // Urban
+  'Restaurant': 'Service',
+  'Cinema': 'Darkness',
+  'Supermarket': 'Aisle',
+  'Bank': 'Account',
+  'Library': 'Return',
+  'Museum': 'Frame',
+  'Hotel': 'Keycard',
+  'Theater': 'Curtain',
+  'Opera': 'Vibrations',
+  'Market': 'Price tag',
+  // Transport
+  'Train Station': 'Platform',
+  'Airport': 'Transit',
+  'Airplane': 'Cabin',
+  'Cruise Ship': 'Deck',
+  'Submarine': 'Pressure',
+  'Caravan': 'Stop',
+  // Nature
+  'Beach': 'Seashell',
+  'North Pole': 'Night',
+  'Desert': 'Mirage',
+  'Rainforest': 'Canopy',
+  'Desert Island': 'Signal',
+  'Volcano': 'Ashes',
+  // Public Institutions
+  'School': 'Bell',
+  'Church': 'Stained glass',
+  'Prison': 'Number',
+  'Embassy': 'Passport',
+  'Military Camp': 'Formation',
+  // Science/Industrial
+  'Hospital': 'Gown',
+  'Laboratory': 'Gel',
+  'Factory': 'Line',
+  'Space Station': 'Orbit',
+  // Entertainment
+  'Amusement Park': 'Queue',
+  'Stadium': 'Wave',
+  'Casino': 'Chip',
+  'Circus': 'Net',
+  'Olympic Stadium': 'Podium',
+  'Spa': 'Candle',
+  'Festival': 'Wristband',
+  'Lighthouse': 'Beam',
+  'Castle': 'Moat',
+  // GROUPS
+  'Warlords': 'Justice',
+  'Revolutionary Army': 'Rebellion',
+  'Divine Knights': 'Sanctuary',
+  'Five Elders': 'Council',
+  'Clan D': 'Heritage',
+  'S Rank': 'Bounty',
+  'Shichibukai': 'Pact',
+  'Yonko': 'Territory',
+  'Akatsuki': 'Cloud',
+  'Uchiha Clan': 'Iris',
+  'Saiyans': 'Tail',
+  'Avengers': 'Assembly',
+  'Justice League': 'Lantern',
+  'X-Men': 'Gene',
+  '300 Spartans': 'Shield',
+  'Expendables': 'Mercenary',
+  'Jedi': 'Order',
+  'Power Rangers': 'Zord',
+  'Naruto Nation': 'Exam',
+  'Zodiac Knights': 'Cosmos',
+};

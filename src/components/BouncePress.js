@@ -1,11 +1,10 @@
-import React, { useCallback } from 'react';
-import { Animated, Pressable } from 'react-native';
-import { useBouncePress } from '../animations';
+import React, { useCallback, useRef } from 'react';
+import { Animated, Pressable, Easing } from 'react-native';
 import { triggerHaptic } from '../animations';
 import { playClick } from '../sound';
 
 /**
- * BouncePress - Pressable wrapper with bounce animation + haptic feedback
+ * BouncePress - Pressable wrapper with smooth spring animation + haptic feedback
  *
  * Props:
  *   onPress      - function (required)
@@ -13,27 +12,42 @@ import { playClick } from '../sound';
  *   children     - React children
  *   disabled     - boolean
  *   haptic       - 'light' | 'medium' | 'heavy' (default: 'light')
- *   activeOpacity - number (0-1, default: 0.85) - simulated via opacity animation
  *   sound        - boolean (default: true) - whether to play click sound
  */
 export default function BouncePress({ onPress, style, children, disabled, haptic = 'light', sound = true }) {
-  const { onPressIn, onPressOut, animatedStyle } = useBouncePress();
+  const scale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = useCallback(() => {
-    onPressIn();
+    Animated.spring(scale, {
+      toValue: 0.9,
+      friction: 7,
+      tension: 400,
+      useNativeDriver: true,
+    }).start();
     triggerHaptic(haptic);
-  }, [onPressIn, haptic]);
+  }, [scale, haptic]);
+
+  const handlePressOut = useCallback(() => {
+    Animated.spring(scale, {
+      toValue: 1,
+      friction: 4,
+      tension: 400,
+      useNativeDriver: true,
+    }).start();
+  }, [scale]);
 
   const handlePress = useCallback(() => {
     if (sound) playClick();
     onPress();
   }, [onPress, sound]);
 
+  const animatedStyle = { transform: [{ scale }] };
+
   return (
     <Pressable
       onPress={disabled ? undefined : handlePress}
       onPressIn={disabled ? undefined : handlePressIn}
-      onPressOut={disabled ? undefined : onPressOut}
+      onPressOut={disabled ? undefined : handlePressOut}
       disabled={disabled}
     >
       <Animated.View style={[animatedStyle, style]}>

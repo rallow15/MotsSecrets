@@ -61,14 +61,13 @@ function loadAdMob() {
 }
 
 function PrepScreenWrapper({ navigation, route }) {
-  const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, customWords, mimerMode, spyfallTimer, numUndercovers, numMisterWhites, easyMode, spyfallUndercover, darkTheme } = route.params;
+  const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, selectedCategories, customWords, mimerMode, spyfallTimer, numUndercovers, numMisterWhites, easyMode, spyfallUndercover, darkTheme } = route.params;
 
   const _gameMode      = gameMode      ?? 0;
   const _currentPlayer = currentPlayer ?? 0;
   const _takenNumbers  = takenNumbers  ?? [];
   const _playerNumbers = playerNumbers ?? new Array(numPlayers).fill(null);
   const _playerNames   = Array.isArray(playerNames) ? playerNames : new Array(numPlayers).fill('');
-  const _selectedCategory = selectedCategory ?? null;
   const _customWords = Array.isArray(customWords) ? customWords : [];
   const _mimerMode = mimerMode ?? false;
   const _spyfallTimer = spyfallTimer ?? null;
@@ -77,6 +76,14 @@ function PrepScreenWrapper({ navigation, route }) {
   const _easyMode = easyMode ?? false;
   const _spyfallUndercover = spyfallUndercover ?? false;
   const _darkTheme = darkTheme ?? false;
+
+  // Si multi-sélection de catégories, toujours tirer au sort une nouvelle catégorie
+  let _selectedCategory;
+  if (Array.isArray(selectedCategories) && selectedCategories.length > 0) {
+    _selectedCategory = selectedCategories[Math.floor(Math.random() * selectedCategories.length)];
+  } else {
+    _selectedCategory = selectedCategory ?? null;
+  }
 
   const assignments = route.params.assignments
     ?? generateAssignments(numPlayers, _gameMode, _selectedCategory, _customWords, _mimerMode, _numUndercovers, _numMisterWhites, _easyMode, _spyfallUndercover);
@@ -88,6 +95,7 @@ function PrepScreenWrapper({ navigation, route }) {
         ...route,
         params: {
           numPlayers, gameMode: _gameMode, selectedCategory: _selectedCategory,
+          selectedCategories,
           customWords: _customWords, mimerMode: _mimerMode, spyfallTimer: _spyfallTimer,
           numUndercovers: _numUndercovers, numMisterWhites: _numMisterWhites,
           easyMode: _easyMode, spyfallUndercover: _spyfallUndercover, darkTheme: _darkTheme,

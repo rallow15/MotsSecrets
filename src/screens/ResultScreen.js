@@ -195,6 +195,7 @@ export default function ResultScreen({ navigation, route }) {
       gameMode:     gameMode ?? 0,
       playerNames:  safeNames,          // ← noms conservés
       selectedCategory: route.params.selectedCategory, // ← catégorie conservée
+      selectedCategories: route.params.selectedCategories, // ← multi-sélection conservée
       customWords: route.params.customWords || [], // ← mots personnalisés conservés
       mimerMode: route.params.mimerMode ?? false, // ← mode MIMER conservé
       spyfallUndercover: route.params.spyfallUndercover ?? false,
@@ -204,7 +205,7 @@ export default function ResultScreen({ navigation, route }) {
       currentPlayer: 0,
       takenNumbers:  [],
       playerNumbers: new Array(numPlayers).fill(null),
-      // PAS d'assignments → PrepScreenWrapper en génère de nouveaux
+      assignments: null, // forcer la régénération via PrepScreenWrapper
     })
   );
 

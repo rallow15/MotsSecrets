@@ -1,4 +1,4 @@
-import { WORD_DB, WORD_DB_EN } from './data/words';
+import { WORD_DB, WORD_DB_EN, SPYFALL_HINTS_FR, SPYFALL_HINTS_EN } from './data/words';
 import { getLang } from './i18n';
 
 /**
@@ -17,10 +17,16 @@ export function generateAssignments(numPlayers, gameMode = 0, selectedCategory =
   const wordDb = lang === 'en' ? WORD_DB_EN : WORD_DB;
 
   // Choisir une catégorie (aléatoire ou sélectionnée)
-  // Exclure MIMER si le mode mime n'est pas activé, et SPECIALE si pas de mots personnalisés
+  // Exclure MIMER si le mode mime n'est pas activé, SPECIALE si pas de mots personnalisés
+  // Exclure LIEUX/GROUPES (réservés au mode Spyfall) si on n'est pas en mode Spyfall
+  const spyfallCats = ['LIEUX', 'LOCATIONS', 'GROUPES', 'GROUPS'];
   const eligibleDb = mimerMode
     ? wordDb
-    : wordDb.filter(d => d.cat !== 'MIMER' && d.cat !== 'SPECIALE');
+    : wordDb.filter(d => {
+        if (d.cat === 'MIMER' || d.cat === 'SPECIALE') return false;
+        if (gameMode !== 3 && spyfallCats.includes(d.cat)) return false;
+        return true;
+      });
 
   let categoryData;
   if (selectedCategory) {
@@ -128,6 +134,10 @@ export function generateAssignments(numPlayers, gameMode = 0, selectedCategory =
   // Mode MIMER : les mots sont des noms d'images à afficher + indice pour Mister White
   const misterWord = easyMode ? category : null;
 
+  // Indice Spyfall facile : chercher l'indice du mot principal
+  const spyfallHints = lang === 'en' ? SPYFALL_HINTS_EN : SPYFALL_HINTS_FR;
+  const spyHint = (gameMode === 3 && easyMode && wordA) ? (spyfallHints[wordA] || null) : null;
+
   return roles.map((role) => ({
     word: isSpecialeCategory && words.length <= 1 ? null : (role === 'intrus' ? wordB : role === 'mister' ? misterWord : role === 'spy' ? null : wordA),
     role: isSpecialeCategory && words.length <= 1 ? 'normal' : role,
@@ -135,6 +145,7 @@ export function generateAssignments(numPlayers, gameMode = 0, selectedCategory =
     isMimer,
     mimerData: isMimer ? mimerData : null, // Contient { nom, images, indice } pour Mister White
     easyMode,
+    spyHint: role === 'spy' ? spyHint : null,
   }));
 }
 

@@ -4,7 +4,7 @@ import Slider from '@react-native-community/slider';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   ScrollView, Modal, Animated, Easing, Image, ImageBackground,
-  TextInput,
+  TextInput, useColorScheme,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t, getLang, setLang } from '../i18n';
@@ -13,7 +13,7 @@ import { generateAssignments } from '../gameLogic';
 import { setGlobalDarkTheme } from '../theme';
 import { initSounds, playClick, playStart, startBackgroundMusic, stopBackgroundMusic, setMusicEnabled, setSfxEnabled, musicEnabled, sfxEnabled } from '../sound';
 import { loadAndShowRewardedAd } from '../ads';
-import { triggerHaptic } from '../animations';
+import { triggerHaptic, useModalAnimation } from '../animations';
 import BouncePress from '../components/BouncePress';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
@@ -67,8 +67,10 @@ const CATEGORY_EMOJIS = {
   BASKETBALL: '🏀',
   ACTEURS: '🎭',
   ACTRICES: '🎭',
+  METIERS: '👷',
   ACTORS: '🎭',
   ACTRESSES: '🎭',
+  PROFESSIONS: '👷',
   PAYS: '🗺️',
   COUNTRIES: '🗺️',
   ANIMAUX: '🦁',
@@ -101,6 +103,7 @@ const CATEGORY_NAMES = {
     BASKETBALL: 'BASKETBALL',
     ACTEURS: 'ACTEURS',
     ACTRICES: 'ACTRICES',
+    METIERS: 'MÉTIERS',
     PAYS: 'PAYS',
     ANIMAUX: 'ANIMAUX',
     JEUX_VIDEO: 'JEUX VIDÉO',
@@ -121,6 +124,7 @@ const CATEGORY_NAMES = {
     BASKETBALL: 'BASKETBALL',
     ACTORS: 'ACTORS',
     ACTRESSES: 'ACTRESSES',
+    PROFESSIONS: 'PROFESSIONS',
     COUNTRIES: 'COUNTRIES',
     ANIMALS: 'ANIMALS',
     VIDEO_GAMES: 'VIDEO GAMES',
@@ -312,10 +316,14 @@ export default function MenuScreen({ navigation }) {
   const [showRules, setShowRules] = useState(false);
   const [rulesPage, setRulesPage] = useState(0);
   const [showCategories, setShowCategories] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategories, setSelectedCategories] = useState(null); // null = aléatoire, [] = aucune, ['FOOTBALL', 'ACTEURS'] = multi-sélection
   const [showSettings, setShowSettings] = useState(false);
   const [showUnlockShop, setShowUnlockShop] = useState(false);
   const [showSpecialeMode, setShowSpecialeMode] = useState(false);
+  const rulesModalStyle = useModalAnimation(showRules);
+  const settingsModalStyle = useModalAnimation(showSettings);
+  const shopModalStyle = useModalAnimation(showUnlockShop);
+  const specialeModalStyle = useModalAnimation(showSpecialeMode);
   const [specialeNumPlayers, setSpecialeNumPlayers] = useState(3);
   const [specialeGameMode, setSpecialeGameMode] = useState(0);
   const [specialeNumUndercovers, setSpecialeNumUndercovers] = useState(1);
@@ -333,8 +341,8 @@ export default function MenuScreen({ navigation }) {
   const [numSpies, setNumSpies] = useState(1);
 
   // Les rôles spéciaux doivent être 2x moins nombreux que les normaux
-  // => specials ≤ floor(players / 3)
-  const maxTotalSpecials = Math.floor(numPlayers / 3);
+  // => specials ≤ floor((players + 1) / 3) — permet Mister White à partir de 5 joueurs
+  const maxTotalSpecials = Math.floor((numPlayers + 1) / 3);
 
   const canAddUC = (numUndercovers + 1 + numMisterWhites) <= maxTotalSpecials;
   const canAddSpy = (numSpies + 1 + numUndercovers) <= maxTotalSpecials;
@@ -350,6 +358,13 @@ export default function MenuScreen({ navigation }) {
     }
   }, [numUndercovers, numMisterWhites]);
 
+  // En mode Spyfall, l'intrus est à 0 par défaut
+  useEffect(() => {
+    if (gameMode === 3 && numUndercovers > 0) {
+      setNumUndercovers(0);
+    }
+  }, [gameMode]);
+
   // Synchroniser specialeGameMode avec les compteurs spéciaux
   useEffect(() => {
     if (specialeNumUndercovers > 0 && specialeNumMisterWhites > 0) setSpecialeGameMode(2);
@@ -359,22 +374,29 @@ export default function MenuScreen({ navigation }) {
 
   // Quand le nombre de joueurs change, ajuster les compteurs pour rester cohérent
   useEffect(() => {
-    const maxTotal = Math.floor(numPlayers / 3);
+    const maxTotal = Math.floor((numPlayers + 1) / 3);
 
     let newUC = numUndercovers;
     let newMW = numMisterWhites;
+    let newSpies = numSpies;
 
-    // Règle : intrus + mister whites ≤ floor(players / 3)
+    // Règle : intrus + mister whites ≤ maxTotal
     while (newUC + newMW > maxTotal && newMW > 0) newMW--;
     while (newUC + newMW > maxTotal && newUC > 0) newUC--;
 
+    // Règle Spyfall : espions + intrus ≤ maxTotal
+    while (newSpies + newUC > maxTotal && newUC > 0) newUC--;
+    while (newSpies + newUC > maxTotal && newSpies > 1) newSpies--;
+
     if (newUC !== numUndercovers) setNumUndercovers(newUC);
     if (newMW !== numMisterWhites) setNumMisterWhites(newMW);
+    if (newSpies !== numSpies) setNumSpies(newSpies);
   }, [numPlayers]);
   // États des sons (synchronisés avec sound.js)
   const [musicOn, setMusicOn] = useState(musicEnabled);
   const [sfxOn, setSfxOn] = useState(sfxEnabled);
   const [darkTheme, setDarkTheme] = useState(false);
+  const systemColorScheme = useColorScheme();
   // Catégorie OBJETS débloquée ou non
   const [objectsUnlocked, setObjectsUnlocked] = useState(false);
   // Mots personnalisés pour la catégorie SPÉCIALE
@@ -407,6 +429,11 @@ export default function MenuScreen({ navigation }) {
         if (theme === 'true') {
           setDarkTheme(true);
           setGlobalDarkTheme(true);
+        } else if (theme !== 'false') {
+          // Pas de préférence sauvegardée → suivre le thème du système
+          const isSystemDark = systemColorScheme === 'dark';
+          setDarkTheme(isSystemDark);
+          setGlobalDarkTheme(isSystemDark);
         }
       } catch (e) {}
     };
@@ -513,11 +540,14 @@ export default function MenuScreen({ navigation }) {
       setShowUnlockShop(false);
       setShowSpecialeMode(false);
       setShowCategories(false);
+      setGameMode(0);
+      setMimerMode(false);
       setNumUndercovers(1);
       setNumMisterWhites(0);
       setNumSpies(1);
       setEasyMode(false);
       setSpyfallUndercover(false);
+      setSelectedCategories(null);
       setShowOtherModes(false);
 
       // Redémarrer l'animation pulse
@@ -632,7 +662,7 @@ export default function MenuScreen({ navigation }) {
     triggerHaptic('medium');
 
     // Vérifier si la catégorie SPÉCIALE est sélectionnée sans mots
-    const isSpecialeSelected = selectedCategory === 'SPECIALE';
+    const isSpecialeSelected = Array.isArray(selectedCategories) && selectedCategories.includes('SPECIALE');
     if (isSpecialeSelected && customWords.length === 0) {
       alert(lang === 'fr'
         ? 'La catégorie SPÉCIALE nécessite au moins 1 mot personnalisé.\n\nAjoutez des mots via le bouton "GÉRER LES MOTS SPÉCIAUX".'
@@ -650,21 +680,30 @@ export default function MenuScreen({ navigation }) {
 
     // En mode MIMER, la catégorie est automatiquement MIMER
     // En mode SPYFALL, la catégorie est LIEUX/GROUPES selon sélection (défaut LIEUX)
-    let finalCategory = selectedCategory;
-    if (mimerMode) finalCategory = 'MIMER';
-    if (gameMode === 3 && !finalCategory) finalCategory = lang === 'fr' ? 'LIEUX' : 'LOCATIONS';
-    if (gameMode === 3 && finalCategory !== 'LIEUX' && finalCategory !== 'LOCATIONS' && finalCategory !== 'GROUPES' && finalCategory !== 'GROUPS') {
-      finalCategory = lang === 'fr' ? 'LIEUX' : 'LOCATIONS';
+    // Multi-catégories : choisir une catégorie au hasard parmi la sélection
+    let finalCategory;
+    if (mimerMode) {
+      finalCategory = 'MIMER';
+    } else if (gameMode === 3) {
+      // Spyfall : LIEUX ou GROUPES uniquement
+      if (Array.isArray(selectedCategories) && selectedCategories.length > 0) {
+        const spyfallCats = selectedCategories.filter(c => c === 'LIEUX' || c === 'LOCATIONS' || c === 'GROUPES' || c === 'GROUPS');
+        finalCategory = spyfallCats.length > 0 ? spyfallCats[Math.floor(Math.random() * spyfallCats.length)] : (lang === 'fr' ? 'LIEUX' : 'LOCATIONS');
+      } else {
+        finalCategory = lang === 'fr' ? 'LIEUX' : 'LOCATIONS';
+      }
+    } else if (Array.isArray(selectedCategories) && selectedCategories.length > 0) {
+      // Multi-sélection : choisir au hasard
+      finalCategory = selectedCategories[Math.floor(Math.random() * selectedCategories.length)];
+    } else {
+      finalCategory = null; // aléatoire parmi toutes
     }
 
-    setShowGameSetup(false);
-    setIsPlayOpening(false);
-    playOpenAnim.setValue(0);
-    gameSetupAnim.setValue(0);
     navigation.navigate('Prep', {
       numPlayers,
       gameMode,
       selectedCategory: finalCategory,
+      selectedCategories,
       customWords,
       mimerMode,
       numUndercovers: gameMode === 3 ? (numUndercovers > 0 ? numUndercovers : numSpies) : numUndercovers,
@@ -673,6 +712,12 @@ export default function MenuScreen({ navigation }) {
       easyMode,
       darkTheme,
     });
+
+    // Fermer le modal proprement après la navigation
+    gameSetupAnim.setValue(0);
+    playOpenAnim.setValue(0);
+    setIsPlayOpening(false);
+    setShowGameSetup(false);
   };
 
   const handleCategorySelect = async (cat) => {
@@ -799,6 +844,8 @@ export default function MenuScreen({ navigation }) {
     if (cat === 'MIMER') return false;
     if (cat === 'SPECIALE') return false;
     if ((cat === 'OBJECTS' || cat === 'OBJETS') && !objectsUnlocked) return false;
+    // LIEUX/GROUPES sont réservés au mode Spyfall
+    if (gameMode !== 3 && (cat === 'LIEUX' || cat === 'LOCATIONS' || cat === 'GROUPES' || cat === 'GROUPS')) return false;
     return true;
   });
 
@@ -907,9 +954,9 @@ export default function MenuScreen({ navigation }) {
         </View>
       </Animated.View>
 
-      <Modal visible={showRules} animationType="slide" transparent onRequestClose={() => setShowRules(false)}>
+      <Modal visible={showRules} animationType="fade" transparent onRequestClose={() => setShowRules(false)}>
         <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
-          <View style={[styles.modalContent, { backgroundColor: theme.modalBg, borderColor: theme.modalBorder }]}>
+          <Animated.View style={[styles.modalContent, { backgroundColor: theme.modalBg, borderColor: theme.modalBorder }, rulesModalStyle]}>
             <Text style={[styles.modalTitle, { color: theme.text }]}>{lang === 'fr' ? 'RÈGLES' : 'RULES'}</Text>
 
             <View style={styles.rulePageContainer}>
@@ -962,13 +1009,13 @@ export default function MenuScreen({ navigation }) {
                 <ImageBackground source={LAUNCH_BTN_LIGHT} style={styles.launchBtnImage} resizeMode="stretch"><Text style={styles.launchBtnOverlayText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text></ImageBackground>
               </TouchableOpacity>
             )}
-          </View>
+          </Animated.View>
         </View>
       </Modal>
 
-      <Modal visible={showSettings} animationType="slide" transparent onRequestClose={() => setShowSettings(false)}>
+      <Modal visible={showSettings} animationType="fade" transparent onRequestClose={() => setShowSettings(false)}>
         <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
-          <View style={[styles.modalContent, { backgroundColor: theme.modalBg, borderColor: theme.modalBorder }]}>
+          <Animated.View style={[styles.modalContent, { backgroundColor: theme.modalBg, borderColor: theme.modalBorder }, settingsModalStyle]}>
             <Text style={[styles.modalTitle, { color: theme.text }]}>{lang === 'fr' ? 'PARAMÈTRES' : 'SETTINGS'}</Text>
             <View style={styles.settingRow}>
               <Text style={[styles.settingLabel, { color: theme.text }]}>{lang === 'fr' ? 'Langue' : 'Language'}</Text>
@@ -1012,14 +1059,14 @@ export default function MenuScreen({ navigation }) {
                 <ImageBackground source={LAUNCH_BTN_LIGHT} style={styles.launchBtnImage} resizeMode="stretch"><Text style={styles.launchBtnOverlayText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text></ImageBackground>
               </TouchableOpacity>
             )}
-          </View>
+          </Animated.View>
         </View>
       </Modal>
 
       {/* Modal pour débloquer la catégorie OBJETS */}
-      <Modal visible={showUnlockShop} animationType="slide" transparent onRequestClose={() => setShowUnlockShop(false)}>
+      <Modal visible={showUnlockShop} animationType="fade" transparent onRequestClose={() => setShowUnlockShop(false)}>
         <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
-          <View style={[styles.modalContent, { backgroundColor: theme.modalBg, borderColor: theme.modalBorder }]}>
+          <Animated.View style={[styles.modalContent, { backgroundColor: theme.modalBg, borderColor: theme.modalBorder }, shopModalStyle]}>
             <Text style={[styles.modalTitle, { color: theme.text }]}>{lang === 'fr' ? 'BOUTIQUE' : 'SHOP'}</Text>
             <Text style={[styles.modalSubtitle, { color: theme.subtitleColor }]}>
               {lang === 'fr'
@@ -1087,14 +1134,14 @@ export default function MenuScreen({ navigation }) {
                 <ImageBackground source={LAUNCH_BTN_LIGHT} style={styles.launchBtnImage} resizeMode="stretch"><Text style={styles.launchBtnOverlayText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text></ImageBackground>
               </TouchableOpacity>
             )}
-          </View>
+          </Animated.View>
         </View>
       </Modal>
 
       {/* Modal pour le mode SPÉCIALE (bouton étoile) - mode Undercover */}
-      <Modal visible={showSpecialeMode} animationType="slide" transparent onRequestClose={() => setShowSpecialeMode(false)}>
+      <Modal visible={showSpecialeMode} animationType="fade" transparent onRequestClose={() => setShowSpecialeMode(false)}>
         <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
-          <View style={[styles.modalContent, { maxHeight: '90%', backgroundColor: theme.modalBg, borderColor: theme.modalBorder }]}>
+          <Animated.View style={[styles.modalContent, { maxHeight: '90%', backgroundColor: theme.modalBg, borderColor: theme.modalBorder }, specialeModalStyle]}>
             <Text style={[styles.modalTitle, { color: theme.neon }]}>⭐ SPÉCIALE</Text>
             <Text style={[styles.modalSubtitle, { color: theme.subtitleColor }]}>
               {lang === 'fr'
@@ -1250,12 +1297,12 @@ export default function MenuScreen({ navigation }) {
                 <ImageBackground source={LAUNCH_BTN_LIGHT} style={styles.launchBtnImage} resizeMode="stretch"><Text style={styles.launchBtnOverlayText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text></ImageBackground>
               </TouchableOpacity>
             )}
-          </View>
+          </Animated.View>
         </View>
       </Modal>
 
-      <Modal visible={showGameSetup} animationType="slide" transparent onRequestClose={closeGameSetup}>
-        <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]} collapsable={false}>
+      {showGameSetup && (
+        <View style={[styles.gameSetupOverlay, { backgroundColor: theme.modalOverlay }]} collapsable={false}>
           <Animated.View style={[styles.modalContent, { maxHeight: '90%', backgroundColor: theme.modalBg, borderColor: theme.modalBorder }, { transform: [{ scale: gameSetupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1] }) }], opacity: gameSetupAnim }]} collapsable={false}>
             <Text style={[styles.modalTitle, { color: theme.text }]}>{lang === 'fr' ? 'CONFIGURATION' : 'CONFIGURATION'}</Text>
 
@@ -1337,7 +1384,7 @@ export default function MenuScreen({ navigation }) {
                   </View>
                 </View>
 
-                {!mimerMode && selectedCategory !== 'SPECIALE' && (
+                {!mimerMode && !(Array.isArray(selectedCategories) && selectedCategories.includes('SPECIALE')) && (
                   <View style={styles.roleCounters}>
                     {gameMode === 3 ? (
                       <View>
@@ -1385,11 +1432,11 @@ export default function MenuScreen({ navigation }) {
                   </View>
                 )}
 
-                {numMisterWhites > 0 && !mimerMode && gameMode !== 3 && (
+                {(numMisterWhites > 0 && !mimerMode && gameMode !== 3 || gameMode === 3) && !mimerMode && (
                   <View style={[styles.easyModeRow, { backgroundColor: theme.counterBg, borderColor: theme.counterBorder }]}>
                     <View style={styles.easyModeInfo}>
                       <Text style={[styles.easyModeLabel, { color: theme.text }]}>{lang === 'fr' ? 'Facile' : 'Easy'}</Text>
-                      <Text style={[styles.easyModeDesc, { color: theme.textMuted }]}>{lang === 'fr' ? 'Mister White connait la categorie' : 'Mister White knows the category'}</Text>
+                      <Text style={[styles.easyModeDesc, { color: theme.textMuted }]}>{gameMode === 3 ? (lang === 'fr' ? "L'espion reçoit un indice" : 'Spy gets a hint') : (lang === 'fr' ? 'Mister White connait la categorie' : 'Mister White knows the category')}</Text>
                     </View>
                     <TouchableOpacity
                       style={[styles.toggleBtn, easyMode && styles.toggleBtnActive, { backgroundColor: easyMode ? theme.neon : theme.counterBtnBg, borderColor: easyMode ? theme.neon : theme.counterBtnBorder }]}
@@ -1410,11 +1457,11 @@ export default function MenuScreen({ navigation }) {
                   <Text style={[styles.setupLabel, { color: theme.text }]}>{lang === 'fr' ? 'Categorie' : 'Category'}</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScrollHorizontal}>
                     <TouchableOpacity
-                      style={[styles.categoryChip, selectedCategory === null ? { backgroundColor: theme.chipActiveBg, borderColor: theme.chipActiveBg } : { backgroundColor: theme.chipBg, borderColor: theme.chipBorder }]}
-                      onPress={() => { playClick(); setSelectedCategory(null); }}
+                      style={[styles.categoryChip, selectedCategories === null ? { backgroundColor: theme.chipActiveBg, borderColor: theme.chipActiveBg } : { backgroundColor: theme.chipBg, borderColor: theme.chipBorder }]}
+                      onPress={() => { playClick(); setSelectedCategories(null); }}
                     >
                       <Text style={styles.categoryChipEmoji}>🎲</Text>
-                      <Text style={[styles.categoryChipText, selectedCategory === null && { color: '#fff' }, selectedCategory !== null && { color: theme.text }]}>
+                      <Text style={[styles.categoryChipText, selectedCategories === null && { color: '#fff' }, selectedCategories !== null && { color: theme.text }]}>
                         {lang === 'fr' ? 'Aleatoire' : 'Random'}
                       </Text>
                     </TouchableOpacity>
@@ -1427,11 +1474,18 @@ export default function MenuScreen({ navigation }) {
                         <View key={cat} style={styles.categoryWrapper}>
                           {!isExpoGo && showAdIndicator && <Image source={AD_REWARD_ICON} style={styles.adRewardIconSmall} resizeMode="contain" />}
                           <TouchableOpacity
-                            style={[styles.categoryChip, selectedCategory === cat ? { backgroundColor: theme.chipActiveBg, borderColor: theme.chipActiveBg } : { backgroundColor: theme.chipBg, borderColor: theme.chipBorder }]}
-                            onPress={() => handleCategorySelect(cat)}
+                            style={[styles.categoryChip, (selectedCategories !== null && selectedCategories.includes(cat)) ? { backgroundColor: theme.chipActiveBg, borderColor: theme.chipActiveBg } : { backgroundColor: theme.chipBg, borderColor: theme.chipBorder }]}
+                            onPress={() => {
+                              playClick();
+                              setSelectedCategories(prev => {
+                                if (prev === null) return [cat];
+                                if (prev.includes(cat)) return prev.length === 1 ? null : prev.filter(c => c !== cat);
+                                return [...prev, cat];
+                              });
+                            }}
                           >
                             <Text style={styles.categoryChipEmoji}>{emoji}</Text>
-                            <Text style={[styles.categoryChipText, selectedCategory === cat && { color: '#fff' }, selectedCategory !== cat && { color: theme.text }]}>
+                            <Text style={[styles.categoryChipText, (selectedCategories !== null && selectedCategories.includes(cat)) && { color: '#fff' }, (selectedCategories === null || !selectedCategories.includes(cat)) && { color: theme.text }]}>
                               {CATEGORY_NAMES[lang][cat] || cat.replace(/_/g, ' ')}
                             </Text>
                           </TouchableOpacity>
@@ -1456,20 +1510,30 @@ export default function MenuScreen({ navigation }) {
                   <Text style={[styles.setupLabel, { color: theme.text }]}>{lang === 'fr' ? 'Categorie' : 'Category'}</Text>
                   <View style={styles.categoryScrollHorizontal}>
                     <TouchableOpacity
-                      style={[styles.categoryChip, (selectedCategory === null || selectedCategory === 'LIEUX' || selectedCategory === 'LOCATIONS') ? { backgroundColor: theme.chipActiveBg, borderColor: theme.chipActiveBg } : { backgroundColor: theme.chipBg, borderColor: theme.chipBorder }]}
-                      onPress={() => { playClick(); setSelectedCategory(lang === 'fr' ? 'LIEUX' : 'LOCATIONS'); }}
+                      style={[styles.categoryChip, (selectedCategories === null || (Array.isArray(selectedCategories) && (selectedCategories.includes('LIEUX') || selectedCategories.includes('LOCATIONS')))) ? { backgroundColor: theme.chipActiveBg, borderColor: theme.chipActiveBg } : { backgroundColor: theme.chipBg, borderColor: theme.chipBorder }]}
+                      onPress={() => { playClick(); setSelectedCategories(prev => {
+                        const lieux = lang === 'fr' ? 'LIEUX' : 'LOCATIONS';
+                        if (prev === null) return [lieux];
+                        if (prev.includes(lieux)) return prev.length === 1 ? null : prev.filter(c => c !== lieux);
+                        return [...prev, lieux];
+                      }); }}
                     >
                       <Text style={styles.categoryChipEmoji}>🏠</Text>
-                      <Text style={[styles.categoryChipText, (selectedCategory === null || selectedCategory === 'LIEUX' || selectedCategory === 'LOCATIONS') ? { color: '#fff' } : { color: theme.text }]}>
+                      <Text style={[styles.categoryChipText, (selectedCategories === null || (Array.isArray(selectedCategories) && (selectedCategories.includes('LIEUX') || selectedCategories.includes('LOCATIONS')))) ? { color: '#fff' } : { color: theme.text }]}>
                         {lang === 'fr' ? 'LIEUX' : 'LOCATIONS'}
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[styles.categoryChip, (selectedCategory === 'GROUPES' || selectedCategory === 'GROUPS') ? { backgroundColor: theme.chipActiveBg, borderColor: theme.chipActiveBg } : { backgroundColor: theme.chipBg, borderColor: theme.chipBorder }]}
-                      onPress={() => { playClick(); setSelectedCategory(lang === 'fr' ? 'GROUPES' : 'GROUPS'); }}
+                      style={[styles.categoryChip, (Array.isArray(selectedCategories) && (selectedCategories.includes('GROUPES') || selectedCategories.includes('GROUPS'))) ? { backgroundColor: theme.chipActiveBg, borderColor: theme.chipActiveBg } : { backgroundColor: theme.chipBg, borderColor: theme.chipBorder }]}
+                      onPress={() => { playClick(); setSelectedCategories(prev => {
+                        const groupes = lang === 'fr' ? 'GROUPES' : 'GROUPS';
+                        if (prev === null) return [groupes];
+                        if (prev.includes(groupes)) return prev.length === 1 ? null : prev.filter(c => c !== groupes);
+                        return [...prev, groupes];
+                      }); }}
                     >
                       <Text style={styles.categoryChipEmoji}>👥</Text>
-                      <Text style={[styles.categoryChipText, (selectedCategory === 'GROUPES' || selectedCategory === 'GROUPS') ? { color: '#fff' } : { color: theme.text }]}>
+                      <Text style={[styles.categoryChipText, (Array.isArray(selectedCategories) && (selectedCategories.includes('GROUPES') || selectedCategories.includes('GROUPS'))) ? { color: '#fff' } : { color: theme.text }]}>
                         {lang === 'fr' ? 'GROUPES' : 'GROUPS'}
                       </Text>
                     </TouchableOpacity>
@@ -1479,36 +1543,33 @@ export default function MenuScreen({ navigation }) {
             </ScrollView>
 
             {(darkTheme && !isWeb) ? (
-              <TouchableOpacity
+              <BouncePress
                 onPress={handleLaunchGame}
                 disabled={gameMode === 2 && numPlayers < 4}
-                activeOpacity={0.8}
               >
                 <ImageBackground source={LAUNCH_BTN} style={styles.launchBtnImage} resizeMode="stretch"><Text style={styles.launchBtnOverlayText}>{lang === 'fr' ? 'LANCER LA PARTIE' : 'START GAME'}</Text></ImageBackground>
-              </TouchableOpacity>
+              </BouncePress>
             ) : (
-              <TouchableOpacity
+              <BouncePress
                 onPress={handleLaunchGame}
                 disabled={gameMode === 2 && numPlayers < 4}
-                activeOpacity={0.8}
               >
                 <ImageBackground source={LAUNCH_BTN_LIGHT} style={styles.launchBtnImage} resizeMode="stretch"><Text style={styles.launchBtnOverlayText}>{lang === 'fr' ? 'LANCER LA PARTIE' : 'START GAME'}</Text></ImageBackground>
-              </TouchableOpacity>
+              </BouncePress>
             )}
 
             {(darkTheme && !isWeb) ? (
-              <TouchableOpacity onPress={closeGameSetup} activeOpacity={0.8}>
+              <BouncePress onPress={closeGameSetup}>
                 <ImageBackground source={LAUNCH_BTN} style={styles.launchBtnImage} resizeMode="stretch"><Text style={styles.launchBtnOverlayText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text></ImageBackground>
-              </TouchableOpacity>
+              </BouncePress>
             ) : (
-              <TouchableOpacity onPress={closeGameSetup} activeOpacity={0.8}>
+              <BouncePress onPress={closeGameSetup}>
                 <ImageBackground source={LAUNCH_BTN_LIGHT} style={styles.launchBtnImage} resizeMode="stretch"><Text style={styles.launchBtnOverlayText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text></ImageBackground>
-              </TouchableOpacity>
+              </BouncePress>
             )}
           </Animated.View>
         </View>
-      </Modal>
-
+      )}
 
       {showLoading && (
         <Animated.View style={[styles.loadingOverlay, { opacity: loadingOpacity }]}>
@@ -1582,6 +1643,7 @@ const styles = StyleSheet.create({
 
   // ─── Modals (existants, inchangés) ───
   modalOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' },
+  gameSetupOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: 100 },
   modalContent: { width: '85%', backgroundColor: '#F5F5DC', borderRadius: 20, padding: 16, borderWidth: 2, borderColor: '#1a1a1a', maxHeight: '85%' },
   modalTitle: { fontFamily: 'BebasNeue', fontSize: 24, color: '#1a1a1a', letterSpacing: 2, textAlign: 'center', marginBottom: 10 },
   modalSubtitle: { fontFamily: 'SpaceMono', fontSize: 11, color: '#666', textAlign: 'center', marginBottom: 16 },
