@@ -415,9 +415,9 @@ export default function ResultScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container:     { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28, gap: 16 },
-  bgImage:       { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
-  bgGradientDark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.15)' },
-  bgGradientLight: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(180,150,80,0.10)' },
+  bgImage:       { ...StyleSheet.absoluteFillObject },
+  bgGradientDark: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.15)' },
+  bgGradientLight: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(180,150,80,0.10)' },
   commenceLabel: { fontFamily: 'SpaceMono', fontSize: 10, letterSpacing: 3 },
   winnerName:    { fontFamily: 'BebasNeue', fontSize: 88, textAlign: 'center', lineHeight: 84, letterSpacing: 2 },
   revealBtn:     { width: '100%', paddingVertical: 18, alignItems: 'center', marginTop: 8, borderRadius: 12 },

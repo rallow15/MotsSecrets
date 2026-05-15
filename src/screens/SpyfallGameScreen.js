@@ -70,9 +70,9 @@ export default function SpyfallGameScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28, gap: 16 },
-  bgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
-  bgGradientDark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.15)' },
-  bgGradientLight: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(180,150,80,0.10)' },
+  bgImage: { ...StyleSheet.absoluteFillObject },
+  bgGradientDark: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.15)' },
+  bgGradientLight: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(180,150,80,0.10)' },
   divider: { width: '60%', height: 2, marginVertical: 8 },
   starterRow: { alignItems: 'center', gap: 4 },
   starterLabel: { fontFamily: 'SpaceMono', fontSize: 10, letterSpacing: 3 },

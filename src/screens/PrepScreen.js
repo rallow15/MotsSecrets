@@ -119,9 +119,9 @@ export default function PrepScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  bgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
-  bgGradientDark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.15)' },
-  bgGradientLight: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(180,150,80,0.10)' },
+  bgImage: { ...StyleSheet.absoluteFillObject },
+  bgGradientDark: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.15)' },
+  bgGradientLight: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(180,150,80,0.10)' },
   container:  { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, gap: 8 },
   backBtn: { position: 'absolute', left: 20, width: 44, height: 44, borderRadius: 22, borderWidth: 2, alignItems: 'center', justifyContent: 'center', zIndex: 10 },
   playerBadge:{ fontFamily: 'SpaceMono', fontSize: 11, letterSpacing: 5, overflow: 'visible' },
