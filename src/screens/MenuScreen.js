@@ -1616,9 +1616,9 @@ const styles = StyleSheet.create({
   // ─── Background ───
   bgBeige: { flex: 1, backgroundColor: '#E5DFC8' },
   bgDark: { flex: 1, backgroundColor: '#0a0a0a' },
-  bgGradient: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(180,150,80,0.10)' },
-  bgGradientDark: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.15)' },
-  bgImage: { ...StyleSheet.absoluteFillObject },
+  bgGradient: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(180,150,80,0.10)' },
+  bgGradientDark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.15)' },
+  bgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
 
   // ─── Mots flottants ───
 

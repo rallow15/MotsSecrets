@@ -443,10 +443,10 @@ export default function RevealScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, overflow: 'hidden' },
-  bgImage: { ...StyleSheet.absoluteFillObject },
-  bgGradientDark: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.15)' },
-  bgGradientLight: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(180,150,80,0.10)' },
+  root: { flex: 1 },
+  bgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
+  bgGradientDark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.15)' },
+  bgGradientLight: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(180,150,80,0.10)' },
   passContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingTop: 40 },
   passPrompt: { fontFamily: 'BebasNeue', fontSize: 64, textAlign: 'center', lineHeight: 60 },
   tapIcon: { fontSize: 52 },
@@ -476,9 +476,9 @@ const styles = StyleSheet.create({
   spyTitle: { fontFamily: 'BebasNeue', fontSize: 52, letterSpacing: 2 },
   spyInstruction: { fontFamily: 'SpaceMono', fontSize: 11, textAlign: 'center' },
   // Spyfall fullscreen
-  spyfallFullscreen: { ...StyleSheet.absoluteFillObject },
-  spyfallBgImage: { flex: 1, width: '100%', height: '100%' },
-  spyfallOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },
+  spyfallFullscreen: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  spyfallBgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  spyfallOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.35)' },
   spyfallContent: { flex: 1, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 100 },
   spyfallLieuWord: { fontFamily: 'BebasNeue', fontSize: 56, color: '#FFFFFF', textAlign: 'center', letterSpacing: 3, textShadowColor: 'rgba(0,0,0,0.75)', textShadowOffset: { width: 2, height: 2 }, textShadowRadius: 6 },
   spyfallMangaLabel: { fontFamily: 'BebasNeue', fontSize: 32, color: '#FFFFFF', textAlign: 'center', letterSpacing: 2, marginTop: 8, textShadowColor: 'rgba(0,0,0,0.75)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 4 },
