@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
   spyInstruction: { fontFamily: 'SpaceMono', fontSize: 11, textAlign: 'center' },
   // Spyfall fullscreen
   spyfallFullscreen: { ...StyleSheet.absoluteFillObject },
-  spyfallBgImage: { ...StyleSheet.absoluteFillObject },
+  spyfallBgImage: { flex: 1, width: '100%', height: '100%' },
   spyfallOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },
   spyfallContent: { flex: 1, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 100 },
   spyfallLieuWord: { fontFamily: 'BebasNeue', fontSize: 56, color: '#FFFFFF', textAlign: 'center', letterSpacing: 3, textShadowColor: 'rgba(0,0,0,0.75)', textShadowOffset: { width: 2, height: 2 }, textShadowRadius: 6 },
