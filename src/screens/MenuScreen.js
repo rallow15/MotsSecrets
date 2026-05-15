@@ -1157,7 +1157,7 @@ export default function MenuScreen({ navigation }) {
       {/* Modal pour le mode SPÉCIALE (bouton étoile) - mode Undercover */}
       <Modal visible={showSpecialeMode} animationType="fade" transparent onRequestClose={() => setShowSpecialeMode(false)}>
         <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
-          <Animated.View style={[styles.modalContent, { maxHeight: '90%', backgroundColor: theme.modalBg, borderColor: theme.modalBorder }, specialeModalStyle]}>
+          <Animated.View style={[styles.modalContent, { backgroundColor: theme.modalBg, borderColor: theme.modalBorder }, specialeModalStyle]}>
             <Text style={[styles.modalTitle, { color: theme.neon }]}>⭐ SPÉCIALE</Text>
             <Text style={[styles.modalSubtitle, { color: theme.subtitleColor }]}>
               {lang === 'fr'
@@ -1231,7 +1231,7 @@ export default function MenuScreen({ navigation }) {
                     {customWords.map((word, i) => (
                       <View key={i} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: theme.btnBg, borderRadius: 16, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: theme.cardBorder }}>
                         <Text style={{ fontFamily: 'SpaceMono', fontSize: 12, color: theme.text, letterSpacing: 2 }}>
-                          {revealedWords[i] ? word : '•'.repeat(word.length)}
+                          {revealedWords[i] ? word : '•••'}
                         </Text>
                         <TouchableOpacity onPress={() => setRevealedWords(prev => ({ ...prev, [i]: !prev[i] }))} style={{ marginLeft: 6 }}>
                           <Text style={{ fontSize: 14 }}>{revealedWords[i] ? '🙈' : '👁️'}</Text>
