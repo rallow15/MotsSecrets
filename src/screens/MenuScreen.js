@@ -13,7 +13,7 @@ import { generateAssignments } from '../gameLogic';
 import { setGlobalDarkTheme } from '../theme';
 import { initSounds, playClick, playStart, startBackgroundMusic, stopBackgroundMusic, setMusicEnabled, setSfxEnabled, musicEnabled, sfxEnabled } from '../sound';
 import { loadAndShowRewardedAd } from '../ads';
-import { triggerHaptic, useModalAnimation } from '../animations';
+import { triggerHaptic, useModalAnimation, setHapticEnabled } from '../animations';
 import BouncePress from '../components/BouncePress';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
@@ -395,6 +395,7 @@ export default function MenuScreen({ navigation }) {
   // États des sons (synchronisés avec sound.js)
   const [musicOn, setMusicOn] = useState(musicEnabled);
   const [sfxOn, setSfxOn] = useState(sfxEnabled);
+  const [hapticOn, setHapticOn] = useState(true);
   const [darkTheme, setDarkTheme] = useState(false);
   const systemColorScheme = useColorScheme();
   // Catégorie OBJETS débloquée ou non
@@ -1045,6 +1046,15 @@ export default function MenuScreen({ navigation }) {
                 onPress={toggleSfx}
               >
                 <Text style={[styles.toggleBtnText, { color: sfxOn ? '#fff' : theme.text }]}>{sfxOn ? 'ON' : 'OFF'}</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.settingRow}>
+              <Text style={[styles.settingLabel, { color: theme.text }]}>{lang === 'fr' ? 'Vibrations' : 'Vibration'}</Text>
+              <TouchableOpacity
+                style={[styles.toggleBtn, hapticOn && styles.toggleBtnActive, { backgroundColor: hapticOn ? theme.neon : theme.counterBtnBg, borderColor: hapticOn ? theme.neon : theme.counterBtnBorder }]}
+                onPress={() => { setHapticOn(!hapticOn); setHapticEnabled(!hapticOn); }}
+              >
+                <Text style={[styles.toggleBtnText, { color: hapticOn ? '#fff' : theme.text }]}>{hapticOn ? 'ON' : 'OFF'}</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.settingRow}>

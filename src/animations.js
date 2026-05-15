@@ -2,7 +2,18 @@ import { Animated, Vibration, Platform } from 'react-native';
 import { useRef, useCallback, useEffect } from 'react';
 
 // ─── Haptic Feedback ───
+let _hapticEnabled = true;
+
+export function setHapticEnabled(value) {
+  _hapticEnabled = !!value;
+}
+
+export function isHapticEnabled() {
+  return _hapticEnabled;
+}
+
 export function triggerHaptic(style = 'light') {
+  if (!_hapticEnabled) return;
   if (Platform.OS === 'web') {
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
       const ms = style === 'heavy' ? 50 : style === 'medium' ? 25 : 10;
