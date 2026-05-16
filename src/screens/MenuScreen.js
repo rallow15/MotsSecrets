@@ -320,6 +320,7 @@ export default function MenuScreen({ navigation }) {
   const [showSettings, setShowSettings] = useState(false);
   const [showUnlockShop, setShowUnlockShop] = useState(false);
   const [showSpecialeMode, setShowSpecialeMode] = useState(false);
+  const [showWordList, setShowWordList] = useState(false);
   const rulesModalStyle = useModalAnimation(showRules);
   const settingsModalStyle = useModalAnimation(showSettings);
   const shopModalStyle = useModalAnimation(showUnlockShop);
@@ -1209,35 +1210,49 @@ export default function MenuScreen({ navigation }) {
               {/* Section: Mots personnalisés */}
               <View style={styles.setupSection}>
                 <Text style={[styles.setupLabel, { color: theme.text }]}>{lang === 'fr' ? 'Mots personnalisés' : 'Custom words'}</Text>
-                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
                   <TextInput
-                    style={[styles.wordInput, { flex: 1, fontFamily: 'SpaceMono', fontSize: 13, borderWidth: 1, borderColor: theme.inputBorder, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, color: theme.text, backgroundColor: theme.inputBg }]}
+                    style={[styles.wordInput, { flex: 1, fontFamily: 'SpaceMono', fontSize: 14, borderWidth: 1, borderColor: theme.inputBorder, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, color: theme.text, backgroundColor: theme.inputBg }]}
                     value={newWord}
                     onChangeText={setNewWord}
+                    onSubmitEditing={handleAddWord}
                     placeholder={lang === 'fr' ? 'Ajouter un mot...' : 'Add a word...'}
                     placeholderTextColor={darkTheme ? 'rgba(232,213,255,0.4)' : '#999'}
                     maxLength={30}
+                    returnKeyType="done"
                   />
                   <TouchableOpacity
                     style={[styles.addWordBtn, !newWord.trim() && styles.addWordBtnDisabled, { backgroundColor: theme.neon }]}
-                    onPress={() => { handleAddWord(); }}
+                    onPress={handleAddWord}
                     disabled={!newWord.trim()}
                   >
                     <Text style={styles.addWordBtnText}>+</Text>
                   </TouchableOpacity>
                 </View>
                 {customWords.length > 0 && (
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                  <TouchableOpacity
+                    style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 10, backgroundColor: theme.btnBg, borderWidth: 1, borderColor: theme.border }}
+                    onPress={() => setShowWordList(!showWordList)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={{ fontFamily: 'BebasNeue', fontSize: 16, color: theme.text, letterSpacing: 2 }}>
+                      {customWords.length} {lang === 'fr' ? (customWords.length > 1 ? 'mots' : 'mot') : (customWords.length > 1 ? 'words' : 'word')}
+                    </Text>
+                    <Text style={{ fontSize: 14, color: theme.text }}>{showWordList ? '▲' : '▼'}</Text>
+                  </TouchableOpacity>
+                )}
+                {showWordList && customWords.length > 0 && (
+                  <View style={{ marginTop: 6, gap: 6 }}>
                     {customWords.map((word, i) => (
-                      <View key={i} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: theme.btnBg, borderRadius: 16, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: theme.cardBorder }}>
-                        <Text style={{ fontFamily: 'SpaceMono', fontSize: 12, color: theme.text, letterSpacing: 2 }}>
+                      <View key={i} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: theme.btnBg, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: theme.cardBorder }}>
+                        <Text style={{ flex: 1, fontFamily: 'SpaceMono', fontSize: 13, color: theme.text, letterSpacing: 2 }}>
                           {revealedWords[i] ? word : '•••'}
                         </Text>
-                        <TouchableOpacity onPress={() => setRevealedWords(prev => ({ ...prev, [i]: !prev[i] }))} style={{ marginLeft: 6 }}>
+                        <TouchableOpacity onPress={() => setRevealedWords(prev => ({ ...prev, [i]: !prev[i] }))} style={{ marginLeft: 8, paddingHorizontal: 4 }}>
                           <Text style={{ fontSize: 14 }}>{revealedWords[i] ? '🙈' : '👁️'}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleRemoveWord(i)} style={{ marginLeft: 4 }}>
-                          <Text style={{ color: '#ff4444', fontSize: 14, fontWeight: 'bold' }}>×</Text>
+                        <TouchableOpacity onPress={() => handleRemoveWord(i)} style={{ marginLeft: 4, paddingHorizontal: 4 }}>
+                          <Text style={{ color: '#ff4444', fontSize: 16, fontWeight: 'bold' }}>×</Text>
                         </TouchableOpacity>
                       </View>
                     ))}
