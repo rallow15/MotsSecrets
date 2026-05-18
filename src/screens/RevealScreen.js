@@ -92,6 +92,62 @@ const LIEUX_IMAGES = {
   'Prison': require('../../assets/lieux/18_Prison.png'),
 };
 
+// Images TRAVAIL - require statiques pour Metro
+const TRAVAIL_IMAGES = {
+  'Acteur': require('../../assets/travaille/ACTEUR.jpeg'),
+  'Avocat': require('../../assets/travaille/avocat.jpeg'),
+  'Entraîneur de football': require('../../assets/travaille/entraineur football.jpeg'),
+  'Gendarme': require('../../assets/travaille/gendarme.png'),
+  'Infirmier': require('../../assets/travaille/infirmiere.png'),
+  'Journaliste': require('../../assets/travaille/journaliste.jpeg'),
+  'Juge': require('../../assets/travaille/JUGE.jpeg'),
+  'Livreur': require('../../assets/travaille/livreur.png'),
+  'Médecin': require('../../assets/travaille/medecin.png'),
+  'Militaire': require('../../assets/travaille/militaire.png'),
+  'Policier': require('../../assets/travaille/policier.png'),
+  'Pompier': require('../../assets/travaille/pompier.jpeg'),
+  'Professeur': require('../../assets/travaille/professeur.jpeg'),
+  // EN
+  'Actor': require('../../assets/travaille/ACTEUR.jpeg'),
+  'Lawyer': require('../../assets/travaille/avocat.jpeg'),
+  'Football Coach': require('../../assets/travaille/entraineur football.jpeg'),
+  'Gendarme': require('../../assets/travaille/gendarme.png'),
+  'Nurse': require('../../assets/travaille/infirmiere.png'),
+  'Journalist': require('../../assets/travaille/journaliste.jpeg'),
+  'Judge': require('../../assets/travaille/JUGE.jpeg'),
+  'Delivery Driver': require('../../assets/travaille/livreur.png'),
+  'Doctor': require('../../assets/travaille/medecin.png'),
+  'Soldier': require('../../assets/travaille/militaire.png'),
+  'Police Officer': require('../../assets/travaille/policier.png'),
+  'Firefighter': require('../../assets/travaille/pompier.jpeg'),
+  'Teacher': require('../../assets/travaille/professeur.jpeg'),
+};
+
+// Images SPORT - require statiques pour Metro
+const SPORT_IMAGES = {
+  'Baseball': require('../../assets/sport/baseball.png'),
+  'Basketball': require('../../assets/sport/basketball.png'),
+  'Boxe': require('../../assets/sport/boxe.png'),
+  'Catch': require('../../assets/sport/catch.png'),
+  'Football américain': require('../../assets/sport/football americain.jpeg'),
+  'Football': require('../../assets/sport/football.png'),
+  'Futsal': require('../../assets/sport/futsal.jpeg'),
+  'Handball': require('../../assets/sport/handball.png'),
+  'Karaté': require('../../assets/sport/karate.png'),
+  'MMA': require('../../assets/sport/mma.png'),
+  'Natation': require('../../assets/sport/natation.png'),
+  'Rugby': require('../../assets/sport/rugby.jpeg'),
+  'Tennis': require('../../assets/sport/tennis.png'),
+  'Volleyball': require('../../assets/sport/volleyball.png'),
+  'Water-polo': require('../../assets/sport/water polo.png'),
+  // EN
+  'Wrestling': require('../../assets/sport/catch.png'),
+  'American Football': require('../../assets/sport/football americain.jpeg'),
+  'Swimming': require('../../assets/sport/natation.png'),
+  'Karate': require('../../assets/sport/karate.png'),
+  'Water Polo': require('../../assets/sport/water polo.png'),
+};
+
 // Images GROUPES - require statiques pour Metro
 const GROUPES_IMAGES = {
   // FR
@@ -168,7 +224,7 @@ export default function RevealScreen({ navigation, route }) {
   const mimerData = assignment.mimerData;
   // En mode facile, Mister White connaît la catégorie
   const word = isMister ? (easyMode && category ? category : 'MISTER WHITE') : isSpy ? null : assignment.word;
-  const lieuImage = word && (LIEUX_IMAGES[word] || GROUPES_IMAGES[word]) ? (LIEUX_IMAGES[word] || GROUPES_IMAGES[word]) : null;
+  const lieuImage = word && (LIEUX_IMAGES[word] || GROUPES_IMAGES[word] || TRAVAIL_IMAGES[word] || SPORT_IMAGES[word]) ? (LIEUX_IMAGES[word] || GROUPES_IMAGES[word] || TRAVAIL_IMAGES[word] || SPORT_IMAGES[word]) : null;
 
   const wordLen = word ? word.length : 0;
   const wordFontSize = wordLen > 14 ? 44 : wordLen > 10 ? 58 : wordLen > 7 ? 72 : 88;
@@ -363,7 +419,7 @@ export default function RevealScreen({ navigation, route }) {
         ) : isSpy ? (
           // Mode SPYFALL : afficher ESPION
           <View style={styles.spyContainer}>
-            <Text style={styles.spyEmoji}>🕵️</Text>
+            <Image source={require('../../assets/spy-icon.png')} style={styles.spyEmoji} resizeMode="contain" />
             <Text style={[styles.spyTitle, { color: theme.text }]}>{t('roleSpy')}</Text>
             <Text style={[styles.spyInstruction, { color: theme.textMuted }]}>{t('spyInstruction')}</Text>
             {spyHint && easyMode && (
@@ -444,7 +500,7 @@ export default function RevealScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  bgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
+  bgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   bgGradientDark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.15)' },
   bgGradientLight: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(180,150,80,0.10)' },
   passContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingTop: 40 },
@@ -472,7 +528,7 @@ const styles = StyleSheet.create({
   misterHintText: { fontFamily: 'SpaceMono', fontSize: 11 },
   // SPY
   spyContainer: { alignItems: 'center', gap: 12 },
-  spyEmoji: { fontSize: 64 },
+  spyEmoji: { width: 80, height: 80 },
   spyTitle: { fontFamily: 'BebasNeue', fontSize: 52, letterSpacing: 2 },
   spyInstruction: { fontFamily: 'SpaceMono', fontSize: 11, textAlign: 'center' },
   // Spyfall fullscreen

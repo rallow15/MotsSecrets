@@ -90,6 +90,62 @@ const LIEUX_IMAGES = {
   'Prison': require('../../assets/lieux/18_Prison.png'),
 };
 
+// Images TRAVAIL - require statiques pour Metro
+const TRAVAIL_IMAGES = {
+  'Acteur': require('../../assets/travaille/ACTEUR.jpeg'),
+  'Avocat': require('../../assets/travaille/avocat.jpeg'),
+  'Entraîneur de football': require('../../assets/travaille/entraineur football.jpeg'),
+  'Gendarme': require('../../assets/travaille/gendarme.png'),
+  'Infirmier': require('../../assets/travaille/infirmiere.png'),
+  'Journaliste': require('../../assets/travaille/journaliste.jpeg'),
+  'Juge': require('../../assets/travaille/JUGE.jpeg'),
+  'Livreur': require('../../assets/travaille/livreur.png'),
+  'Médecin': require('../../assets/travaille/medecin.png'),
+  'Militaire': require('../../assets/travaille/militaire.png'),
+  'Policier': require('../../assets/travaille/policier.png'),
+  'Pompier': require('../../assets/travaille/pompier.jpeg'),
+  'Professeur': require('../../assets/travaille/professeur.jpeg'),
+  // EN
+  'Actor': require('../../assets/travaille/ACTEUR.jpeg'),
+  'Lawyer': require('../../assets/travaille/avocat.jpeg'),
+  'Football Coach': require('../../assets/travaille/entraineur football.jpeg'),
+  'Gendarme': require('../../assets/travaille/gendarme.png'),
+  'Nurse': require('../../assets/travaille/infirmiere.png'),
+  'Journalist': require('../../assets/travaille/journaliste.jpeg'),
+  'Judge': require('../../assets/travaille/JUGE.jpeg'),
+  'Delivery Driver': require('../../assets/travaille/livreur.png'),
+  'Doctor': require('../../assets/travaille/medecin.png'),
+  'Soldier': require('../../assets/travaille/militaire.png'),
+  'Police Officer': require('../../assets/travaille/policier.png'),
+  'Firefighter': require('../../assets/travaille/pompier.jpeg'),
+  'Teacher': require('../../assets/travaille/professeur.jpeg'),
+};
+
+// Images SPORT - require statiques pour Metro
+const SPORT_IMAGES = {
+  'Baseball': require('../../assets/sport/baseball.png'),
+  'Basketball': require('../../assets/sport/basketball.png'),
+  'Boxe': require('../../assets/sport/boxe.png'),
+  'Catch': require('../../assets/sport/catch.png'),
+  'Football américain': require('../../assets/sport/football americain.jpeg'),
+  'Football': require('../../assets/sport/football.png'),
+  'Futsal': require('../../assets/sport/futsal.jpeg'),
+  'Handball': require('../../assets/sport/handball.png'),
+  'Karaté': require('../../assets/sport/karate.png'),
+  'MMA': require('../../assets/sport/mma.png'),
+  'Natation': require('../../assets/sport/natation.png'),
+  'Rugby': require('../../assets/sport/rugby.jpeg'),
+  'Tennis': require('../../assets/sport/tennis.png'),
+  'Volleyball': require('../../assets/sport/volleyball.png'),
+  'Water-polo': require('../../assets/sport/water polo.png'),
+  // EN
+  'Wrestling': require('../../assets/sport/catch.png'),
+  'American Football': require('../../assets/sport/football americain.jpeg'),
+  'Swimming': require('../../assets/sport/natation.png'),
+  'Karate': require('../../assets/sport/karate.png'),
+  'Water Polo': require('../../assets/sport/water polo.png'),
+};
+
 // Images GROUPES - require statiques pour Metro
 const GROUPES_IMAGES = {
   '300 Spartans': require('../../assets/groupes/01_300 spartans.png'),
@@ -233,7 +289,7 @@ export default function ResultScreen({ navigation, route }) {
             wordDisplay = wordDisplay.replace('.jpg', '').replace('.png', '');
           }
           // Image lieu pour Spyfall
-          const lieuImg = wordDisplay && (LIEUX_IMAGES[wordDisplay] || GROUPES_IMAGES[wordDisplay]) ? (LIEUX_IMAGES[wordDisplay] || GROUPES_IMAGES[wordDisplay]) : null;
+          const lieuImg = wordDisplay && (LIEUX_IMAGES[wordDisplay] || GROUPES_IMAGES[wordDisplay] || TRAVAIL_IMAGES[wordDisplay] || SPORT_IMAGES[wordDisplay]) ? (LIEUX_IMAGES[wordDisplay] || GROUPES_IMAGES[wordDisplay] || TRAVAIL_IMAGES[wordDisplay] || SPORT_IMAGES[wordDisplay]) : null;
 
           const handleReveal = () => {
             if (!isRev) {
@@ -415,7 +471,7 @@ export default function ResultScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container:     { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28, gap: 16 },
-  bgImage:       { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
+  bgImage:       { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   bgGradientDark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.15)' },
   bgGradientLight: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(180,150,80,0.10)' },
   commenceLabel: { fontFamily: 'SpaceMono', fontSize: 10, letterSpacing: 3 },

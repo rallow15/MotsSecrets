@@ -35,25 +35,16 @@ export const CATEGORIES_FR = {
   },
 
   // ═══════════════════════════════════════════════════════════
-  // 🎬 ACTEURS
+  // 🌟 PERSONNES CONNUES
   // ═════════════════════════════════════════════════════════════
-  ACTEURS: {
+  PERSONNES_CONNUES: {
     _subcategories: {
-      'Action/Heroes': ["Tom Cruise", "Will Smith", "Dwayne Johnson", "Jason Statham", "Vin Diesel", "Keanu Reeves", "Robert Downey Jr.", "Hugh Jackman", "Tom Holland", "Michael B. Jordan", "Bruce Willis", "Arnold Schwarzenegger", "Sylvester Stallone"],
-      'Drame classiques': ["Leonardo DiCaprio", "Tom Hanks", "Morgan Freeman", "Robert De Niro", "Al Pacino", "Denzel Washington", "Brad Pitt", "Johnny Depp", "Samuel L. Jackson"],
-      'Arts martiaux': ["Jackie Chan", "Bruce Lee", "Jet Li", "Chuck Norris", "Wesley Snipes"],
-      'Thriller/Conduite': ["Matt Damon", "Ben Affleck", "Mark Wahlberg", "Christian Bale"],
-      'Français': ["Omar Sy", "Jean Dujardin", "Gad Elmaleh", "François Cluzet", "Romain Duris"],
-    },
-  },
-
-  // ═════════════════════════════════════════════════════════════
-  // 🎬 ACTRICES
-  // ═════════════════════════════════════════════════════════════
-  ACTRICES: {
-    _subcategories: {
-      'Action/Heroines': ["Scarlett Johansson", "Angelina Jolie", "Gal Gadot", "Margot Robbie", "Zendaya", "Charlize Theron"],
-      'Drame/Prestige': ["Jennifer Lawrence", "Meryl Streep", "Natalie Portman", "Emma Watson", "Emma Stone", "Cate Blanchett"],
+      'Action/Héros': ["Vin Diesel", "Dwayne Johnson", "The Rock", "Jason Statham", "Bruce Willis", "John Cena", "Dave Bautista"],
+      'Comédie/Action': ["Will Smith", "Jamie Foxx", "Marlon Wayans", "Martin Lawrence", "Idris Elba", "Chris Rock", "Michael B. Jordan"],
+      'R&B/Pop': ["Michael Jackson", "Prince", "Bruno Mars", "The Weeknd", "Chris Brown", "Usher", "Justin Timberlake"],
+      'Rap/Hip-Hop': ["Lil Wayne", "Snoop Dogg", "Future", "Wiz Khalifa", "Young Thug", "Lil Baby", "Travis Scott", "Drake", "Eminem", "Kanye West", "Tupac", "The Notorious B.I.G."],
+      'Arts martiaux': ["Bruce Lee", "Jackie Chan", "Jet Li", "Jean-Claude Van Damme", "Donnie Yen", "Michael Jai White", "Steven Seagal"],
+      'Pop/Divas': ["Madonna", "Beyoncé", "Mariah Carey", "Rihanna", "Lady Gaga", "Britney Spears", "Celine Dion", "Whitney Houston", "Janet Jackson"],
     },
   },
 
@@ -140,18 +131,20 @@ export const CATEGORIES_FR = {
 
 
   // ═════════════════════════════════════════════════════════════
-  // 🎵 MUSIQUE / CHANTEURS
+  // 🎵 MUSIQUE
   // ═════════════════════════════════════════════════════════════
   MUSIQUE: {
     _subcategories: {
-      'Rap FR': ["Niska", "Booba", "Jul", "PNL", "Ninho", "Gims", "Maître Gims", "Dadju", "Black M"],
-      'Pop/Variété FR': ["Stromae", "Angèle", "Aya Nakamura", "Vitaa", "Shy'm", "Zaz", "Soprano", "Bigflo", "Oli"],
-      'Variété FR années 80-90': ["Johnny Hallyday", "Eddy Mitchell", "Jacques Dutronc", "Serge Gainsbourg", "Charles Aznavour", "Joe Dassin", "Michel Sardou", "Renaud", "Francis Cabrel", "Jean-Jacques Goldman", "Patrick Bruel", "Florent Pagny"],
-      'Variété FR 2000+': ["Garou", "Daniel Balavoine", "Alain Souchon", "Laurent Voulzy", "Carla Bruni", "Mylène Farmer", "Christine and the Queens", "Louane", "Clara Luciani", "Aya Nakamura"],
-      'Rock FR': ["Téléphone", "Indochine", "Noir Désir", "Mano Negra", "Tryo", "Kyo", "Daft Punk", "Phoenix", "Louise Attaque"],
-      'Rock international': ["Linkin Park", "Nirvana", "Metallica", "Queen", "The Beatles", "Rolling Stones", "Led Zeppelin", "Pink Floyd", "AC/DC", "Guns N' Roses"],
-      'Pop/R&B internationale': ["Michael Jackson", "Prince", "Madonna", "Beyoncé", "Rihanna", "Taylor Swift", "Adele", "Lady Gaga", "Katy Perry", "Bruno Mars"],
-      'Rap US': ["The Weeknd", "Drake", "Kanye West", "Jay-Z", "Eminem", "50 Cent", "Snoop Dogg", "Tupac", "Biggie", "Nas"],
+      'Rap/Hip-Hop': ["Trap", "Boom Bap", "Cloud Rap", "Drill", "Old School", "Rap français", "Gangsta Rap", "Lo-Fi Rap", "Conscious Rap", "Mumble Rap"],
+      'Pop/Variété': ["Synthpop", "Electropop", "Indie Pop", "K-Pop", "Dance-Pop", "Variété française", "Dream Pop", "Bubblegum Pop", "Art Pop"],
+      'Rock': ["Hard Rock", "Punk Rock", "Grunge", "Indie Rock", "Progressive Rock", "Psychédélique", "Post-Punk", "Glam Rock", "Stoner Rock"],
+      'Électronique': ["Techno", "House", "Trance", "Dubstep", "Drum and Bass", "Ambient", "EDM", "Deep House", "Tech House", "Electro"],
+      'R&B/Soul/Funk': ["Neo-Soul", "Funk", "Disco", "Motown", "Gospel", "Quiet Storm", "Contemporary R&B"],
+      'Jazz/Blues': ["Bebop", "Smooth Jazz", "Swing", "Delta Blues", "Cool Jazz", "Free Jazz", "Big Band"],
+      'Classique': ["Symphonie", "Concerto", "Opéra", "Sonate", "Ballet", "Fugue", "Oratorio"],
+      'Reggae/Ska': ["Reggae", "Dancehall", "Ska", "Dub", "Ragga"],
+      'Latine': ["Salsa", "Bachata", "Reggaeton", "Samba", "Tango", "Cumbia", "Bossa Nova", "Merengue"],
+      'Métal': ["Heavy Metal", "Death Metal", "Black Metal", "Thrash Metal", "Power Metal", "Doom Metal", "Metalcore"],
     },
   },
 
@@ -182,12 +175,10 @@ export const CATEGORIES_FR = {
   // ═════════════════════════════════════════════════════════════
   MANGA: {
     _subcategories: {
-      'Naruto': ["Naruto", "Sasuke", "Sakura", "Kakashi", "Itachi"],
-      'Dragon Ball': ["Goku", "Vegeta", "Gohan", "Piccolo", "Frieza", "Krillin", "Broly", "Trunks", "Bulma", "Cell", "Majin Boo", "Tortue Géniale", "Goku Black"],
-      'One Piece': ["Luffy", "Zoro", "Nami", "Sanji", "Chopper", "Shanks", "Kaido", "Big Mom", "Rock D. Xebec"],
-      'Demon Slayer': ["Tanjiro", "Nezuko", "Zenitsu", "Inosuke", "Muzan", "Shinobu"],
-      'Attack on Titan': ["Eren", "Mikasa", "Levi", "Armin", "Reiner", "Annie"],
-      'One Punch Man': ["Saitama", "Genos"],
+      'Naruto': ["Naruto", "Sasuke", "Kakashi", "Itachi", "Madara", "Obito", "Jiraya", "Orochimaru", "Hashirama", "Minato", "Pain", "Gaara"],
+      'Dragon Ball': ["Goku", "Vegeta", "Broly", "Black Goku", "Gohan", "Trunks", "Bardock", "Gogeta", "Vegeto", "Roi Vegeta", "Gotenks", "Raditz"],
+      'One Piece': ["Luffy", "Zoro", "Sanji", "Shanks", "Barbe Blanche", "Kaido", "Big Mom", "Barbe Noire", "Gol D. Roger", "Ace", "Sabo"],
+      'Divers/Légendaires': ["Saitama", "Krillin", "Tortue Géniale", "Kratos", "Nappa"],
     },
   },
 
@@ -235,6 +226,16 @@ export const CATEGORIES_FR = {
       'Loisirs': ["Parc d\'attractions", "Stade", "Casino", "Cirque", "Stade olympique", "Spa", "Festival", "Phare", "Château"],
     },
   },
+
+  // ═════════════════════════════════════════════════════════════
+  // 💼 TRAVAIL (Mode Spyfall - images)
+  // ═════════════════════════════════════════════════════════════
+  TRAVAIL: ["Acteur", "Avocat", "Entraîneur de football", "Gendarme", "Infirmier", "Journaliste", "Juge", "Livreur", "Médecin", "Militaire", "Policier", "Pompier", "Professeur"],
+
+  // ═════════════════════════════════════════════════════════════
+  // 🏅 SPORT (Mode Spyfall - images)
+  // ═════════════════════════════════════════════════════════════
+  SPORT: ["Baseball", "Basketball", "Boxe", "Catch", "Football américain", "Football", "Futsal", "Handball", "Karaté", "MMA", "Natation", "Rugby", "Tennis", "Volleyball", "Water-polo"],
 
   // ═════════════════════════════════════════════════════════════
   // 👥 GROUPES (Mode Spyfall - images)
@@ -385,25 +386,16 @@ export const CATEGORIES_EN = {
   },
 
   // ═════════════════════════════════════════════════════════════
-  // 🎬 ACTORS
+  // 🌟 STARS
   // ═════════════════════════════════════════════════════════════
-  ACTORS: {
+  STARS: {
     _subcategories: {
-      'Action/Heroes': ["Tom Cruise", "Will Smith", "Dwayne Johnson", "Jason Statham", "Vin Diesel", "Keanu Reeves", "Robert Downey Jr.", "Hugh Jackman", "Tom Holland", "Michael B. Jordan", "Bruce Willis", "Arnold Schwarzenegger", "Sylvester Stallone"],
-      'Drama Classics': ["Leonardo DiCaprio", "Tom Hanks", "Morgan Freeman", "Robert De Niro", "Al Pacino", "Denzel Washington", "Brad Pitt", "Johnny Depp", "Samuel L. Jackson"],
-      'Martial Arts': ["Jackie Chan", "Bruce Lee", "Jet Li", "Chuck Norris", "Wesley Snipes"],
-      'Thriller/Driving': ["Matt Damon", "Ben Affleck", "Mark Wahlberg", "Christian Bale"],
-      'French': ["Omar Sy", "Jean Dujardin", "Gad Elmaleh", "François Cluzet", "Romain Duris"],
-    },
-  },
-
-  // ═════════════════════════════════════════════════════════════
-  // 🎬 ACTRESSES
-  // ═════════════════════════════════════════════════════════════
-  ACTRESSES: {
-    _subcategories: {
-      'Action/Heroines': ["Scarlett Johansson", "Angelina Jolie", "Gal Gadot", "Margot Robbie", "Zendaya", "Charlize Theron"],
-      'Drama/Prestige': ["Jennifer Lawrence", "Meryl Streep", "Natalie Portman", "Emma Watson", "Emma Stone", "Cate Blanchett"],
+      'Action/Heroes': ["Vin Diesel", "Dwayne Johnson", "Jason Statham", "Bruce Willis", "John Cena", "Dave Bautista"],
+      'Comedy/Action': ["Will Smith", "Jamie Foxx", "Marlon Wayans", "Martin Lawrence", "Idris Elba", "Chris Rock", "Michael B. Jordan"],
+      'R&B/Pop': ["Michael Jackson", "Prince", "Bruno Mars", "The Weeknd", "Chris Brown", "Usher", "Justin Timberlake"],
+      'Rap/Hip-Hop': ["Lil Wayne", "Snoop Dogg", "Future", "Wiz Khalifa", "Young Thug", "Lil Baby", "Travis Scott", "Drake", "Eminem", "Kanye West", "Tupac", "The Notorious B.I.G."],
+      'Martial Arts': ["Bruce Lee", "Jackie Chan", "Jet Li", "Jean-Claude Van Damme", "Donnie Yen", "Michael Jai White", "Steven Seagal"],
+      'Pop/Divas': ["Madonna", "Beyoncé", "Mariah Carey", "Rihanna", "Lady Gaga", "Britney Spears", "Celine Dion", "Whitney Houston", "Janet Jackson"],
     },
   },
 
@@ -489,18 +481,20 @@ export const CATEGORIES_EN = {
   },
 
   // ═════════════════════════════════════════════════════════════
-  // 🎵 MUSIC / SINGERS
+  // 🎵 MUSIC
   // ═════════════════════════════════════════════════════════════
   MUSIC: {
     _subcategories: {
-      'Rap FR': ["Niska", "Booba", "Jul", "PNL", "Ninho", "Gims", "Maître Gims", "Dadju", "Black M"],
-      'Pop/Variété FR': ["Stromae", "Angèle", "Aya Nakamura", "Vitaa", "Shy'm", "Zaz", "Soprano", "Bigflo", "Oli"],
-      'FR 80s-90s Legends': ["Johnny Hallyday", "Eddy Mitchell", "Jacques Dutronc", "Serge Gainsbourg", "Charles Aznavour", "Joe Dassin", "Michel Sardou", "Renaud", "Francis Cabrel", "Jean-Jacques Goldman", "Patrick Bruel", "Florent Pagny"],
-      'FR 2000+': ["Garou", "Daniel Balavoine", "Alain Souchon", "Laurent Voulzy", "Carla Bruni", "Mylène Farmer", "Christine and the Queens", "Louane", "Clara Luciani", "Aya Nakamura"],
-      'Rock FR': ["Téléphone", "Indochine", "Noir Désir", "Mano Negra", "Tryo", "Kyo", "Daft Punk", "Phoenix", "Louise Attaque"],
-      'Rock International': ["Linkin Park", "Nirvana", "Metallica", "Queen", "The Beatles", "Rolling Stones", "Led Zeppelin", "Pink Floyd", "AC/DC", "Guns N' Roses"],
-      'Pop/R&B International': ["Michael Jackson", "Prince", "Madonna", "Beyoncé", "Rihanna", "Taylor Swift", "Adele", "Lady Gaga", "Katy Perry", "Bruno Mars"],
-      'Rap US': ["The Weeknd", "Drake", "Kanye West", "Jay-Z", "Eminem", "50 Cent", "Snoop Dogg", "Tupac", "Biggie", "Nas"],
+      'Rap/Hip-Hop': ["Trap", "Boom Bap", "Cloud Rap", "Drill", "Old School", "French Rap", "Gangsta Rap", "Lo-Fi Rap", "Conscious Rap", "Mumble Rap"],
+      'Pop': ["Synthpop", "Electropop", "Indie Pop", "K-Pop", "Dance-Pop", "Dream Pop", "Bubblegum Pop", "Art Pop", "Chamber Pop"],
+      'Rock': ["Hard Rock", "Punk Rock", "Grunge", "Indie Rock", "Progressive Rock", "Psychedelic Rock", "Post-Punk", "Glam Rock", "Stoner Rock"],
+      'Electronic': ["Techno", "House", "Trance", "Dubstep", "Drum and Bass", "Ambient", "EDM", "Deep House", "Tech House", "Electro"],
+      'R&B/Soul/Funk': ["Neo-Soul", "Funk", "Disco", "Motown", "Gospel", "Quiet Storm", "Contemporary R&B"],
+      'Jazz/Blues': ["Bebop", "Smooth Jazz", "Swing", "Delta Blues", "Cool Jazz", "Free Jazz", "Big Band"],
+      'Classical': ["Symphony", "Concerto", "Opera", "Sonata", "Ballet", "Fugue", "Oratorio"],
+      'Reggae/Ska': ["Reggae", "Dancehall", "Ska", "Dub", "Ragga"],
+      'Latin': ["Salsa", "Bachata", "Reggaeton", "Samba", "Tango", "Cumbia", "Bossa Nova", "Merengue"],
+      'Metal': ["Heavy Metal", "Death Metal", "Black Metal", "Thrash Metal", "Power Metal", "Doom Metal", "Metalcore"],
     },
   },
 
@@ -531,12 +525,10 @@ export const CATEGORIES_EN = {
   // ═════════════════════════════════════════════════════════════
   MANGA: {
     _subcategories: {
-      'Naruto': ["Naruto", "Sasuke", "Sakura", "Kakashi", "Itachi"],
-      'Dragon Ball': ["Goku", "Vegeta", "Gohan", "Piccolo", "Frieza", "Krillin", "Broly", "Trunks", "Bulma", "Cell", "Majin Buu", "Master Roshi", "Goku Black"],
-      'One Piece': ["Luffy", "Zoro", "Nami", "Sanji", "Chopper", "Shanks", "Kaido", "Big Mom", "Rock D. Xebec"],
-      'Demon Slayer': ["Tanjiro", "Nezuko", "Zenitsu", "Inosuke", "Muzan", "Shinobu"],
-      'Attack on Titan': ["Eren", "Mikasa", "Levi", "Armin", "Reiner", "Annie"],
-      'One Punch Man': ["Saitama", "Genos"],
+      'Naruto': ["Naruto", "Sasuke", "Kakashi", "Itachi", "Madara", "Obito", "Jiraya", "Orochimaru", "Hashirama", "Minato", "Pain", "Gaara"],
+      'Dragon Ball': ["Goku", "Vegeta", "Broly", "Black Goku", "Gohan", "Trunks", "Bardock", "Gogeta", "Vegeto", "King Vegeta", "Gotenks", "Raditz"],
+      'One Piece': ["Luffy", "Zoro", "Sanji", "Shanks", "Barbe Blanche", "Kaido", "Big Mom", "Barbe Noire", "Gol D. Roger", "Ace", "Sabo"],
+      'Misc/Legends': ["Saitama", "Krillin", "Master Roshi", "Kratos", "Nappa"],
     },
   },
 
@@ -586,6 +578,15 @@ export const CATEGORIES_EN = {
   },
 
   // ═════════════════════════════════════════════════════════════
+  // 💼 JOBS (Spyfall Mode - images)
+  // ═════════════════════════════════════════════════════════════
+  JOBS: ["Actor", "Lawyer", "Football Coach", "Gendarme", "Nurse", "Journalist", "Judge", "Delivery Driver", "Doctor", "Soldier", "Police Officer", "Firefighter", "Teacher"],
+
+  // ═════════════════════════════════════════════════════════════
+  // 🏅 SPORT (Spyfall Mode - images)
+  // ═════════════════════════════════════════════════════════════
+  SPORT: ["Baseball", "Basketball", "Boxing", "Wrestling", "American Football", "Football", "Futsal", "Handball", "Karate", "MMA", "Swimming", "Rugby", "Tennis", "Volleyball", "Water Polo"],
+
   // 👥 GROUPS (Spyfall Mode - images)
   // ═════════════════════════════════════════════════════════════
   GROUPS: {
@@ -825,6 +826,37 @@ export const SPYFALL_HINTS_FR = {
   'Festival': 'Bracelet',
   'Phare': 'Signal',
   'Château': 'Douves',
+  // TRAVAIL
+  // SPORT
+  'Baseball': 'Batte',
+  'Basketball': 'Panier',
+  'Boxe': 'Gant',
+  'Catch': 'Ring',
+  'Football américain': 'Casque',
+  'Football': 'Ballon rond',
+  'Futsal': 'Terrain',
+  'Handball': 'But',
+  'Karaté': 'Ceinture',
+  'MMA': 'Octogone',
+  'Natation': 'Ligne',
+  'Rugby': 'Mêlée',
+  'Tennis': 'Raquette',
+  'Volleyball': 'Filet',
+  'Water-polo': 'Bonnet',
+  // TRAVAIL
+  'Acteur': 'Scène',
+  'Avocat': 'Plaidoirie',
+  'Entraîneur de football': 'Terrain',
+  'Gendarme': 'Radar',
+  'Infirmier': 'Pouls',
+  'Journaliste': 'Titre',
+  'Juge': 'Marteau',
+  'Livreur': 'Colis',
+  'Médecin': 'Ordonnance',
+  'Militaire': 'Caserne',
+  'Policier': 'Amende',
+  'Pompier': 'Lance',
+  'Professeur': 'Craie',
   // GROUPES
   'Amiraux': 'Justice',
   'Armée Révolutionnaire': 'Rébellion',
@@ -895,6 +927,37 @@ export const SPYFALL_HINTS_EN = {
   'Festival': 'Wristband',
   'Lighthouse': 'Beam',
   'Castle': 'Moat',
+  // JOBS
+  // SPORT
+  'Baseball': 'Bat',
+  'Basketball': 'Hoop',
+  'Boxing': 'Glove',
+  'Wrestling': 'Ring',
+  'American Football': 'Helmet',
+  'Football': 'Ball',
+  'Futsal': 'Court',
+  'Handball': 'Goal',
+  'Karate': 'Belt',
+  'MMA': 'Octagon',
+  'Swimming': 'Lane',
+  'Rugby': 'Scrum',
+  'Tennis': 'Racket',
+  'Volleyball': 'Net',
+  'Water Polo': 'Cap',
+  // JOBS
+  'Actor': 'Stage',
+  'Lawyer': 'Pleading',
+  'Football Coach': 'Pitch',
+  'Gendarme': 'Radar',
+  'Nurse': 'Pulse',
+  'Journalist': 'Headline',
+  'Judge': 'Gavel',
+  'Delivery Driver': 'Package',
+  'Doctor': 'Prescription',
+  'Soldier': 'Barracks',
+  'Police Officer': 'Fine',
+  'Firefighter': 'Hose',
+  'Teacher': 'Chalk',
   // GROUPS
   'Warlords': 'Justice',
   'Revolutionary Army': 'Rebellion',

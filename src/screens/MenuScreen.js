@@ -65,11 +65,9 @@ const LAUNCH_BTN_LIGHT = require('../../assets/launch-btn-light.png');
 const CATEGORY_EMOJIS = {
   FOOTBALL: '⚽',
   BASKETBALL: '🏀',
-  ACTEURS: '🎭',
-  ACTRICES: '🎭',
+  PERSONNES_CONNUES: '🌟',
   METIERS: '👷',
-  ACTORS: '🎭',
-  ACTRESSES: '🎭',
+  STARS: '🌟',
   PROFESSIONS: '👷',
   PAYS: '🗺️',
   COUNTRIES: '🗺️',
@@ -92,6 +90,9 @@ const CATEGORY_EMOJIS = {
   LOCATIONS: '🏠',
   GROUPES: '👥',
   GROUPS: '👥',
+  TRAVAIL: '💼',
+  JOBS: '💼',
+  SPORT: '🏅',
   SPECIALE: '⭐',
   MIMER: '🎭',
   AGE_OF_EMPIRE_4: '🏰',
@@ -101,8 +102,7 @@ const CATEGORY_NAMES = {
   fr: {
     FOOTBALL: 'FOOTBALL',
     BASKETBALL: 'BASKETBALL',
-    ACTEURS: 'ACTEURS',
-    ACTRICES: 'ACTRICES',
+    PERSONNES_CONNUES: 'PERSONNES CONNUES',
     METIERS: 'MÉTIERS',
     PAYS: 'PAYS',
     ANIMAUX: 'ANIMAUX',
@@ -115,6 +115,8 @@ const CATEGORY_NAMES = {
     OBJETS: 'OBJETS',
     LIEUX: 'LIEUX',
     GROUPES: 'GROUPES',
+    TRAVAIL: 'TRAVAIL',
+    SPORT: 'SPORT',
     SPECIALE: 'SPÉCIALE',
     MIMER: 'MIMER',
     AGE_OF_EMPIRE_4: 'AGE OF EMPIRE 4',
@@ -122,8 +124,7 @@ const CATEGORY_NAMES = {
   en: {
     FOOTBALL: 'FOOTBALL',
     BASKETBALL: 'BASKETBALL',
-    ACTORS: 'ACTORS',
-    ACTRESSES: 'ACTRESSES',
+    STARS: 'STARS',
     PROFESSIONS: 'PROFESSIONS',
     COUNTRIES: 'COUNTRIES',
     ANIMALS: 'ANIMALS',
@@ -136,6 +137,8 @@ const CATEGORY_NAMES = {
     OBJECTS: 'OBJECTS',
     LOCATIONS: 'LOCATIONS',
     GROUPS: 'GROUPS',
+    JOBS: 'JOBS',
+    SPORT: 'SPORT',
     SPECIALE: 'SPECIAL',
     MIMER: 'MIMER',
     AGE_OF_EMPIRE_4: 'AGE OF EMPIRE 4',
@@ -316,7 +319,7 @@ export default function MenuScreen({ navigation }) {
   const [showRules, setShowRules] = useState(false);
   const [rulesPage, setRulesPage] = useState(0);
   const [showCategories, setShowCategories] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState(null); // null = aléatoire, [] = aucune, ['FOOTBALL', 'ACTEURS'] = multi-sélection
+  const [selectedCategories, setSelectedCategories] = useState(null); // null = aléatoire, [] = aucune, ['FOOTBALL', 'PERSONNES_CONNUES'] = multi-sélection
   const [showSettings, setShowSettings] = useState(false);
   const [showUnlockShop, setShowUnlockShop] = useState(false);
   const [showSpecialeMode, setShowSpecialeMode] = useState(false);
@@ -688,9 +691,9 @@ export default function MenuScreen({ navigation }) {
     if (mimerMode) {
       finalCategory = 'MIMER';
     } else if (gameMode === 3) {
-      // Spyfall : LIEUX ou GROUPES uniquement
+      // Spyfall : LIEUX, GROUPES ou TRAVAIL selon sélection (défaut LIEUX)
       if (Array.isArray(selectedCategories) && selectedCategories.length > 0) {
-        const spyfallCats = selectedCategories.filter(c => c === 'LIEUX' || c === 'LOCATIONS' || c === 'GROUPES' || c === 'GROUPS');
+        const spyfallCats = selectedCategories.filter(c => c === 'LIEUX' || c === 'LOCATIONS' || c === 'GROUPES' || c === 'GROUPS' || c === 'TRAVAIL' || c === 'JOBS' || c === 'SPORT');
         finalCategory = spyfallCats.length > 0 ? spyfallCats[Math.floor(Math.random() * spyfallCats.length)] : (lang === 'fr' ? 'LIEUX' : 'LOCATIONS');
       } else {
         finalCategory = lang === 'fr' ? 'LIEUX' : 'LOCATIONS';
@@ -853,8 +856,9 @@ export default function MenuScreen({ navigation }) {
     if (cat === 'MIMER') return false;
     if (cat === 'SPECIALE') return false;
     if ((cat === 'OBJECTS' || cat === 'OBJETS') && !objectsUnlocked) return false;
-    // LIEUX/GROUPES sont réservés au mode Spyfall
-    if (gameMode !== 3 && (cat === 'LIEUX' || cat === 'LOCATIONS' || cat === 'GROUPES' || cat === 'GROUPS')) return false;
+    // LIEUX/GROUPES/TRAVAIL/SPORT sont réservés au mode Spyfall
+    if (gameMode !== 3 && (cat === 'GROUPES' || cat === 'GROUPS' || cat === 'TRAVAIL' || cat === 'JOBS' || cat === 'SPORT')) return false;
+    if (gameMode !== 3 && (cat === 'LIEUX' || cat === 'LOCATIONS')) return false;
     return true;
   });
 
@@ -1315,6 +1319,39 @@ export default function MenuScreen({ navigation }) {
               </TouchableOpacity>
             )}
           </Animated.View>
+          {showWordList && (
+            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', zIndex: 9999 }}>
+              <Animated.View style={[styles.modalContent, { backgroundColor: theme.modalBg, borderColor: theme.modalBorder }, wordListModalStyle]}>
+                <Text style={[styles.modalTitle, { color: theme.text }]}>{lang === 'fr' ? '📝 MES MOTS' : '📝 MY WORDS'}</Text>
+                <ScrollView style={{ maxHeight: 300 }} showsVerticalScrollIndicator={false}>
+                  <View style={{ gap: 8 }}>
+                    {customWords.map((word, i) => (
+                      <View key={i} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: theme.btnBg, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, borderWidth: 1, borderColor: theme.cardBorder }}>
+                        <Text style={{ flex: 1, fontFamily: 'SpaceMono', fontSize: 14, color: theme.text, letterSpacing: 2 }}>
+                          {revealedWords[i] ? word : '•••'}
+                        </Text>
+                        <TouchableOpacity onPress={() => setRevealedWords(prev => ({ ...prev, [i]: !prev[i] }))} style={{ marginLeft: 8, paddingHorizontal: 6 }}>
+                          <Text style={{ fontSize: 16 }}>{revealedWords[i] ? '🙈' : '👁️'}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => handleRemoveWord(i)} style={{ marginLeft: 4, paddingHorizontal: 6 }}>
+                          <Text style={{ color: '#ff4444', fontSize: 18, fontWeight: 'bold' }}>×</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                </ScrollView>
+                {(darkTheme && !isWeb) ? (
+                  <BouncePress onPress={() => { playClick(); setShowWordList(false); }}>
+                    <ImageBackground source={LAUNCH_BTN} style={styles.launchBtnImage} resizeMode="stretch"><Text style={styles.launchBtnOverlayText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text></ImageBackground>
+                  </BouncePress>
+                ) : (
+                  <BouncePress onPress={() => { playClick(); setShowWordList(false); }}>
+                    <ImageBackground source={LAUNCH_BTN_LIGHT} style={styles.launchBtnImage} resizeMode="stretch"><Text style={styles.launchBtnOverlayText}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text></ImageBackground>
+                  </BouncePress>
+                )}
+              </Animated.View>
+            </View>
+          )}
         </View>
       </Modal>
 
@@ -1340,7 +1377,7 @@ export default function MenuScreen({ navigation }) {
 
                 <View style={styles.modeGrid}>
                   <TouchableOpacity
-                    style={[styles.modeCard, { backgroundColor: (!mimerMode && gameMode !== 3) ? theme.cardActiveBg : theme.cardBg, borderColor: (!mimerMode && gameMode !== 3) ? theme.cardActiveBorder : theme.cardBorder }]}
+                    style={[styles.modeCard, { backgroundColor: 'transparent', borderColor: (!mimerMode && gameMode !== 3) ? (darkTheme ? '#9b30ff' : '#1a1a1a') : (darkTheme ? 'rgba(155,48,255,0.4)' : 'rgba(0,0,0,0.2)') }]}
                     onPress={() => {
                       playClick();
                       setMimerMode(false);
@@ -1349,12 +1386,12 @@ export default function MenuScreen({ navigation }) {
                     activeOpacity={0.7}
                   >
                     <Image source={ROLE_UNDERCOVER} style={styles.modeCardImage} resizeMode="contain" />
-                    <Text style={[styles.modeCardTitle, { color: (!mimerMode && gameMode !== 3) ? '#fff' : theme.text }]}>UNDERCOVER</Text>
-                    <Text style={[styles.modeCardDesc, { color: (!mimerMode && gameMode !== 3) ? 'rgba(255,255,255,0.7)' : theme.textMuted }]}>{lang === 'fr' ? 'Intrus + Mister White' : 'Undercover + Mister White'}</Text>
+                    <Text style={[styles.modeCardTitle, { color: (!mimerMode && gameMode !== 3) ? (darkTheme ? '#b44dff' : '#1a1a1a') : theme.text }]}>UNDERCOVER</Text>
+                    <Text style={[styles.modeCardDesc, { color: (!mimerMode && gameMode !== 3) ? (darkTheme ? 'rgba(180,77,255,0.7)' : 'rgba(0,0,0,0.5)') : theme.textMuted }]}>{lang === 'fr' ? 'Intrus + Mister White' : 'Undercover + Mister White'}</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={[styles.modeCard, { backgroundColor: gameMode === 3 ? theme.cardActiveBg : theme.cardBg, borderColor: gameMode === 3 ? theme.cardActiveBorder : theme.cardBorder }]}
+                    style={[styles.modeCard, { backgroundColor: 'transparent', borderColor: gameMode === 3 ? (darkTheme ? '#9b30ff' : '#1a1a1a') : (darkTheme ? 'rgba(155,48,255,0.4)' : 'rgba(0,0,0,0.2)') }]}
                     onPress={() => {
                       playClick();
                       setSelectedCategories([lang === 'fr' ? 'LIEUX' : 'LOCATIONS']);
@@ -1368,8 +1405,8 @@ export default function MenuScreen({ navigation }) {
                     activeOpacity={0.7}
                   >
                     <Image source={MODE_IMAGES.spyfall} style={styles.modeCardImage} resizeMode="contain" />
-                    <Text style={[styles.modeCardTitle, { color: gameMode === 3 ? '#fff' : theme.text }]}>{t('modeSpyfall')}</Text>
-                    <Text style={[styles.modeCardDesc, { color: gameMode === 3 ? 'rgba(255,255,255,0.7)' : theme.textMuted }]}>
+                    <Text style={[styles.modeCardTitle, { color: gameMode === 3 ? (darkTheme ? '#b44dff' : '#1a1a1a') : theme.text }]}>{t('modeSpyfall')}</Text>
+                    <Text style={[styles.modeCardDesc, { color: gameMode === 3 ? (darkTheme ? 'rgba(180,77,255,0.7)' : 'rgba(0,0,0,0.5)') : theme.textMuted }]}>
                       {lang === 'fr' ? 'Espion + Intrus' : 'Spy + Undercover'}
                     </Text>
                   </TouchableOpacity>
@@ -1377,7 +1414,7 @@ export default function MenuScreen({ navigation }) {
                   <View style={styles.modeCardOuter}>
                     {!mimerMode && <Image source={AD_REWARD_ICON} style={styles.modeCardAdBadge} resizeMode="contain" />}
                     <TouchableOpacity
-                      style={[styles.modeCard, { width: '100%', backgroundColor: mimerMode ? theme.cardActiveBg : theme.cardBg, borderColor: mimerMode ? theme.cardActiveBorder : theme.cardBorder }]}
+                      style={[styles.modeCard, { width: '100%', backgroundColor: 'transparent', borderColor: mimerMode ? (darkTheme ? '#9b30ff' : '#1a1a1a') : (darkTheme ? 'rgba(155,48,255,0.4)' : 'rgba(0,0,0,0.2)') }]}
                       onPress={async () => {
                         if (!mimerMode && !isExpoGo) {
                           const rewarded = await loadAndShowRewardedAd(() => {}, 'mime');
@@ -1394,8 +1431,8 @@ export default function MenuScreen({ navigation }) {
                       activeOpacity={0.7}
                     >
                       <Image source={MODE_IMAGES.mime} style={styles.modeCardImage} resizeMode="contain" />
-                      <Text style={[styles.modeCardTitle, { color: mimerMode ? '#fff' : theme.text }]}>{t('modeMimer')}</Text>
-                      <Text style={[styles.modeCardDesc, { color: mimerMode ? 'rgba(255,255,255,0.7)' : theme.textMuted }]}>{t('modeMimerDesc')}</Text>
+                      <Text style={[styles.modeCardTitle, { color: mimerMode ? (darkTheme ? '#b44dff' : '#1a1a1a') : theme.text }]}>{t('modeMimer')}</Text>
+                      <Text style={[styles.modeCardDesc, { color: mimerMode ? (darkTheme ? 'rgba(180,77,255,0.7)' : 'rgba(0,0,0,0.5)') : theme.textMuted }]}>{t('modeMimerDesc')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -1405,7 +1442,7 @@ export default function MenuScreen({ navigation }) {
                     {gameMode === 3 ? (
                       <View>
                         <View style={[styles.roleCounterRow, { backgroundColor: theme.counterBg, borderColor: theme.counterBorder }]}>
-                          <Text style={styles.roleCounterEmoji}>{"🕵️"}</Text>
+                          <Image source={require('../../assets/spy-icon.png')} style={styles.roleCounterIcon} resizeMode="contain" />
                           <Text style={[styles.roleCounterLabel, { color: theme.textMuted }]}>{lang === 'fr' ? 'Espion' : 'Spy'}</Text>
                           <View style={styles.roleCounterControls}>
                             <TouchableOpacity style={[styles.roleCounterBtn, { backgroundColor: theme.counterBtnBg, borderColor: theme.counterBtnBorder }]} onPress={() => { playClick(); setNumSpies(v => Math.max(0, v - 1)); }}><Text style={[styles.roleCounterBtnText, { color: theme.text }]}>-</Text></TouchableOpacity>
@@ -1524,7 +1561,7 @@ export default function MenuScreen({ navigation }) {
               {gameMode === 3 && !mimerMode && (
                 <View style={styles.setupSection}>
                   <Text style={[styles.setupLabel, { color: theme.text }]}>{lang === 'fr' ? 'Categorie' : 'Category'}</Text>
-                  <View style={styles.categoryScrollHorizontal}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScrollHorizontal}>
                     <TouchableOpacity
                       style={[styles.categoryChip, (selectedCategories === null || (Array.isArray(selectedCategories) && (selectedCategories.includes('LIEUX') || selectedCategories.includes('LOCATIONS')))) ? { backgroundColor: theme.chipActiveBg, borderColor: theme.chipActiveBg } : { backgroundColor: theme.chipBg, borderColor: theme.chipBorder }]}
                       onPress={() => { playClick(); setSelectedCategories(prev => {
@@ -1553,7 +1590,34 @@ export default function MenuScreen({ navigation }) {
                         {lang === 'fr' ? 'GROUPES' : 'GROUPS'}
                       </Text>
                     </TouchableOpacity>
-                  </View>
+                    <TouchableOpacity
+                      style={[styles.categoryChip, (Array.isArray(selectedCategories) && (selectedCategories.includes('TRAVAIL') || selectedCategories.includes('JOBS'))) ? { backgroundColor: theme.chipActiveBg, borderColor: theme.chipActiveBg } : { backgroundColor: theme.chipBg, borderColor: theme.chipBorder }]}
+                      onPress={() => { playClick(); setSelectedCategories(prev => {
+                        const jobs = lang === 'fr' ? 'TRAVAIL' : 'JOBS';
+                        if (prev === null) return [jobs];
+                        if (prev.includes(jobs)) return prev.length === 1 ? null : prev.filter(c => c !== jobs);
+                        return [...prev, jobs];
+                      }); }}
+                    >
+                      <Text style={styles.categoryChipEmoji}>💼</Text>
+                      <Text style={[styles.categoryChipText, (Array.isArray(selectedCategories) && (selectedCategories.includes('TRAVAIL') || selectedCategories.includes('JOBS'))) ? { color: '#fff' } : { color: theme.text }]}>
+                        {lang === 'fr' ? 'TRAVAIL' : 'JOBS'}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.categoryChip, (Array.isArray(selectedCategories) && selectedCategories.includes('SPORT')) ? { backgroundColor: theme.chipActiveBg, borderColor: theme.chipActiveBg } : { backgroundColor: theme.chipBg, borderColor: theme.chipBorder }]}
+                      onPress={() => { playClick(); setSelectedCategories(prev => {
+                        if (prev === null) return ['SPORT'];
+                        if (prev.includes('SPORT')) return prev.length === 1 ? null : prev.filter(c => c !== 'SPORT');
+                        return [...prev, 'SPORT'];
+                      }); }}
+                    >
+                      <Text style={styles.categoryChipEmoji}>🏅</Text>
+                      <Text style={[styles.categoryChipText, (Array.isArray(selectedCategories) && selectedCategories.includes('SPORT')) ? { color: '#fff' } : { color: theme.text }]}>
+                        SPORT
+                      </Text>
+                    </TouchableOpacity>
+                  </ScrollView>
                 </View>
               )}
             </ScrollView>
@@ -1587,43 +1651,10 @@ export default function MenuScreen({ navigation }) {
         </View>
       )}
 
-      {/* Modal pour voir/gérer les mots personnalisés */}
-      <Modal visible={showWordList} animationType="fade" transparent onRequestClose={() => setShowWordList(false)}>
-        <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
-          <Animated.View style={[styles.modalContent, { backgroundColor: theme.modalBg, borderColor: theme.modalBorder }, wordListModalStyle]}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>{lang === 'fr' ? '📝 MES MOTS' : '📝 MY WORDS'}</Text>
-            <ScrollView style={{ maxHeight: 300 }} showsVerticalScrollIndicator={false}>
-              <View style={{ gap: 8 }}>
-                {customWords.map((word, i) => (
-                  <View key={i} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: theme.btnBg, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, borderWidth: 1, borderColor: theme.cardBorder }}>
-                    <Text style={{ flex: 1, fontFamily: 'SpaceMono', fontSize: 14, color: theme.text, letterSpacing: 2 }}>
-                      {revealedWords[i] ? word : '•••'}
-                    </Text>
-                    <TouchableOpacity onPress={() => setRevealedWords(prev => ({ ...prev, [i]: !prev[i] }))} style={{ marginLeft: 8, paddingHorizontal: 6 }}>
-                      <Text style={{ fontSize: 16 }}>{revealedWords[i] ? '🙈' : '👁️'}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleRemoveWord(i)} style={{ marginLeft: 4, paddingHorizontal: 6 }}>
-                      <Text style={{ color: '#ff4444', fontSize: 18, fontWeight: 'bold' }}>×</Text>
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </View>
-            </ScrollView>
-            <TouchableOpacity
-              style={[styles.replayBtn, { backgroundColor: theme.neon, marginTop: 12 }]}
-              onPress={() => { playClick(); setShowWordList(false); }}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.replayBtnText, { color: '#1a1a1a' }]}>{lang === 'fr' ? 'FERMER' : 'CLOSE'}</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        </View>
-      </Modal>
-
       {showLoading && (
         <Animated.View style={[styles.loadingOverlay, { opacity: loadingOpacity }]}>
           <Animated.View style={{ transform: [{ scale: loadingScale }] }}>
-            <Image source={require('../../assets/icon.png')} style={styles.loadingLogo} />
+            <Image source={require('../../assets/icon-android.png')} style={styles.loadingLogo} />
           </Animated.View>
           <Text style={styles.loadingTitle}>MOTS SECRETS</Text>
           <View style={styles.loadingBarContainer}>
@@ -1652,7 +1683,7 @@ const styles = StyleSheet.create({
   bgDark: { flex: 1, backgroundColor: '#0a0a0a' },
   bgGradient: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(180,150,80,0.10)' },
   bgGradientDark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.15)' },
-  bgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
+  bgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
 
   // ─── Mots flottants ───
 
@@ -1719,8 +1750,7 @@ const styles = StyleSheet.create({
   toggleBtnText: { fontFamily: 'SpaceMono', fontSize: 11, color: '#F5F5DC', fontWeight: 'bold' },
   toggleBtnDisabled: { opacity: 0.3 },
   modeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 6 },
-  modeCard: { width: '47%', backgroundColor: '#F5F5DC', borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.15)', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 6, alignItems: 'center', gap: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5 },
-  modeCardActive: { backgroundColor: '#1a1a1a', borderColor: '#1a1a1a', shadowOpacity: 0.4, shadowRadius: 6, elevation: 8 },
+  modeCard: { width: '47%', backgroundColor: 'transparent', borderWidth: 2, borderRadius: 12, paddingVertical: 8, paddingHorizontal: 6, alignItems: 'center', gap: 1 },
   modeCardImage: { width: '85%', height: 40, marginBottom: 2 },
   modeCardTitle: { fontFamily: 'BebasNeue', fontSize: 13, color: '#1a1a1a', letterSpacing: 1, textAlign: 'center' },
   modeCardTitleActive: { color: '#F5F5DC' },
