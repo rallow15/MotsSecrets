@@ -47,6 +47,7 @@ let BannerAdSize = null;
 
 const BANNER_TOP_ID    = isWeb ? '' : (Platform.OS === 'ios' ? 'ca-app-pub-2965679591230669/1687420131' : 'ca-app-pub-2965679591230669/2407188674');
 const BANNER_BOTTOM_ID = isWeb ? '' : (Platform.OS === 'ios' ? 'ca-app-pub-2965679591230669/7168735115' : 'ca-app-pub-2965679591230669/8830249922');
+const BANNER_HEIGHT = 50; // BannerAdSize.BANNER = 320x50dp — réserver l'espace pour éviter les décalages
 
 function loadAdMob() {
   if (!hasAdMobNative) return false;
@@ -113,7 +114,6 @@ export default function App() {
     SpaceMono: require('./assets/fonts/SpaceMono-Regular.ttf'),
     ShakeAlone: require('./assets/fonts/ShakeAlone-YqLpj.otf'),
   });
-  const [adKey, setAdKey] = useState(0);
   const [showConsent, setShowConsent] = useState(isWeb ? false : !__DEV__);
   const [consentGiven, setConsentGiven] = useState(isWeb ? 'given' : 'pending');
   const [consentChecked, setConsentChecked] = useState(isWeb);
@@ -192,8 +192,6 @@ export default function App() {
         initAds();
       } catch (e) {}
     }
-    const id = setInterval(() => setAdKey(k => k + 1), 30000);
-    return () => clearInterval(id);
   }, [adMobLoaded]);
 
   const handleConsentGiven = (status) => {
@@ -211,16 +209,17 @@ export default function App() {
 
   return (
     <View style={styles.root}>
-      {hasAdMobNative && !__DEV__ && adMobLoaded && BannerAd && (
-        <View style={styles.banner}>
-          <BannerAd
-            key={adKey}
-            unitId={BANNER_TOP_ID}
-            size={BannerAdSize.BANNER}
-            requestOptions={{
-              requestNonPersonalizedAdsOnly: consentGiven === 'refused'
-            }}
-          />
+      {hasAdMobNative && !__DEV__ && (
+        <View style={[styles.banner, { height: BANNER_HEIGHT }]}>
+          {adMobLoaded && BannerAd && (
+            <BannerAd
+              unitId={BANNER_TOP_ID}
+              size={BannerAdSize.BANNER}
+              requestOptions={{
+                requestNonPersonalizedAdsOnly: consentGiven === 'refused'
+              }}
+            />
+          )}
         </View>
       )}
       <View style={styles.nav}>
@@ -240,16 +239,17 @@ export default function App() {
           </NavigationContainer>
         </ThemeProvider>
       </View>
-      {hasAdMobNative && !__DEV__ && adMobLoaded && BannerAd && (
-        <View style={styles.banner}>
-          <BannerAd
-            key={adKey + 1}
-            unitId={BANNER_BOTTOM_ID}
-            size={BannerAdSize.BANNER}
-            requestOptions={{
-              requestNonPersonalizedAdsOnly: consentGiven === 'refused'
-            }}
-          />
+      {hasAdMobNative && !__DEV__ && (
+        <View style={[styles.banner, { height: BANNER_HEIGHT }]}>
+          {adMobLoaded && BannerAd && (
+            <BannerAd
+              unitId={BANNER_BOTTOM_ID}
+              size={BannerAdSize.BANNER}
+              requestOptions={{
+                requestNonPersonalizedAdsOnly: consentGiven === 'refused'
+              }}
+            />
+          )}
         </View>
       )}
     </View>
@@ -260,5 +260,5 @@ const styles = StyleSheet.create({
   root:    { flex: 1, backgroundColor: colors.bg },
   nav:     { flex: 1 },
   loading: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
-  banner:  { alignItems: 'center', backgroundColor: colors.bg },
+  banner:  { alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg },
 });

@@ -132,7 +132,7 @@ export default function SpyfallVoteScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F5DC', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20, paddingTop: 40, gap: 10 },
+  container: { flex: 1, backgroundColor: '#F5F5DC', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20, paddingTop: 16, gap: 10 },
   title: { fontFamily: 'BebasNeue', fontSize: 36, color: '#1a1a1a', letterSpacing: 2, textAlign: 'center' },
   voterLabel: { fontFamily: 'BebasNeue', fontSize: 22, color: '#1a1a1a', letterSpacing: 1 },
   instruction: { fontFamily: 'SpaceMono', fontSize: 10, color: '#666', letterSpacing: 2, textAlign: 'center' },
