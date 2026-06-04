@@ -319,7 +319,6 @@ export default function ResultScreen({ navigation, route }) {
                     </View>
                   </View>
                 ) : (
-                ) : (
                   <Text style={[
                     styles.cardWord,
                     { color: darkTheme ? 'rgba(232,213,255,0.4)' : '#999' },
