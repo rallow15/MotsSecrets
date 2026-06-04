@@ -18,9 +18,9 @@ export function generateAssignments(numPlayers, gameMode = 0, selectedCategory =
 
   // Choisir une catégorie (aléatoire ou sélectionnée)
   // Exclure MIMER si le mode mime n'est pas activé, SPECIALE si pas de mots personnalisés
-  // Exclure GROUPES et TRAVAIL (réservés au mode Spyfall) si on n'est pas en mode Spyfall
+  // Exclure TRAVAIL (réservé au mode Spyfall) si on n'est pas en mode Spyfall
   // LIEUX/LOCATIONS sont disponibles en mode Undercover et Spyfall
-  const spyfallOnlyCats = ['GROUPES', 'GROUPS', 'TRAVAIL', 'JOBS', 'SPORT'];
+  const spyfallOnlyCats = ['TRAVAIL', 'JOBS', 'SPORT'];
   const eligibleDb = mimerMode
     ? wordDb
     : wordDb.filter(d => {

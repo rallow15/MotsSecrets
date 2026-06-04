@@ -88,8 +88,6 @@ const CATEGORY_EMOJIS = {
   OBJECTS: '📦',
   LIEUX: '🏠',
   LOCATIONS: '🏠',
-  GROUPES: '👥',
-  GROUPS: '👥',
   TRAVAIL: '💼',
   JOBS: '💼',
   SPORT: '🏅',
@@ -114,7 +112,6 @@ const CATEGORY_NAMES = {
     MANGA: 'MANGA',
     OBJETS: 'OBJETS',
     LIEUX: 'LIEUX',
-    GROUPES: 'GROUPES',
     TRAVAIL: 'TRAVAIL',
     SPORT: 'SPORT',
     SPECIALE: 'SPÉCIALE',
@@ -136,7 +133,6 @@ const CATEGORY_NAMES = {
     MANGA: 'MANGA',
     OBJECTS: 'OBJECTS',
     LOCATIONS: 'LOCATIONS',
-    GROUPS: 'GROUPS',
     JOBS: 'JOBS',
     SPORT: 'SPORT',
     SPECIALE: 'SPECIAL',
@@ -288,6 +284,37 @@ const MODE_IMAGES = {
 
 const ROLE_UNDERCOVER = require('../../assets/role-undercover.png');
 const ROLE_MISTERWHITE = require('../../assets/role-misterwhite.png');
+
+// Bascule (toggle switch) iOS-style
+function ToggleSwitch({ value, onValueChange, activeColor, inactiveColor }) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={onValueChange}
+      style={{
+        width: 52,
+        height: 30,
+        borderRadius: 15,
+        backgroundColor: value ? activeColor : inactiveColor,
+        padding: 2,
+        alignItems: value ? 'flex-end' : 'flex-start',
+        justifyContent: 'center',
+      }}
+    >
+      <View style={{
+        width: 26,
+        height: 26,
+        borderRadius: 13,
+        backgroundColor: '#FFFFFF',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
+        elevation: 4,
+      }} />
+    </TouchableOpacity>
+  );
+}
 
 // Slider simple avec valeur affichée
 function ModeSlider({ value, onValueChange, min, max, themeColors }) {
@@ -685,15 +712,15 @@ export default function MenuScreen({ navigation }) {
     }
 
     // En mode MIMER, la catégorie est automatiquement MIMER
-    // En mode SPYFALL, la catégorie est LIEUX/GROUPES selon sélection (défaut LIEUX)
+    // En mode SPYFALL, la catégorie est LIEUX selon sélection (défaut LIEUX)
     // Multi-catégories : choisir une catégorie au hasard parmi la sélection
     let finalCategory;
     if (mimerMode) {
       finalCategory = 'MIMER';
     } else if (gameMode === 3) {
-      // Spyfall : LIEUX, GROUPES ou TRAVAIL selon sélection (défaut LIEUX)
+      // Spyfall : LIEUX ou TRAVAIL selon sélection (défaut LIEUX)
       if (Array.isArray(selectedCategories) && selectedCategories.length > 0) {
-        const spyfallCats = selectedCategories.filter(c => c === 'LIEUX' || c === 'LOCATIONS' || c === 'GROUPES' || c === 'GROUPS' || c === 'TRAVAIL' || c === 'JOBS' || c === 'SPORT');
+        const spyfallCats = selectedCategories.filter(c => c === 'LIEUX' || c === 'LOCATIONS' || c === 'TRAVAIL' || c === 'JOBS' || c === 'SPORT');
         finalCategory = spyfallCats.length > 0 ? spyfallCats[Math.floor(Math.random() * spyfallCats.length)] : (lang === 'fr' ? 'LIEUX' : 'LOCATIONS');
       } else {
         finalCategory = lang === 'fr' ? 'LIEUX' : 'LOCATIONS';
@@ -856,8 +883,8 @@ export default function MenuScreen({ navigation }) {
     if (cat === 'MIMER') return false;
     if (cat === 'SPECIALE') return false;
     if ((cat === 'OBJECTS' || cat === 'OBJETS') && !objectsUnlocked) return false;
-    // LIEUX/GROUPES/TRAVAIL/SPORT sont réservés au mode Spyfall
-    if (gameMode !== 3 && (cat === 'GROUPES' || cat === 'GROUPS' || cat === 'TRAVAIL' || cat === 'JOBS' || cat === 'SPORT')) return false;
+    // LIEUX/TRAVAIL/SPORT sont réservés au mode Spyfall
+    if (gameMode !== 3 && (cat === 'TRAVAIL' || cat === 'JOBS' || cat === 'SPORT')) return false;
     if (gameMode !== 3 && (cat === 'LIEUX' || cat === 'LOCATIONS')) return false;
     return true;
   });
@@ -1038,39 +1065,19 @@ export default function MenuScreen({ navigation }) {
             </View>
             <View style={styles.settingRow}>
               <Text style={[styles.settingLabel, { color: theme.text }]}>{lang === 'fr' ? 'Musique' : 'Music'}</Text>
-              <TouchableOpacity
-                style={[styles.toggleBtn, musicOn && styles.toggleBtnActive, { backgroundColor: musicOn ? theme.neon : theme.counterBtnBg, borderColor: musicOn ? theme.neon : theme.counterBtnBorder }]}
-                onPress={toggleMusic}
-              >
-                <Text style={[styles.toggleBtnText, { color: musicOn ? '#fff' : theme.text }]}>{musicOn ? 'ON' : 'OFF'}</Text>
-              </TouchableOpacity>
+              <ToggleSwitch value={musicOn} onValueChange={toggleMusic} activeColor={theme.neon} inactiveColor={theme.border} />
             </View>
             <View style={styles.settingRow}>
               <Text style={[styles.settingLabel, { color: theme.text }]}>{lang === 'fr' ? 'Effets' : 'SFX'}</Text>
-              <TouchableOpacity
-                style={[styles.toggleBtn, sfxOn && styles.toggleBtnActive, { backgroundColor: sfxOn ? theme.neon : theme.counterBtnBg, borderColor: sfxOn ? theme.neon : theme.counterBtnBorder }]}
-                onPress={toggleSfx}
-              >
-                <Text style={[styles.toggleBtnText, { color: sfxOn ? '#fff' : theme.text }]}>{sfxOn ? 'ON' : 'OFF'}</Text>
-              </TouchableOpacity>
+              <ToggleSwitch value={sfxOn} onValueChange={toggleSfx} activeColor={theme.neon} inactiveColor={theme.border} />
             </View>
             <View style={styles.settingRow}>
               <Text style={[styles.settingLabel, { color: theme.text }]}>{lang === 'fr' ? 'Vibrations' : 'Vibration'}</Text>
-              <TouchableOpacity
-                style={[styles.toggleBtn, hapticOn && styles.toggleBtnActive, { backgroundColor: hapticOn ? theme.neon : theme.counterBtnBg, borderColor: hapticOn ? theme.neon : theme.counterBtnBorder }]}
-                onPress={() => { setHapticOn(!hapticOn); setHapticEnabled(!hapticOn); }}
-              >
-                <Text style={[styles.toggleBtnText, { color: hapticOn ? '#fff' : theme.text }]}>{hapticOn ? 'ON' : 'OFF'}</Text>
-              </TouchableOpacity>
+              <ToggleSwitch value={hapticOn} onValueChange={() => { setHapticOn(!hapticOn); setHapticEnabled(!hapticOn); }} activeColor={theme.neon} inactiveColor={theme.border} />
             </View>
             <View style={styles.settingRow}>
               <Text style={[styles.settingLabel, { color: theme.text }]}>{lang === 'fr' ? 'Thème sombre' : 'Dark theme'}</Text>
-              <TouchableOpacity
-                style={[styles.toggleBtn, darkTheme && styles.toggleBtnActive, { backgroundColor: darkTheme ? theme.neon : theme.counterBtnBg, borderColor: darkTheme ? theme.neon : theme.counterBtnBorder }]}
-                onPress={toggleTheme}
-              >
-                <Text style={[styles.toggleBtnText, { color: darkTheme ? '#fff' : theme.text }]}>{darkTheme ? 'ON' : 'OFF'}</Text>
-              </TouchableOpacity>
+              <ToggleSwitch value={darkTheme} onValueChange={toggleTheme} activeColor={theme.neon} inactiveColor={theme.border} />
             </View>
             {(darkTheme && !isWeb) ? (
               <TouchableOpacity onPress={() => setShowSettings(false)} activeOpacity={0.8}>
@@ -1381,7 +1388,8 @@ export default function MenuScreen({ navigation }) {
                     onPress={() => {
                       playClick();
                       setMimerMode(false);
-                      setGameMode(numUndercovers > 0 && numMisterWhites > 0 ? 2 : numMisterWhites > 0 ? 1 : 0);
+                      if (numUndercovers === 0) setNumUndercovers(1);
+                      setGameMode((numUndercovers === 0 ? 1 : numUndercovers) > 0 && numMisterWhites > 0 ? 2 : numMisterWhites > 0 ? 1 : 0);
                     }}
                     activeOpacity={0.7}
                   >
@@ -1574,20 +1582,6 @@ export default function MenuScreen({ navigation }) {
                       <Text style={styles.categoryChipEmoji}>🏠</Text>
                       <Text style={[styles.categoryChipText, (selectedCategories === null || (Array.isArray(selectedCategories) && (selectedCategories.includes('LIEUX') || selectedCategories.includes('LOCATIONS')))) ? { color: '#fff' } : { color: theme.text }]}>
                         {lang === 'fr' ? 'LIEUX' : 'LOCATIONS'}
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.categoryChip, (Array.isArray(selectedCategories) && (selectedCategories.includes('GROUPES') || selectedCategories.includes('GROUPS'))) ? { backgroundColor: theme.chipActiveBg, borderColor: theme.chipActiveBg } : { backgroundColor: theme.chipBg, borderColor: theme.chipBorder }]}
-                      onPress={() => { playClick(); setSelectedCategories(prev => {
-                        const groupes = lang === 'fr' ? 'GROUPES' : 'GROUPS';
-                        if (prev === null) return [groupes];
-                        if (prev.includes(groupes)) return prev.length === 1 ? null : prev.filter(c => c !== groupes);
-                        return [...prev, groupes];
-                      }); }}
-                    >
-                      <Text style={styles.categoryChipEmoji}>👥</Text>
-                      <Text style={[styles.categoryChipText, (Array.isArray(selectedCategories) && (selectedCategories.includes('GROUPES') || selectedCategories.includes('GROUPS'))) ? { color: '#fff' } : { color: theme.text }]}>
-                        {lang === 'fr' ? 'GROUPES' : 'GROUPS'}
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity

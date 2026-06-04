@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions, Animated }
 import { colors, screenThemes, useDarkTheme } from '../theme';
 import { t, getLang } from '../i18n';
 import { playClick, playReveal } from '../sound';
-import { GROUPES_MANGA } from '../data/words';
 import { generateAssignments } from '../gameLogic';
 import { useScaleIn, triggerHaptic } from '../animations';
 
@@ -148,41 +147,6 @@ const SPORT_IMAGES = {
   'Water Polo': require('../../assets/sport/water polo.png'),
 };
 
-// Images GROUPES - require statiques pour Metro
-const GROUPES_IMAGES = {
-  // FR
-  '300 Spartans': require('../../assets/groupes/01_300 spartans.png'),
-  'Akatsuki': require('../../assets/groupes/02_akastuki.png'),
-  'Amiraux': require('../../assets/groupes/03_amiraux.png'),
-  'Armée Révolutionnaire': require('../../assets/groupes/04_Armée Révolutionnaire.png'),
-  'Avengers': require('../../assets/groupes/05_avengers.jpeg'),
-  'Chevalier du Zodiaque': require('../../assets/groupes/06_chevalier du zodiaque.png'),
-  'Chevaliers Divins': require('../../assets/groupes/07_chevaliers divins.png'),
-  'Cinq Doyens': require('../../assets/groupes/08_Cinq Doyens.png'),
-  'Clan D': require('../../assets/groupes/09_clan D.png'),
-  'Clan Uchiha': require('../../assets/groupes/10_clan uchiha.png'),
-  'Expendables': require('../../assets/groupes/11_expendable.png'),
-  'Jedi': require('../../assets/groupes/12_jedi.png'),
-  'Justice League': require('../../assets/groupes/13_justice league.jpeg'),
-  'Power Rangers': require('../../assets/groupes/14_power rangers.png'),
-  'Rang Nation': require('../../assets/groupes/15_rang nation.png'),
-  'Rang S': require('../../assets/groupes/16_rang s.png'),
-  'Saiyan': require('../../assets/groupes/17_saiyan.png'),
-  'Shichibukai': require('../../assets/groupes/18_shichibukai.png'),
-  'X-Men': require('../../assets/groupes/19_x men.jpeg'),
-  'Yonko': require('../../assets/groupes/20_yonko.png'),
-  // EN
-  'Warlords': require('../../assets/groupes/03_amiraux.png'),
-  'Revolutionary Army': require('../../assets/groupes/04_Armée Révolutionnaire.png'),
-  'Zodiac Knights': require('../../assets/groupes/06_chevalier du zodiaque.png'),
-  'Divine Knights': require('../../assets/groupes/07_chevaliers divins.png'),
-  'Five Elders': require('../../assets/groupes/08_Cinq Doyens.png'),
-  'Uchiha Clan': require('../../assets/groupes/10_clan uchiha.png'),
-  'Naruto Nation': require('../../assets/groupes/15_rang nation.png'),
-  'S Rank': require('../../assets/groupes/16_rang s.png'),
-  'Saiyans': require('../../assets/groupes/17_saiyan.png'),
-};
-
 // Images MIMER - require statiques pour Metro
 const COUPE_2018 = require('../../assets/mimer/Coupe Du monde 2018.jpg');
 const COUPE_1998 = require('../../assets/mimer/Coupe Du monde 1998.jpg');
@@ -224,7 +188,7 @@ export default function RevealScreen({ navigation, route }) {
   const mimerData = assignment.mimerData;
   // En mode facile, Mister White connaît la catégorie
   const word = isMister ? (easyMode && category ? category : 'MISTER WHITE') : isSpy ? null : assignment.word;
-  const lieuImage = word && (LIEUX_IMAGES[word] || GROUPES_IMAGES[word] || TRAVAIL_IMAGES[word] || SPORT_IMAGES[word]) ? (LIEUX_IMAGES[word] || GROUPES_IMAGES[word] || TRAVAIL_IMAGES[word] || SPORT_IMAGES[word]) : null;
+  const lieuImage = word && (LIEUX_IMAGES[word] || TRAVAIL_IMAGES[word] || SPORT_IMAGES[word]) ? (LIEUX_IMAGES[word] || TRAVAIL_IMAGES[word] || SPORT_IMAGES[word]) : null;
 
   const wordLen = word ? word.length : 0;
   const wordFontSize = wordLen > 14 ? 44 : wordLen > 10 ? 58 : wordLen > 7 ? 72 : 88;
@@ -435,7 +399,6 @@ export default function RevealScreen({ navigation, route }) {
             <View style={styles.spyfallOverlay} />
             <View style={styles.spyfallContent}>
               <Text style={styles.spyfallLieuWord}>{word}</Text>
-              {GROUPES_MANGA[word] && <Text style={styles.spyfallMangaLabel}>{GROUPES_MANGA[word]}</Text>}
             </View>
           </View>
         ) : (
@@ -467,9 +430,6 @@ export default function RevealScreen({ navigation, route }) {
             ]}>
               {isMister && easyMode ? '' : (typeof word === 'string' ? word : '')}
             </Text>
-            {word && GROUPES_MANGA[word] && (
-              <Text style={[styles.mangaLabel, { color: darkTheme ? '#FFFFFF' : '#1a1a1a' }]}>{GROUPES_MANGA[word]}</Text>
-            )}
           </>
         )}
 
@@ -482,7 +442,7 @@ export default function RevealScreen({ navigation, route }) {
         <Text style={[
           { fontFamily: 'BebasNeue', letterSpacing: 2, color: '#FFFFFF' },
           isSpyfall && lieuImage ? { fontSize: 32 } : { fontSize: 26 },
-        ]}>{isSpyfall ? (category === 'GROUPES' || category === 'GROUPS' ? t('memorizeGroupe') : t('memorizeLieu')) : t('memorize')}</Text>
+        ]}>{isSpyfall ? t('memorizeLieu') : t('memorize')}</Text>
 
         <TouchableOpacity style={isSpyfallInnocent ? styles.okBtnLight : [styles.okBtn, { backgroundColor: theme.okBtnBg, borderColor: theme.okBtnBorder }]} onPress={() => handleNext()} activeOpacity={0.8}>
           <Text style={[styles.okBtnText, { color: theme.okBtnText }]}>OK 👆</Text>

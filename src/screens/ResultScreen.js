@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, StyleSheet, Animated, ScrollView, Pressab
 import { colors, screenThemes, useDarkTheme } from '../theme';
 import { t } from '../i18n';
 import { playClick, playWin, playLose, playIntruderReveal, playInnocentReveal, playMisterWhite, vibrate, vibrateIntruderFound } from '../sound';
-import { GROUPES_MANGA } from '../data/words';
 import { triggerHaptic } from '../animations';
 
 // Images LIEUX - pour l'affichage Spyfall
@@ -146,38 +145,6 @@ const SPORT_IMAGES = {
   'Water Polo': require('../../assets/sport/water polo.png'),
 };
 
-// Images GROUPES - require statiques pour Metro
-const GROUPES_IMAGES = {
-  '300 Spartans': require('../../assets/groupes/01_300 spartans.png'),
-  'Akatsuki': require('../../assets/groupes/02_akastuki.png'),
-  'Amiraux': require('../../assets/groupes/03_amiraux.png'),
-  'Armée Révolutionnaire': require('../../assets/groupes/04_Armée Révolutionnaire.png'),
-  'Avengers': require('../../assets/groupes/05_avengers.jpeg'),
-  'Chevalier du Zodiaque': require('../../assets/groupes/06_chevalier du zodiaque.png'),
-  'Chevaliers Divins': require('../../assets/groupes/07_chevaliers divins.png'),
-  'Cinq Doyens': require('../../assets/groupes/08_Cinq Doyens.png'),
-  'Clan D': require('../../assets/groupes/09_clan D.png'),
-  'Clan Uchiha': require('../../assets/groupes/10_clan uchiha.png'),
-  'Expendables': require('../../assets/groupes/11_expendable.png'),
-  'Jedi': require('../../assets/groupes/12_jedi.png'),
-  'Justice League': require('../../assets/groupes/13_justice league.jpeg'),
-  'Power Rangers': require('../../assets/groupes/14_power rangers.png'),
-  'Rang Nation': require('../../assets/groupes/15_rang nation.png'),
-  'Rang S': require('../../assets/groupes/16_rang s.png'),
-  'Saiyan': require('../../assets/groupes/17_saiyan.png'),
-  'Shichibukai': require('../../assets/groupes/18_shichibukai.png'),
-  'X-Men': require('../../assets/groupes/19_x men.jpeg'),
-  'Yonko': require('../../assets/groupes/20_yonko.png'),
-  'Warlords': require('../../assets/groupes/03_amiraux.png'),
-  'Revolutionary Army': require('../../assets/groupes/04_Armée Révolutionnaire.png'),
-  'Zodiac Knights': require('../../assets/groupes/06_chevalier du zodiaque.png'),
-  'Divine Knights': require('../../assets/groupes/07_chevaliers divins.png'),
-  'Five Elders': require('../../assets/groupes/08_Cinq Doyens.png'),
-  'Uchiha Clan': require('../../assets/groupes/10_clan uchiha.png'),
-  'Naruto Nation': require('../../assets/groupes/15_rang nation.png'),
-  'S Rank': require('../../assets/groupes/16_rang s.png'),
-  'Saiyans': require('../../assets/groupes/17_saiyan.png'),
-};
 import Constants from 'expo-constants';
 
 // Détecter si on est dans Expo Go ou sur le web
@@ -289,7 +256,7 @@ export default function ResultScreen({ navigation, route }) {
             wordDisplay = wordDisplay.replace('.jpg', '').replace('.png', '');
           }
           // Image lieu pour Spyfall
-          const lieuImg = wordDisplay && (LIEUX_IMAGES[wordDisplay] || GROUPES_IMAGES[wordDisplay] || TRAVAIL_IMAGES[wordDisplay] || SPORT_IMAGES[wordDisplay]) ? (LIEUX_IMAGES[wordDisplay] || GROUPES_IMAGES[wordDisplay] || TRAVAIL_IMAGES[wordDisplay] || SPORT_IMAGES[wordDisplay]) : null;
+          const lieuImg = wordDisplay && (LIEUX_IMAGES[wordDisplay] || TRAVAIL_IMAGES[wordDisplay] || SPORT_IMAGES[wordDisplay]) ? (LIEUX_IMAGES[wordDisplay] || TRAVAIL_IMAGES[wordDisplay] || SPORT_IMAGES[wordDisplay]) : null;
 
           const handleReveal = () => {
             if (!isRev) {
@@ -349,22 +316,9 @@ export default function ResultScreen({ navigation, route }) {
                       ]}>
                         {wordDisplay}
                       </Text>
-                      {GROUPES_MANGA[wordDisplay] && <Text style={[styles.cardMangaLabel, { color: theme.textMuted }]}>{GROUPES_MANGA[wordDisplay]}</Text>}
                     </View>
                   </View>
-                ) : isRev && GROUPES_MANGA[wordDisplay] ? (
-                  <View>
-                    <Text style={[
-                      styles.cardWord,
-                      a.role === 'intrus' ? { color: theme.danger } : null,
-                      a.role === 'mister' ? { color: colors.accent } : null,
-                      a.role === 'spy' ? { color: theme.danger } : null,
-                      a.role === 'normal' ? { color: theme.text } : null,
-                    ]}>
-                      {wordDisplay}
-                    </Text>
-                    <Text style={[styles.cardMangaLabel, { color: theme.textMuted }]}>{GROUPES_MANGA[wordDisplay]}</Text>
-                  </View>
+                ) : (
                 ) : (
                   <Text style={[
                     styles.cardWord,

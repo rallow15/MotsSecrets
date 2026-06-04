@@ -237,17 +237,6 @@ export const CATEGORIES_FR = {
   // ═════════════════════════════════════════════════════════════
   SPORT: ["Baseball", "Basketball", "Boxe", "Catch", "Football américain", "Football", "Futsal", "Handball", "Karaté", "MMA", "Natation", "Rugby", "Tennis", "Volleyball", "Water-polo"],
 
-  // ═════════════════════════════════════════════════════════════
-  // 👥 GROUPES (Mode Spyfall - images)
-  // ═════════════════════════════════════════════════════════════
-  GROUPES: {
-    _subcategories: {
-      'One Piece': ["Amiraux", "Armée Révolutionnaire", "Chevaliers Divins", "Cinq Doyens", "Clan D", "Rang S", "Shichibukai", "Yonko"],
-      'Naruto/Dragon Ball': ["Akatsuki", "Clan Uchiha", "Saiyan"],
-      'Comics/Marvel/DC': ["Avengers", "Justice League", "X-Men"],
-      'Cinéma/Série': ["300 Spartans", "Expendables", "Jedi", "Power Rangers", "Rang Nation", "Chevalier du Zodiaque"],
-    },
-  },
 
   // ═════════════════════════════════════════════════════════════
   // 🏰 AGE OF EMPIRE 4
@@ -587,17 +576,6 @@ export const CATEGORIES_EN = {
   // ═════════════════════════════════════════════════════════════
   SPORT: ["Baseball", "Basketball", "Boxing", "Wrestling", "American Football", "Football", "Futsal", "Handball", "Karate", "MMA", "Swimming", "Rugby", "Tennis", "Volleyball", "Water Polo"],
 
-  // 👥 GROUPS (Spyfall Mode - images)
-  // ═════════════════════════════════════════════════════════════
-  GROUPS: {
-    _subcategories: {
-      'One Piece': ["Warlords", "Revolutionary Army", "Divine Knights", "Five Elders", "Clan D", "S Rank", "Shichibukai", "Yonko"],
-      'Naruto/Dragon Ball': ["Akatsuki", "Uchiha Clan", "Saiyans"],
-      'Comics/Marvel/DC': ["Avengers", "Justice League", "X-Men"],
-      'Cinema/Series': ["300 Spartans", "Expendables", "Jedi", "Power Rangers", "Naruto Nation", "Zodiac Knights"],
-    },
-  },
-
   // ═════════════════════════════════════════════════════════════
   // 🏰 AGE OF EMPIRE 4
   // ═════════════════════════════════════════════════════════════
@@ -703,18 +681,6 @@ export const CATEGORIES_EN = {
 
 };
 
-// ═════════════════════════════════════════════════════════════
-// MAPPING MANGA / FRANCHISE POUR LES GROUPES
-// ═════════════════════════════════════════════════════════════
-export const GROUPES_MANGA = {
-  '300 Spartans': 'Film', 'Akatsuki': 'Naruto', 'Amiraux': 'One Piece', 'Armée Révolutionnaire': 'One Piece', 'Avengers': 'Marvel',
-  'Chevalier du Zodiaque': 'Saint Seiya', 'Chevaliers Divins': 'One Piece', 'Cinq Doyens': 'One Piece', 'Clan D': 'One Piece', 'Clan Uchiha': 'Naruto',
-  'Expendables': 'Film', 'Jedi': 'Star Wars', 'Justice League': 'DC Comics', 'Power Rangers': 'Power Rangers', 'Rang Nation': 'Solo Leveling',
-  'Rang S': 'One Piece', 'Saiyan': 'Dragon Ball', 'Shichibukai': 'One Piece', 'X-Men': 'Marvel', 'Yonko': 'One Piece',
-  // EN aliases
-  'Warlords': 'One Piece', 'Revolutionary Army': 'One Piece', 'Zodiac Knights': 'Saint Seiya', 'Divine Knights': 'One Piece',
-  'Five Elders': 'One Piece', 'Uchiha Clan': 'Naruto', 'Naruto Nation': 'Solo Leveling', 'S Rank': 'One Piece', 'Saiyans': 'Dragon Ball',
-};
 
 // ═════════════════════════════════════════════════════════════
 // HELPERS - Extraction des mots (plat) depuis les catégories
@@ -857,27 +823,6 @@ export const SPYFALL_HINTS_FR = {
   'Policier': 'Amende',
   'Pompier': 'Lance',
   'Professeur': 'Craie',
-  // GROUPES
-  'Amiraux': 'Justice',
-  'Armée Révolutionnaire': 'Rébellion',
-  'Chevaliers Divins': 'Sanctuaire',
-  'Cinq Doyens': 'Conseil',
-  'Clan D': 'Héritage',
-  'Rang S': 'Bounty',
-  'Shichibukai': 'Pacte',
-  'Yonko': 'Territoire',
-  'Akatsuki': 'Nuage',
-  'Clan Uchiha': 'Iris',
-  'Saiyan': 'Queue',
-  'Avengers': 'Assemblée',
-  'Justice League': 'Lanterne',
-  'X-Men': 'Gène',
-  '300 Spartans': 'Bouclier',
-  'Expendables': 'Mercenaire',
-  'Jedi': 'Ordre',
-  'Power Rangers': 'Zord',
-  'Rang Nation': 'Examen',
-  'Chevalier du Zodiaque': 'Cosmos',
 };
 
 export const SPYFALL_HINTS_EN = {
@@ -958,25 +903,4 @@ export const SPYFALL_HINTS_EN = {
   'Police Officer': 'Fine',
   'Firefighter': 'Hose',
   'Teacher': 'Chalk',
-  // GROUPS
-  'Warlords': 'Justice',
-  'Revolutionary Army': 'Rebellion',
-  'Divine Knights': 'Sanctuary',
-  'Five Elders': 'Council',
-  'Clan D': 'Heritage',
-  'S Rank': 'Bounty',
-  'Shichibukai': 'Pact',
-  'Yonko': 'Territory',
-  'Akatsuki': 'Cloud',
-  'Uchiha Clan': 'Iris',
-  'Saiyans': 'Tail',
-  'Avengers': 'Assembly',
-  'Justice League': 'Lantern',
-  'X-Men': 'Gene',
-  '300 Spartans': 'Shield',
-  'Expendables': 'Mercenary',
-  'Jedi': 'Order',
-  'Power Rangers': 'Zord',
-  'Naruto Nation': 'Exam',
-  'Zodiac Knights': 'Cosmos',
 };
