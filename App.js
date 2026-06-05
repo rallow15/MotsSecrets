@@ -47,7 +47,6 @@ let BannerAdSize = null;
 
 const BANNER_TOP_ID    = isWeb ? '' : (Platform.OS === 'ios' ? 'ca-app-pub-2965679591230669/1687420131' : 'ca-app-pub-2965679591230669/2407188674');
 const BANNER_BOTTOM_ID = isWeb ? '' : (Platform.OS === 'ios' ? 'ca-app-pub-2965679591230669/7168735115' : 'ca-app-pub-2965679591230669/8830249922');
-const BANNER_HEIGHT = 50; // BannerAdSize.BANNER = 320x50dp — réserver l'espace pour éviter les décalages
 
 function loadAdMob() {
   if (!hasAdMobNative) return false;
@@ -209,19 +208,6 @@ export default function App() {
 
   return (
     <View style={styles.root}>
-      {hasAdMobNative && !__DEV__ && (
-        <View style={[styles.banner, { height: BANNER_HEIGHT }]}>
-          {adMobLoaded && BannerAd && (
-            <BannerAd
-              unitId={BANNER_TOP_ID}
-              size={BannerAdSize.BANNER}
-              requestOptions={{
-                requestNonPersonalizedAdsOnly: consentGiven === 'refused'
-              }}
-            />
-          )}
-        </View>
-      )}
       <View style={styles.nav}>
         <ThemeProvider value={darkTheme}>
           <NavigationContainer>
@@ -239,17 +225,26 @@ export default function App() {
           </NavigationContainer>
         </ThemeProvider>
       </View>
-      {hasAdMobNative && !__DEV__ && (
-        <View style={[styles.banner, { height: BANNER_HEIGHT }]}>
-          {adMobLoaded && BannerAd && (
-            <BannerAd
-              unitId={BANNER_BOTTOM_ID}
-              size={BannerAdSize.BANNER}
-              requestOptions={{
-                requestNonPersonalizedAdsOnly: consentGiven === 'refused'
-              }}
-            />
-          )}
+      {hasAdMobNative && !__DEV__ && adMobLoaded && BannerAd && (
+        <View style={styles.bannerTop}>
+          <BannerAd
+            unitId={BANNER_TOP_ID}
+            size={BannerAdSize.BANNER}
+            requestOptions={{
+              requestNonPersonalizedAdsOnly: consentGiven === 'refused'
+            }}
+          />
+        </View>
+      )}
+      {hasAdMobNative && !__DEV__ && adMobLoaded && BannerAd && (
+        <View style={styles.bannerBottom}>
+          <BannerAd
+            unitId={BANNER_BOTTOM_ID}
+            size={BannerAdSize.BANNER}
+            requestOptions={{
+              requestNonPersonalizedAdsOnly: consentGiven === 'refused'
+            }}
+          />
         </View>
       )}
     </View>
@@ -260,5 +255,6 @@ const styles = StyleSheet.create({
   root:    { flex: 1, backgroundColor: colors.bg },
   nav:     { flex: 1 },
   loading: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
-  banner:  { alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg },
+  bannerTop:    { position: 'absolute', top: 0, left: 0, right: 0, alignItems: 'center', backgroundColor: colors.bg },
+  bannerBottom: { position: 'absolute', bottom: 0, left: 0, right: 0, alignItems: 'center', backgroundColor: colors.bg },
 });

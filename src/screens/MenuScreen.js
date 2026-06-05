@@ -1648,7 +1648,7 @@ export default function MenuScreen({ navigation }) {
       {showLoading && (
         <Animated.View style={[styles.loadingOverlay, { opacity: loadingOpacity }]}>
           <Animated.View style={{ transform: [{ scale: loadingScale }] }}>
-            <Image source={require('../../assets/icon-android.png')} style={styles.loadingLogo} />
+            <Image source={require('../../assets/icon.png')} style={styles.loadingLogo} />
           </Animated.View>
           <Text style={styles.loadingTitle}>MOTS SECRETS</Text>
           <View style={styles.loadingBarContainer}>
