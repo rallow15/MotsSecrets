@@ -117,7 +117,6 @@ export default function App() {
   const [consentGiven, setConsentGiven] = useState(isWeb ? 'given' : 'pending');
   const [consentChecked, setConsentChecked] = useState(isWeb);
   const [adMobLoaded, setAdMobLoaded] = useState(false);
-  const [adKey, setAdKey] = useState(0);
   const [darkTheme, setDarkTheme] = useState(false);
 
   setOnThemeChange(setDarkTheme);
@@ -138,13 +137,6 @@ export default function App() {
     if (!hasAdMobNative) return;
     setAdMobLoaded(loadAdMob());
   }, []);
-
-  // Rafraîchir les bannières toutes les 30s
-  useEffect(() => {
-    if (!adMobLoaded) return;
-    const id = setInterval(() => setAdKey(k => k + 1), 30000);
-    return () => clearInterval(id);
-  }, [adMobLoaded]);
 
   // Vérifier le consentement UMP (mobile uniquement)
   useEffect(() => {
@@ -236,7 +228,6 @@ export default function App() {
       {hasAdMobNative && !__DEV__ && adMobLoaded && BannerAd && (
         <View style={styles.bannerTop}>
           <BannerAd
-            key={adKey}
             unitId={BANNER_TOP_ID}
             size={BannerAdSize.BANNER}
             requestOptions={{
@@ -248,7 +239,6 @@ export default function App() {
       {hasAdMobNative && !__DEV__ && adMobLoaded && BannerAd && (
         <View style={styles.bannerBottom}>
           <BannerAd
-            key={adKey + 1}
             unitId={BANNER_BOTTOM_ID}
             size={BannerAdSize.BANNER}
             requestOptions={{
