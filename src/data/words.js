@@ -801,7 +801,7 @@ export const SPYFALL_HINTS_FR = {
   // SPORT
   'Baseball': 'Batte',
   'Basketball': 'Panier',
-  'Boxe': 'Gant',
+  'Boxe': 'Décision',
   'Catch': 'Ring',
   'Football américain': 'Casque',
   'Football': 'Intensité',
@@ -886,7 +886,7 @@ export const SPYFALL_HINTS_EN = {
   // SPORT
   'Baseball': 'Bat',
   'Basketball': 'Hoop',
-  'Boxing': 'Glove',
+  'Boxing': 'Decision',
   'Wrestling': 'Ring',
   'American Football': 'Helmet',
   'Football': 'Intensity',
