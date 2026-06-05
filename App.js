@@ -253,7 +253,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   root:    { flex: 1, backgroundColor: colors.bg },
-  nav:     { flex: 1 },
+  nav:     { flex: 1, paddingTop: 50, paddingBottom: 50 },
   loading: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
   bannerTop:    { position: 'absolute', top: 0, left: 0, right: 0, alignItems: 'center', backgroundColor: colors.bg },
   bannerBottom: { position: 'absolute', bottom: 0, left: 0, right: 0, alignItems: 'center', backgroundColor: colors.bg },
