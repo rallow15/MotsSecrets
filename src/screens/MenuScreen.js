@@ -899,7 +899,7 @@ export default function MenuScreen({ navigation }) {
 
           {/* Drapeau langue en haut à gauche */}
           <TouchableOpacity
-            style={[styles.langBtn, { top: insets.top + 12 }]}
+            style={[styles.langBtn, { top: insets.top + 55 }]}
             onPress={toggleLang}
             activeOpacity={0.7}
           >

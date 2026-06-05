@@ -74,7 +74,7 @@ export default function PrepScreen({ navigation, route }) {
       />
       <View style={darkTheme ? styles.bgGradientDark : styles.bgGradientLight} />
       <TouchableOpacity style={[styles.container, fadeInStyle]} activeOpacity={1} onPress={handleTap}>
-        <TouchableOpacity style={[styles.backBtn, { top: insets.top + 12, backgroundColor: theme.backBtnBg, borderColor: theme.backBtnBorder }]} onPress={(e) => { e.stopPropagation(); triggerHaptic('light'); navigation.goBack(); }} activeOpacity={0.7}>
+        <TouchableOpacity style={[styles.backBtn, { top: insets.top + 55, backgroundColor: theme.backBtnBg, borderColor: theme.backBtnBorder }]} onPress={(e) => { e.stopPropagation(); triggerHaptic('light'); navigation.goBack(); }} activeOpacity={0.7}>
           <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={darkTheme ? '#e8d5ff' : '#1a1a1a'} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <Path d="M15 18l-6-6 6-6" />
           </Svg>
