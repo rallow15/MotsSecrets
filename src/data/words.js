@@ -792,6 +792,11 @@ export const SPYFALL_HINTS_FR = {
   'Festival': 'Bracelet',
   'Phare': 'Signal',
   'Château': 'Douves',
+  'Centre commercial': 'Étalage',
+  'Club de nuit': 'Néon',
+  'Montagne': 'Altitude',
+  'Station de ski': 'Remontée',
+  'Zoo': 'Enclos',
   // TRAVAIL
   // SPORT
   'Baseball': 'Batte',
@@ -872,6 +877,11 @@ export const SPYFALL_HINTS_EN = {
   'Festival': 'Wristband',
   'Lighthouse': 'Beam',
   'Castle': 'Moat',
+  'Shopping Mall': 'Aisle',
+  'Nightclub': 'Neon',
+  'Mountain': 'Altitude',
+  'Ski Resort': 'Lift',
+  'Zoo': 'Enclosure',
   // JOBS
   // SPORT
   'Baseball': 'Bat',
