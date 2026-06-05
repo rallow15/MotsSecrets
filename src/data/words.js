@@ -218,12 +218,12 @@ export const CATEGORIES_FR = {
   // ═════════════════════════════════════════════════════════════
   LIEUX: {
     _subcategories: {
-      'Urbain': ["Restaurant", "Cinéma", "Supermarché", "Banque", "Bibliothèque", "Musée", "Hôtel", "Théâtre", "Opéra", "Marché"],
+      'Urbain': ["Restaurant", "Cinéma", "Supermarché", "Banque", "Bibliothèque", "Musée", "Hôtel", "Théâtre", "Opéra", "Marché", "Centre commercial", "Club de nuit"],
       'Transport': ["Gare", "Aéroport", "Avion", "Bateau de croisière", "Sous-marin", "Caravane"],
-      'Nature': ["Plage", "Pôle Nord", "Désert", "Forêt tropicale", "Île déserte", "Volcan"],
+      'Nature': ["Plage", "Pôle Nord", "Désert", "Forêt tropicale", "Île déserte", "Volcan", "Montagne"],
       'Institutions publiques': ["École", "Église", "Prison", "Ambassade", "Camp militaire"],
       'Scientifique/Industriel': ["Hôpital", "Laboratoire", "Usine", "Station spatiale"],
-      'Loisirs': ["Parc d\'attractions", "Stade", "Casino", "Cirque", "Stade olympique", "Spa", "Festival", "Phare", "Château"],
+      'Loisirs': ["Parc d\'attractions", "Stade", "Casino", "Cirque", "Stade olympique", "Spa", "Festival", "Phare", "Château", "Station de ski", "Zoo"],
     },
   },
 
@@ -557,12 +557,12 @@ export const CATEGORIES_EN = {
   // ═════════════════════════════════════════════════════════════
   LOCATIONS: {
     _subcategories: {
-      'Urban': ["Restaurant", "Cinema", "Supermarket", "Bank", "Library", "Museum", "Hotel", "Theater", "Opera", "Market"],
+      'Urban': ["Restaurant", "Cinema", "Supermarket", "Bank", "Library", "Museum", "Hotel", "Theater", "Opera", "Market", "Shopping Mall", "Nightclub"],
       'Transport': ["Train Station", "Airport", "Airplane", "Cruise Ship", "Submarine", "Caravan"],
-      'Nature': ["Beach", "North Pole", "Desert", "Rainforest", "Desert Island", "Volcano"],
+      'Nature': ["Beach", "North Pole", "Desert", "Rainforest", "Desert Island", "Volcano", "Mountain"],
       'Public Institutions': ["School", "Church", "Prison", "Embassy", "Military Camp"],
       'Science/Industrial': ["Hospital", "Laboratory", "Factory", "Space Station"],
-      'Entertainment': ["Amusement Park", "Stadium", "Casino", "Circus", "Olympic Stadium", "Spa", "Festival", "Lighthouse", "Castle"],
+      'Entertainment': ["Amusement Park", "Stadium", "Casino", "Circus", "Olympic Stadium", "Spa", "Festival", "Lighthouse", "Castle", "Ski Resort", "Zoo"],
     },
   },
 
