@@ -54,7 +54,6 @@ import SpecialeIconLight from '../../assets/speciale-claire.svg';
 import BoutiqueIconLight from '../../assets/boutique-claire.svg';
 
 // SVG thème clair
-import LogoTitleLight from '../../assets/logo-title-light.svg';
 import PlayBtnLight from '../../assets/play-btn-light.svg';
 
 // Image bouton lancer (thème sombre)
@@ -914,11 +913,7 @@ export default function MenuScreen({ navigation }) {
           <View style={[styles.centerArea, !darkTheme && styles.centerAreaLight]}>
             {/* Titre MOTS SECRETS */}
             <Animated.View style={[styles.titleArea, { opacity: titleOpacity }, !darkTheme && styles.titleAreaLight]}>
-              {darkTheme ? (
                 <Image source={require('../../assets/logo-title.png')} style={styles.logoTitle} resizeMode="contain" />
-              ) : (
-                <LogoTitleLight width={1500} height={500} />
-              )}
             </Animated.View>
 
             {/* Sous-titre - positionné absolument pour ne pas affecter les autres éléments */}
@@ -939,7 +934,7 @@ export default function MenuScreen({ navigation }) {
                 {darkTheme ? (
                   <Image source={require('../../assets/play-btn.png')} style={styles.playBtnImage} resizeMode="contain" />
                 ) : (
-                  <PlayBtnLight width={250} height={250} />
+                  <PlayBtnLight width={200} height={200} />
                 )}
               </TouchableOpacity>
             </Animated.View>
@@ -1687,18 +1682,18 @@ const styles = StyleSheet.create({
 
   // ─── Zone centrale ───
   centerArea: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60, paddingBottom: 100 },
-  centerAreaLight: { justifyContent: 'flex-start', paddingTop: 40 },
+  centerAreaLight: { justifyContent: 'center', paddingTop: 60 },
 
   // ─── Titre ───
   titleArea: { alignItems: 'center', marginBottom: 0 },
   titleAreaLight: { marginBottom: 10 },
   logoTitle: { width: 750, height: 250, resizeMode: 'contain' },
   subtitle: { fontFamily: 'SpaceMono', fontSize: 9, letterSpacing: 3, marginTop: 0 },
-  subtitleAbsolute: { position: 'absolute', top: '55%', left: 0, right: 0, textAlign: 'center', fontFamily: 'SpaceMono', fontSize: 11, letterSpacing: 3, fontWeight: 'bold' },
+  subtitleAbsolute: { textAlign: 'center', fontFamily: 'SpaceMono', fontSize: 11, letterSpacing: 3, fontWeight: 'bold', marginTop: 8 },
 
   // ─── Bouton Play ───
   safeArea: { alignItems: 'center', justifyContent: 'center' },
-  safeAreaLight: { marginTop: -175 },
+  safeAreaLight: { marginTop: 0 },
   playBtnImage: { width: 200, height: 200 },
 
 
@@ -1810,10 +1805,6 @@ const styles = StyleSheet.create({
   easyModeInfo: { flex: 1 },
   easyModeLabel: { fontFamily: 'BebasNeue', fontSize: 14, color: '#1a1a1a', letterSpacing: 1 },
   easyModeDesc: { fontFamily: 'SpaceMono', fontSize: 9, color: '#666', marginTop: 1 },
-  timerChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 16, backgroundColor: 'rgba(0,0,0,0.1)', borderWidth: 1, borderColor: 'rgba(0,0,0,0.2)' },
-  timerChipActive: { backgroundColor: '#1a1a1a', borderColor: '#1a1a1a' },
-  timerChipText: { fontFamily: 'BebasNeue', fontSize: 14, color: '#1a1a1a' },
-  timerChipTextActive: { color: '#F5F5DC' },
   variantSmall: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6, backgroundColor: 'rgba(0,0,0,0.06)', borderWidth: 1, borderColor: 'rgba(0,0,0,0.15)' },
   variantSmallActive: { backgroundColor: '#1a1a1a', borderColor: '#1a1a1a' },
   variantSmallText: { fontFamily: 'SpaceMono', fontSize: 9, color: '#1a1a1a' },

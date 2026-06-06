@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions, Animated } from 'react-native';
+import { useKeepAwake } from 'expo-keep-awake';
 import { colors, screenThemes, useDarkTheme } from '../theme';
 import { t, getLang } from '../i18n';
 import { playClick, playReveal } from '../sound';
@@ -174,6 +175,7 @@ const getJoImages = () => ({
 
 export default function RevealScreen({ navigation, route }) {
   const { numPlayers, assignments, currentPlayer, playerNumbers, playerNames, wordVisible: initialWordVisible, mimerMode } = route.params;
+  useKeepAwake();
   const darkTheme = useDarkTheme();
   const theme = darkTheme ? screenThemes.dark : screenThemes.light;
 

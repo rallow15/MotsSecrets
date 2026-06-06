@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, ScrollView, Pressable, Image, NativeModules } from 'react-native';
+import { useKeepAwake } from 'expo-keep-awake';
 import { colors, screenThemes, useDarkTheme } from '../theme';
 import { t } from '../i18n';
 import { playClick, playWin, playLose, playIntruderReveal, playInnocentReveal, playMisterWhite, vibrate, vibrateIntruderFound } from '../sound';
@@ -185,6 +186,7 @@ export default function ResultScreen({ navigation, route }) {
   const { numPlayers, assignments, playerNumbers, playerNames, gameMode, spyfallOutcome } = route.params;
   const spyfallUndercover = route.params.spyfallUndercover ?? false;
   const isSpyfall = gameMode === 3;
+  useKeepAwake();
   const darkTheme = useDarkTheme();
   const theme = darkTheme ? screenThemes.dark : screenThemes.light;
 
@@ -381,7 +383,6 @@ export default function ResultScreen({ navigation, route }) {
     if (!isSpyfall || !spyfallOutcome) return null;
     const winsLabel = spyfallUndercover ? t('intruderWinsSpyfall') : t('spyWins');
     switch (spyfallOutcome) {
-      case 'spyWinsTimer': return t('timerExpired') + '\n' + winsLabel;
       case 'spyWinsTie': return winsLabel;
       case 'spyWinsWrongAccusation': return t('wrongAccusation') + '\n' + winsLabel;
       case 'spyGuessRight': return (spyfallUndercover ? t('undercoverGuessRight') : t('spyGuessRight')) + '\n' + winsLabel;
@@ -391,7 +392,7 @@ export default function ResultScreen({ navigation, route }) {
   })();
 
   if (isSpyfall && spyfallOutcome) {
-    const spyWins = spyfallOutcome === 'spyWinsTimer' || spyfallOutcome === 'spyWinsTie' || spyfallOutcome === 'spyWinsWrongAccusation' || spyfallOutcome === 'spyGuessRight';
+    const spyWins = spyfallOutcome === 'spyWinsTie' || spyfallOutcome === 'spyWinsWrongAccusation' || spyfallOutcome === 'spyGuessRight';
     return (
       <View style={[styles.container, { backgroundColor: theme.bg }]}>
         <Image

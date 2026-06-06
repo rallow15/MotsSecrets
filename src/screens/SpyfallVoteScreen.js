@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Animated } from 'react-native';
+import { useKeepAwake } from 'expo-keep-awake';
 import { colors } from '../theme';
 import { t, getLang } from '../i18n';
 import { playClick } from '../sound';
@@ -7,7 +8,8 @@ import { useScaleIn, triggerHaptic } from '../animations';
 import BouncePress from '../components/BouncePress';
 
 export default function SpyfallVoteScreen({ navigation, route }) {
-  const { numPlayers, assignments, playerNames, selectedCategory, currentVoter, votes, timeLeft, spyfallUndercover } = route.params;
+  const { numPlayers, assignments, playerNames, selectedCategory, currentVoter, votes, spyfallUndercover } = route.params;
+  useKeepAwake();
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const selectedScale = React.useRef(new Animated.Value(1)).current;
   const lang = getLang();
@@ -92,7 +94,6 @@ export default function SpyfallVoteScreen({ navigation, route }) {
         selectedCategory,
         currentVoter: currentVoter + 1,
         votes: newVotes,
-        timeLeft,
         spyfallUndercover,
       });
     }

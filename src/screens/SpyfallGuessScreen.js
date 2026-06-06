@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { useKeepAwake } from 'expo-keep-awake';
 import { colors } from '../theme';
 import { t, getLang } from '../i18n';
 import { playClick, playWin, playLose } from '../sound';
@@ -8,6 +9,7 @@ import BouncePress from '../components/BouncePress';
 
 export default function SpyfallGuessScreen({ navigation, route }) {
   const { numPlayers, assignments, playerNames, selectedCategory, fromGame, spyfallUndercover, votedPlayerIndex } = route.params;
+  useKeepAwake();
   const [guess, setGuess] = useState('');
   const [showInput, setShowInput] = useState(fromGame ? false : true);
   const lang = getLang();

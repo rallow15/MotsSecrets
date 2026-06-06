@@ -61,7 +61,7 @@ function loadAdMob() {
 }
 
 function PrepScreenWrapper({ navigation, route }) {
-  const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, selectedCategories, customWords, mimerMode, spyfallTimer, numUndercovers, numMisterWhites, easyMode, spyfallUndercover, darkTheme } = route.params;
+  const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, selectedCategories, customWords, mimerMode, numUndercovers, numMisterWhites, easyMode, spyfallUndercover, darkTheme } = route.params;
 
   const _gameMode      = gameMode      ?? 0;
   const _currentPlayer = currentPlayer ?? 0;
@@ -70,7 +70,6 @@ function PrepScreenWrapper({ navigation, route }) {
   const _playerNames   = Array.isArray(playerNames) ? playerNames : new Array(numPlayers).fill('');
   const _customWords = Array.isArray(customWords) ? customWords : [];
   const _mimerMode = mimerMode ?? false;
-  const _spyfallTimer = spyfallTimer ?? null;
   const _numUndercovers = numUndercovers ?? 1;
   const _numMisterWhites = numMisterWhites ?? 0;
   const _easyMode = easyMode ?? false;
@@ -96,7 +95,7 @@ function PrepScreenWrapper({ navigation, route }) {
         params: {
           numPlayers, gameMode: _gameMode, selectedCategory: _selectedCategory,
           selectedCategories,
-          customWords: _customWords, mimerMode: _mimerMode, spyfallTimer: _spyfallTimer,
+          customWords: _customWords, mimerMode: _mimerMode,
           numUndercovers: _numUndercovers, numMisterWhites: _numMisterWhites,
           easyMode: _easyMode, spyfallUndercover: _spyfallUndercover, darkTheme: _darkTheme,
           assignments, currentPlayer: _currentPlayer, takenNumbers: _takenNumbers,

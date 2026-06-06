@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Animated, Image } from 'react-native';
+import { useKeepAwake } from 'expo-keep-awake';
 import { t } from '../i18n';
 import { playClick, playReveal } from '../sound';
 import { useScaleIn, triggerHaptic } from '../animations';
@@ -9,6 +10,7 @@ import BouncePress from '../components/BouncePress';
 export default function SpyfallGameScreen({ navigation, route }) {
   const { numPlayers, assignments, playerNames, selectedCategory, numUndercovers, numMisterWhites, easyMode, mimerMode, customWords, spyfallUndercover: spyfallUC } = route.params;
   const spyfallUndercover = spyfallUC ?? false;
+  useKeepAwake();
   const darkTheme = useDarkTheme();
   const theme = darkTheme ? screenThemes.dark : screenThemes.light;
 
