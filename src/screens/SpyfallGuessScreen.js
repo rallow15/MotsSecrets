@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useKeepAwake } from 'expo-keep-awake';
-import { colors } from '../theme';
+import { screenThemes, useDarkTheme } from '../theme';
 import { t, getLang } from '../i18n';
 import { playClick, playWin, playLose } from '../sound';
 import { triggerHaptic } from '../animations';
 import BouncePress from '../components/BouncePress';
+import ScreenBackground from '../components/ScreenBackground';
 
 export default function SpyfallGuessScreen({ navigation, route }) {
-  const { numPlayers, assignments, playerNames, selectedCategory, fromGame, spyfallUndercover, votedPlayerIndex } = route.params;
+  const { numPlayers, assignments, playerNames, selectedCategory, spyfallUndercover, votedPlayerIndex } = route.params;
   useKeepAwake();
+  const darkTheme = useDarkTheme();
+  const theme = darkTheme ? screenThemes.dark : screenThemes.light;
   const [guess, setGuess] = useState('');
-  const [showInput, setShowInput] = useState(fromGame ? false : true);
+  // Toujours commencer par l'écran "passez le téléphone à l'espion/intrus"
+  const [showInput, setShowInput] = useState(false);
   const lang = getLang();
 
   // Trouver le mot secret (celui des innocents)
@@ -52,38 +56,34 @@ export default function SpyfallGuessScreen({ navigation, route }) {
   };
 
   return (
-    <View style={styles.container}>
+    <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }}>
       {!showInput ? (
         // Écran "Passez le téléphone à l'espion/intrus"
         <>
           <Text style={styles.emoji}>{spyfallUndercover ? '🥸' : '🕵️'}</Text>
-          <Text style={styles.title}>{spyfallUndercover ? t('passToUndercover') : t('passToSpy')}</Text>
-          <BouncePress onPress={handleConfirmSpy} style={styles.confirmBtn}>
-            <Text style={styles.confirmBtnText}>{t('spyConfirmGuess')}</Text>
+          <Text style={[styles.title, { color: theme.text }]}>{spyfallUndercover ? t('passToUndercover') : t('passToSpy')}</Text>
+          <BouncePress accessibilityLabel={t('spyConfirmGuess')} accessibilityRole="button" onPress={handleConfirmSpy} style={[styles.confirmBtn, { backgroundColor: theme.okBtnBg }]}>
+            <Text style={[styles.confirmBtnText, { color: theme.okBtnText }]}>{t('spyConfirmGuess')}</Text>
           </BouncePress>
         </>
       ) : (
         // Écran de devinette
         <>
-          <Text style={styles.title}>
-            {fromGame ? t('spyGuess') : (spyfallUndercover ? t('undercoverCaught') : t('spyCaught'))}
+          <Text style={[styles.title, { color: theme.text }]}>
+            {spyfallUndercover ? t('undercoverCaught') : t('spyCaught')}
           </Text>
 
-          {fromGame ? null : (
-            <Text style={styles.subtitle}>
-              {lang === 'fr'
-                ? `${suspectName} a été découvert ! Devinez le mot pour gagner.`
-                : `${suspectName} was caught! Guess the word to win.`}
-            </Text>
-          )}
+          <Text style={[styles.subtitle, { color: theme.textMuted }]}>
+            {t('caughtGuessWord', suspectName)}
+          </Text>
 
           <View style={styles.inputContainer}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: theme.text, borderBottomColor: theme.inputBorder }]}
               value={guess}
               onChangeText={setGuess}
               placeholder={t('spyGuessHint')}
-              placeholderTextColor="#999"
+              placeholderTextColor={darkTheme ? 'rgba(232,213,255,0.4)' : '#999'}
               autoCapitalize="words"
               autoCorrect={false}
               maxLength={40}
@@ -92,28 +92,30 @@ export default function SpyfallGuessScreen({ navigation, route }) {
           </View>
 
           <BouncePress
+            accessibilityLabel={t('spyGuessConfirm')}
+            accessibilityRole="button"
             onPress={handleSubmit}
-            style={[styles.submitBtn, !guess.trim() && styles.submitBtnDisabled]}
+            style={[styles.submitBtn, !guess.trim() && styles.submitBtnDisabled, { backgroundColor: theme.danger }]}
             disabled={!guess.trim()}
           >
             <Text style={styles.submitBtnText}>{t('spyGuessConfirm')}</Text>
           </BouncePress>
         </>
       )}
-    </View>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F5DC', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28, gap: 16 },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28, gap: 16 },
   emoji: { fontSize: 64 },
-  title: { fontFamily: 'BebasNeue', fontSize: 40, color: '#1a1a1a', letterSpacing: 2, textAlign: 'center' },
-  subtitle: { fontFamily: 'SpaceMono', fontSize: 11, color: '#666', textAlign: 'center', letterSpacing: 1 },
+  title: { fontFamily: 'BebasNeue', fontSize: 40, letterSpacing: 2, textAlign: 'center' },
+  subtitle: { fontFamily: 'SpaceMono', fontSize: 11, textAlign: 'center', letterSpacing: 1 },
   inputContainer: { width: '100%' },
-  input: { fontFamily: 'BebasNeue', fontSize: 28, color: '#1a1a1a', borderBottomWidth: 2, borderBottomColor: 'rgba(0,0,0,0.3)', textAlign: 'center', paddingVertical: 8, letterSpacing: 2 },
-  confirmBtn: { width: '100%', backgroundColor: '#1a1a1a', paddingVertical: 16, alignItems: 'center', borderRadius: 12 },
+  input: { fontFamily: 'BebasNeue', fontSize: 28, borderBottomWidth: 2, textAlign: 'center', paddingVertical: 8, letterSpacing: 2 },
+  confirmBtn: { width: '100%', paddingVertical: 16, alignItems: 'center', borderRadius: 12 },
   confirmBtnText: { fontFamily: 'BebasNeue', fontSize: 22, color: '#F5F5DC', letterSpacing: 2 },
-  submitBtn: { width: '100%', backgroundColor: '#ff4444', paddingVertical: 16, alignItems: 'center', borderRadius: 12 },
-  submitBtnDisabled: { backgroundColor: 'rgba(255,68,68,0.3)' },
+  submitBtn: { width: '100%', paddingVertical: 16, alignItems: 'center', borderRadius: 12 },
+  submitBtnDisabled: { opacity: 0.4 },
   submitBtnText: { fontFamily: 'BebasNeue', fontSize: 22, color: '#F5F5DC', letterSpacing: 2 },
 });

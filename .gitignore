@@ -1,5 +1,28 @@
-node_modules
-dist/
+# Dependencies
+node_modules/
+
+# Expo / builds
 .expo/
-.claude/settings.local.json
+dist/
+web-build/
+nul/
+android/build/
+android/.gradle/
+android/app/build/
+ios/build/
+ios/Pods/
+ios/**/*.xcuserdata
+*.tsbuildinfo
+
+# Tooling Claude Code (artefacts locaux : skills, settings, projects)
+.agents/
+skills-lock.json
+.claude/
+
+# Native debug artifacts
 android/app/debug.keystore
+
+# OS / editors
+.DS_Store
+Thumbs.db
+*.log

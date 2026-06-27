@@ -1,19 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Linking, ActivityIndicator, Platform } from 'react-native';
-import Constants from 'expo-constants';
-
-const isWeb = Platform.OS === 'web';
-
-// SecureStore — uniquement mobile
-let SecureStore;
-if (!isWeb) {
-  try { SecureStore = require('expo-secure-store'); } catch (e) {}
-}
-
-const safeSetItem = async (key, value) => {
-  if (!SecureStore) return;
-  try { await SecureStore.setItemAsync(key, value); } catch (e) {}
-};
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Linking, ActivityIndicator } from 'react-native';
+import { t, getLang } from '../i18n';
+import { isWeb, isExpoGo } from '../utils/platform';
+import { safeSetItem } from '../utils/storage';
 
 let AdsConsent = null;
 let initUMP = null;
@@ -23,8 +12,7 @@ let showConsentForm = null;
 export default function ConsentScreen({ onConsentGiven }) {
   const [loading, setLoading] = useState(true);
   const [umpError, setUmpError] = useState(null);
-
-  const isExpoGo = Constants.appOwnership === 'expo';
+  const lang = getLang();
 
   useEffect(() => {
     if (!isExpoGo) {
@@ -35,7 +23,7 @@ export default function ConsentScreen({ onConsentGiven }) {
           showConsentForm = mod.showConsentForm;
           AdsConsent = mod.AdsConsent;
         })
-        .catch((e) => console.log('UMP import error:', e));
+        .catch(() => {});
     }
   }, [isExpoGo]);
 
@@ -78,7 +66,7 @@ export default function ConsentScreen({ onConsentGiven }) {
         }
       }
     } catch (e) {
-      console.log('Erreur UMP:', e);
+      // UMP error handled by state
       setUmpError(e.message || String(e));
     } finally {
       setLoading(false);
@@ -137,45 +125,49 @@ export default function ConsentScreen({ onConsentGiven }) {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Respect de votre vie privée</Text>
+        <Text style={styles.title}>{t('privacyTitle')}</Text>
 
         <ScrollView style={styles.scrollView}>
           <Text style={styles.text}>
-            Cette application utilise des publicités personnalisées pour financer son développement.
+            {t('privacyText1')}
           </Text>
 
           <Text style={styles.text}>
-            Conformément au RGPD et à la réglementation européenne, vous pouvez choisir d'accepter ou de refuser les publicités personnalisées.
+            {t('privacyText2')}
           </Text>
 
           <Text style={styles.text}>
-            Vos données sont traitées conformément à la politique de confidentialité de Google :
+            {t('privacyText3')}
           </Text>
 
           <TouchableOpacity onPress={openPrivacyPolicy}>
-            <Text style={styles.link}>policies.google.com/privacy</Text>
+            <Text style={styles.link}>{t('privacyLink')}</Text>
           </TouchableOpacity>
 
           {umpError && (
             <Text style={styles.error}>
-             Erreur de chargement: {umpError}
+             {t('consentError')}: {umpError}
             </Text>
           )}
         </ScrollView>
 
         <View style={styles.buttonRow}>
           <TouchableOpacity
+            accessibilityLabel={t('refuse')}
+            accessibilityRole="button"
             style={[styles.button, styles.refuseButton]}
             onPress={handleRefuse}
           >
-            <Text style={styles.refuseButtonText}>REFUSER</Text>
+            <Text style={styles.refuseButtonText}>{t('refuse')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
+            accessibilityLabel={t('accept')}
+            accessibilityRole="button"
             style={[styles.button, styles.acceptButton]}
             onPress={handleAccept}
           >
-            <Text style={styles.acceptButtonText}>ACCEPTER</Text>
+            <Text style={styles.acceptButtonText}>{t('accept')}</Text>
           </TouchableOpacity>
         </View>
       </View>

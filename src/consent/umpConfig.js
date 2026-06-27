@@ -1,22 +1,20 @@
-import Constants from 'expo-constants';
 import { NativeModules } from 'react-native';
-
-const isExpoGo = Constants.appOwnership === 'expo';
+import { isExpoGo } from '../utils/platform';
 
 let AdsConsent = null;
 
 function loadAdsConsent() {
   if (isExpoGo || !NativeModules.RNGoogleMobileAdsModule) {
-    console.log('AdsConsent désactivé (Expo Go ou module natif absent)');
+    if (__DEV__) console.log('AdsConsent désactivé (Expo Go ou module natif absent)');
     return false;
   }
   try {
     const admob = require('react-native-google-mobile-ads');
     AdsConsent = admob.AdsConsent;
-    console.log('AdsConsent chargé');
+    if (__DEV__) console.log('AdsConsent chargé');
     return true;
   } catch (e) {
-    console.log('AdsConsent non disponible:', e.message);
+    if (__DEV__) console.log('AdsConsent non disponible:', e.message);
     return false;
   }
 }
@@ -37,7 +35,7 @@ export async function initUMP() {
       isFormAvailable: consentInfo.isConsentFormAvailable,
     };
   } catch (e) {
-    console.log('AdsConsent requestInfoUpdate error:', e.message);
+    if (__DEV__) console.log('AdsConsent requestInfoUpdate error:', e.message);
     return { status: 'UNKNOWN', isFormAvailable: false };
   }
 }

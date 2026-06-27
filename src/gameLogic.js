@@ -49,13 +49,10 @@ export function generateAssignments(numPlayers, gameMode = 0, selectedCategory =
 
   if (isMimer) {
     const mimerCategory = wordDb.find(d => d.cat === 'MIMER');
-    console.log('MIMER category found:', !!mimerCategory);
     // WORD_DB transforme les catégories en { cat, words }, donc on accède à .words
     if (mimerCategory && mimerCategory.words && mimerCategory.words.length > 0) {
-      // Choisir une paire aléatoire
       const pairIndex = Math.floor(Math.random() * mimerCategory.words.length);
       mimerData = mimerCategory.words[pairIndex];
-      console.log('MIMER mimerData:', mimerData);
       // Pour le mode MIMER, wordA et wordB sont les noms des 2 images de la paire (sans extension)
       // On inverse aléatoirement pour que les innocents puissent avoir l'image 1 ou 2
       const randomSwap = Math.random() < 0.5;
@@ -64,7 +61,6 @@ export function generateAssignments(numPlayers, gameMode = 0, selectedCategory =
       // Enlever l'extension (.jpg, .png, etc.) pour l'affichage
       wordA = img1 ? img1.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '') : null;
       wordB = img2 ? img2.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '') : null;
-      console.log('MIMER wordA:', wordA, 'wordB:', wordB, 'swap:', randomSwap);
     }
   }
 
@@ -72,6 +68,20 @@ export function generateAssignments(numPlayers, gameMode = 0, selectedCategory =
   const isSpecialeCategory = category === 'SPECIALE';
   if (isSpecialeCategory && customWords && customWords.length > 0) {
     words = customWords;
+  }
+
+  // Sécurité : SPECIALE nécessite au moins 2 mots pour fonctionner
+  if (isSpecialeCategory && words.length < 2) {
+    return Array.from({ length: numPlayers }, () => ({
+      word: null,
+      role: 'normal',
+      category,
+      isMimer: false,
+      mimerData: null,
+      easyMode,
+      spyHint: null,
+      error: 'SPECIALE_NEEDS_MORE_WORDS',
+    }));
   }
 
   // Choisir 2 mots/images différents aléatoirement (si pas en mode MIMER)
@@ -91,8 +101,16 @@ export function generateAssignments(numPlayers, gameMode = 0, selectedCategory =
         wordA = subWords[idx1];
         wordB = subWords[idx2];
       } else if (subWords.length === 1) {
+        // Sous-catégorie avec 1 seul mot : on prend ce mot pour wordA
+        // et on tire wordB d'une autre sous-catégorie pour garantir wordA !== wordB
         wordA = subWords[0];
-        wordB = subWords[0];
+        const otherSubKeys = subKeys.filter(k => k !== subKey);
+        const otherWords = otherSubKeys.flatMap(k => subcategories[k]).filter(w => w.length > 0);
+        if (otherWords.length > 0) {
+          wordB = otherWords[Math.floor(Math.random() * otherWords.length)];
+        } else {
+          wordB = subWords[0];
+        }
       }
     } else {
       const idx1 = Math.floor(Math.random() * words.length);

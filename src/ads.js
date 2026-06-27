@@ -3,11 +3,8 @@
 // ═════════════════════════════════════════════════════════════
 
 import { Platform, NativeModules } from 'react-native';
-import Constants from 'expo-constants';
+import { isWeb, isExpoGo } from './utils/platform';
 
-// Détecter si on est dans Expo Go ou sur le web
-const isExpoGo = Constants.appOwnership === 'expo';
-const isWeb = Platform.OS === 'web';
 const hasAdMobNative = !isWeb && !isExpoGo && !!NativeModules.RNGoogleMobileAdsModule;
 
 // Événements pour les pubs récompensées (v16+)
@@ -33,7 +30,7 @@ function loadAdMobModules() {
     MobileAds = admob.MobileAds;
     return true;
   } catch (e) {
-    console.log('❌ AdMob modules non disponibles:', e.message);
+    if (__DEV__) console.log('❌ AdMob modules non disponibles:', e.message);
     return false;
   }
 }
@@ -41,20 +38,20 @@ function loadAdMobModules() {
 // Initialiser AdMob au démarrage
 export async function initAds() {
   if (!hasAdMobNative) {
-    console.log('📱 AdMob désactivé (module natif absent)');
+    if (__DEV__) console.log('📱 AdMob désactivé (module natif absent)');
     return;
   }
   if (!loadAdMobModules()) {
-    console.log('❌ Modules AdMob non chargés');
+    if (__DEV__) console.log('❌ Modules AdMob non chargés');
     return;
   }
   try {
-    console.log('🎯 Initialisation AdMob...');
+    if (__DEV__) console.log('🎯 Initialisation AdMob...');
     const adsInstance = MobileAds();
     await adsInstance.initialize();
-    console.log('✅ AdMob initialisé avec succès');
+    if (__DEV__) console.log('✅ AdMob initialisé avec succès');
   } catch (error) {
-    console.log('❌ Erreur init AdMob:', error.message || error);
+    if (__DEV__) console.log('❌ Erreur init AdMob:', error.message || error);
   }
 }
 
@@ -70,29 +67,41 @@ let rewardedAdInstance = null;
 let onAdEarnedRewardCallback = null;
 let isAdLoading = false;
 
+// Callback pour notifier l'UI du chargement
+let _onLoadingChange = null;
+
+export function setOnLoadingChange(cb) {
+  _onLoadingChange = cb;
+}
+
+export function isAdLoadingState() {
+  return isAdLoading;
+}
+
 // Charger une pub récompensée
 export async function loadRewardedAd(adType = 'default') {
   if (!hasAdMobNative) {
-    console.log('Expo Go - pub récompensée ignorée');
+    if (__DEV__) console.log('Expo Go - pub récompensée ignorée');
     return null;
   }
   if (!loadAdMobModules() || !RewardedAd) {
-    console.log('Rewarded Ad non disponible');
+    if (__DEV__) console.log('Rewarded Ad non disponible');
     return null;
   }
 
   if (isAdLoading) {
-    console.log('Pub déjà en chargement...');
+    if (__DEV__) console.log('Pub déjà en chargement...');
     return null;
   }
 
   isAdLoading = true;
+  if (_onLoadingChange) _onLoadingChange(true);
 
   const prodId = adType === 'mime' ? REWARDED_AD_UNIT_MIME_PROD : adType === 'objects' ? REWARDED_AD_UNIT_OBJECTS_PROD : REWARDED_AD_UNIT_PROD;
   const adUnitId = __DEV__ ? TestAdIds.REWARDED : prodId;
 
   try {
-    console.log('Chargement pub récompensée:', adUnitId);
+    if (__DEV__) console.log('Chargement pub récompensée:', adUnitId);
 
     rewardedAdInstance = RewardedAd.createForAdRequest(adUnitId, {
       requestNonPersonalizedAdsOnly: false,
@@ -102,42 +111,53 @@ export async function loadRewardedAd(adType = 'default') {
     });
 
     return new Promise((resolve) => {
+      let settled = false;
+      const finish = (value) => {
+        if (settled) return;
+        settled = true;
+        isAdLoading = false;
+        if (_onLoadingChange) _onLoadingChange(false);
+        clearTimeout(timeoutId);
+        resolve(value);
+      };
+
       const unsubscribeLoaded = rewardedAdInstance.addAdEventListener(
         REWARDED_EVENT.LOADED,
         () => {
-          console.log('Pub récompensée chargée avec succès');
+          if (__DEV__) console.log('Pub récompensée chargée avec succès');
           unsubscribeLoaded();
-          resolve(rewardedAdInstance);
+          unsubscribeError();
+          finish(rewardedAdInstance);
         }
       );
 
       const unsubscribeError = rewardedAdInstance.addAdEventListener(
         REWARDED_EVENT.ERROR,
         (error) => {
-          console.log('Erreur chargement pub:', error);
-          unsubscribeError();
+          if (__DEV__) console.log('Erreur chargement pub:', error);
           unsubscribeLoaded();
-          isAdLoading = false;
+          unsubscribeError();
           rewardedAdInstance = null;
-          resolve(null);
+          finish(null);
         }
       );
 
       rewardedAdInstance.load();
 
-      // Timeout après 10 secondes
-      setTimeout(() => {
-        if (rewardedAdInstance) {
-          console.log('Timeout chargement pub');
-          isAdLoading = false;
-          rewardedAdInstance = null;
-          resolve(null);
-        }
+      // Timeout après 10 secondes — unsubscribe proprement les listeners
+      const timeoutId = setTimeout(() => {
+        if (settled) return;
+        if (__DEV__) console.log('Timeout chargement pub');
+        unsubscribeLoaded();
+        unsubscribeError();
+        rewardedAdInstance = null;
+        finish(null);
       }, 10000);
     });
   } catch (error) {
-    console.log('Erreur chargement pub récompensée:', error);
+    if (__DEV__) console.log('Erreur chargement pub récompensée:', error);
     isAdLoading = false;
+    if (_onLoadingChange) _onLoadingChange(false);
     return null;
   }
 }
@@ -145,55 +165,65 @@ export async function loadRewardedAd(adType = 'default') {
 // Montrer une pub récompensée
 export async function showRewardedAd(onReward) {
   if (!rewardedAdInstance) {
-    console.log('Pas de pub récompensée chargée');
+    if (__DEV__) console.log('Pas de pub récompensée chargée');
     return false;
   }
 
   return new Promise((resolve) => {
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      onAdEarnedRewardCallback = null;
+      rewardedAdInstance = null;
+      isAdLoading = false;
+      if (_onLoadingChange) _onLoadingChange(false);
+      resolve(value);
+    };
+
     onAdEarnedRewardCallback = onReward;
 
     const unsubscribeEarned = rewardedAdInstance.addAdEventListener(
       REWARDED_EVENT.EARNED_REWARD,
       (reward) => {
-        console.log('Récompense gagnée:', reward);
+        if (__DEV__) console.log('Récompense gagnée:', reward);
         if (onAdEarnedRewardCallback) {
           onAdEarnedRewardCallback(reward);
         }
         unsubscribeEarned();
-        resolve(true);
+        unsubscribeClosed();
+        finish(true);
       }
     );
 
     const unsubscribeClosed = rewardedAdInstance.addAdEventListener(
       REWARDED_EVENT.CLOSED,
       () => {
-        console.log('Pub fermée');
+        if (__DEV__) console.log('Pub fermée');
         unsubscribeClosed();
         unsubscribeEarned();
-        rewardedAdInstance = null;
-        isAdLoading = false;
-        // Si la pub est fermée sans récompense, on résout quand même
-        resolve(false);
+        finish(false);
       }
     );
 
     rewardedAdInstance.show().catch((error) => {
-      console.log('Erreur affichage pub:', error);
-      isAdLoading = false;
-      resolve(false);
+      if (__DEV__) console.log('Erreur affichage pub:', error);
+      unsubscribeEarned();
+      unsubscribeClosed();
+      finish(false);
     });
   });
 }
 
 // Charger et montrer une pub récompensée (tout-en-un)
 export async function loadAndShowRewardedAd(onReward, adType = 'default') {
-  console.log('loadAndShowRewardedAd appelé, type:', adType);
+  if (__DEV__) console.log('loadAndShowRewardedAd appelé, type:', adType);
   const ad = await loadRewardedAd(adType);
   if (ad) {
-    console.log('Pub chargée, affichage...');
+    if (__DEV__) console.log('Pub chargée, affichage...');
     return await showRewardedAd(onReward);
   }
-  console.log('Pub non chargée');
+  if (__DEV__) console.log('Pub non chargée');
   return false;
 }
 

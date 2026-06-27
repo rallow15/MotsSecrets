@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Animated, Image } from 'react-native';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { useKeepAwake } from 'expo-keep-awake';
 import { t } from '../i18n';
 import { playClick, playReveal } from '../sound';
 import { useScaleIn, triggerHaptic } from '../animations';
 import { screenThemes, useDarkTheme } from '../theme';
 import BouncePress from '../components/BouncePress';
+import ScreenBackground from '../components/ScreenBackground';
 
 export default function SpyfallGameScreen({ navigation, route }) {
   const { numPlayers, assignments, playerNames, selectedCategory, numUndercovers, numMisterWhites, easyMode, mimerMode, customWords, spyfallUndercover: spyfallUC } = route.params;
@@ -46,14 +47,7 @@ export default function SpyfallGameScreen({ navigation, route }) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.bg }]}>
-      <Image
-        source={darkTheme ? require('../../assets/bg-sombre.jpg') : require('../../assets/bg-white.jpg')}
-        style={styles.bgImage}
-        resizeMode="cover"
-      />
-      <View style={darkTheme ? styles.bgGradientDark : styles.bgGradientLight} />
-
+    <ScreenBackground darkTheme={darkTheme} style={[styles.container, { backgroundColor: theme.bg }]}>
       <Animated.View style={[styles.starterRow, scaleStyle]}>
         <Text style={[styles.starterLabel, { color: theme.textMuted }]}>{t('startsFirst')}</Text>
         <Text style={[styles.starterName, { color: theme.text }]}>{starterName}</Text>
@@ -66,15 +60,12 @@ export default function SpyfallGameScreen({ navigation, route }) {
       </BouncePress>
 
       <Text style={[styles.hint, { color: theme.textMuted }]}>{t('voteInstruction')}</Text>
-    </View>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28, gap: 16 },
-  bgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
-  bgGradientDark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.15)' },
-  bgGradientLight: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(180,150,80,0.10)' },
   divider: { width: '60%', height: 2, marginVertical: 8 },
   starterRow: { alignItems: 'center', gap: 4 },
   starterLabel: { fontFamily: 'SpaceMono', fontSize: 10, letterSpacing: 3 },

@@ -1,13 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated, TextInput, Keyboard, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, TextInput, Keyboard } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useKeepAwake } from 'expo-keep-awake';
 import Svg, { Path } from 'react-native-svg';
 import { colors, screenThemes, useDarkTheme } from '../theme';
 import { t } from '../i18n';
 import { useFadeIn, triggerHaptic } from '../animations';
+import ScreenBackground from '../components/ScreenBackground';
 
 export default function PrepScreen({ navigation, route }) {
   const { numPlayers, assignments, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, gameMode } = route.params;
+  useKeepAwake();
   const darkTheme = useDarkTheme();
   const theme = darkTheme ? screenThemes.dark : screenThemes.light;
   const insets = useSafeAreaInsets();
@@ -66,15 +69,9 @@ export default function PrepScreen({ navigation, route }) {
   };
 
   return (
-    <View style={[styles.root, { backgroundColor: theme.bg }]}>
-      <Image
-        source={darkTheme ? require('../../assets/bg-sombre.jpg') : require('../../assets/bg-white.jpg')}
-        style={styles.bgImage}
-        resizeMode="cover"
-      />
-      <View style={darkTheme ? styles.bgGradientDark : styles.bgGradientLight} />
-      <TouchableOpacity style={[styles.container, fadeInStyle]} activeOpacity={1} onPress={handleTap}>
-        <TouchableOpacity style={[styles.backBtn, { top: insets.top + 55, backgroundColor: theme.backBtnBg, borderColor: theme.backBtnBorder }]} onPress={(e) => { e.stopPropagation(); triggerHaptic('light'); navigation.goBack(); }} activeOpacity={0.7}>
+    <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }}>
+      <TouchableOpacity accessibilityLabel={t('touchScreen')} style={[styles.container, fadeInStyle]} activeOpacity={1} onPress={handleTap}>
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel="Back" style={[styles.backBtn, { top: insets.top + 55, backgroundColor: theme.backBtnBg, borderColor: theme.backBtnBorder }]} onPress={(e) => { e.stopPropagation(); triggerHaptic('light'); navigation.goBack(); }} activeOpacity={0.7}>
           <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={darkTheme ? '#e8d5ff' : '#1a1a1a'} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <Path d="M15 18l-6-6 6-6" />
           </Svg>
@@ -113,15 +110,12 @@ export default function PrepScreen({ navigation, route }) {
 
         <Animated.Text style={[styles.tapIcon, { opacity: pulseAnim }]}>👆</Animated.Text>
       </TouchableOpacity>
-    </View>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  bgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
-  bgGradientDark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.15)' },
-  bgGradientLight: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(180,150,80,0.10)' },
   container:  { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, gap: 8 },
   backBtn: { position: 'absolute', left: 20, width: 44, height: 44, borderRadius: 22, borderWidth: 2, alignItems: 'center', justifyContent: 'center', zIndex: 10 },
   playerBadge:{ fontFamily: 'SpaceMono', fontSize: 11, letterSpacing: 5, overflow: 'visible' },

@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Animated } from 'react-native';
 import { useKeepAwake } from 'expo-keep-awake';
-import { colors } from '../theme';
+import { screenThemes, useDarkTheme } from '../theme';
 import { t, getLang } from '../i18n';
 import { playClick } from '../sound';
 import { useScaleIn, triggerHaptic } from '../animations';
 import BouncePress from '../components/BouncePress';
+import ScreenBackground from '../components/ScreenBackground';
 
 export default function SpyfallVoteScreen({ navigation, route }) {
   const { numPlayers, assignments, playerNames, selectedCategory, currentVoter, votes, spyfallUndercover } = route.params;
   useKeepAwake();
+  const darkTheme = useDarkTheme();
+  const theme = darkTheme ? screenThemes.dark : screenThemes.light;
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const selectedScale = React.useRef(new Animated.Value(1)).current;
   const lang = getLang();
@@ -68,7 +71,6 @@ export default function SpyfallVoteScreen({ navigation, route }) {
           assignments,
           playerNames,
           selectedCategory,
-          fromGame: false,
           spyfallUndercover,
           votedPlayerIndex: mostVoted,
         });
@@ -100,51 +102,59 @@ export default function SpyfallVoteScreen({ navigation, route }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{spyfallUndercover ? t('voteTitleUndercover') : t('voteTitle')}</Text>
-      <Text style={styles.voterLabel}>{t('playerLabel', currentVoter + 1)}: {voterName}</Text>
-      <Text style={styles.instruction}>{t('voteInstruction')}</Text>
+    <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }}>
+      <Text style={[styles.title, { color: theme.text }]}>{spyfallUndercover ? t('voteTitleUndercover') : t('voteTitle')}</Text>
+      <Text style={[styles.voterLabel, { color: theme.text }]}>{t('playerLabel', currentVoter + 1)}: {voterName}</Text>
+      <Text style={[styles.instruction, { color: theme.textMuted }]}>{t('voteInstruction')}</Text>
 
       <ScrollView style={styles.playerList} contentContainerStyle={styles.playerListContent}>
-        {safeNames.map((name, i) => (
+        {safeNames.map((name, i) => {
+          // Un joueur ne peut pas voter contre lui-même
+          if (i === currentVoter) return null;
+          return (
           <TouchableOpacity
             key={i}
-            style={[styles.playerCard, selectedPlayer === i && styles.playerCardSelected]}
+            accessibilityLabel={name || t('playerFallback', i + 1)}
+            accessibilityRole="button"
+            style={[styles.playerCard, { backgroundColor: theme.cardBg, borderColor: selectedPlayer === i ? theme.btnBg : theme.border }, selectedPlayer === i && { backgroundColor: theme.cardActiveBg, borderColor: theme.cardActiveBorder }]}
             onPress={() => handleSelect(i)}
             activeOpacity={0.7}
           >
-            <Text style={[styles.playerName, selectedPlayer === i && styles.playerNameSelected]}>
+            <Text style={[styles.playerName, { color: selectedPlayer === i ? theme.okBtnText : theme.text }, selectedPlayer === i && styles.playerNameSelected]}>
               {name || t('playerFallback', i + 1)}
             </Text>
-            {selectedPlayer === i && <Text style={styles.checkMark}>✓</Text>}
+            {selectedPlayer === i && <Text style={[styles.checkMark, { color: theme.okBtnText }]}>✓</Text>}
           </TouchableOpacity>
-        ))}
+          );
+        })}
       </ScrollView>
 
       <BouncePress
+        accessibilityLabel={t('voteAccuse')}
+        accessibilityRole="button"
         onPress={handleConfirm}
-        style={[styles.confirmBtn, selectedPlayer === null && styles.confirmBtnDisabled]}
+        style={[styles.confirmBtn, selectedPlayer === null ? styles.confirmBtnDisabled : { backgroundColor: theme.okBtnBg }]}
         disabled={selectedPlayer === null}
       >
-        <Text style={styles.confirmBtnText}>{lang === 'fr' ? 'CONFIRMER' : 'CONFIRM'}</Text>
+        <Text style={[styles.confirmBtnText, { color: theme.okBtnText }]}>{t('voteAccuse')}</Text>
       </BouncePress>
-    </View>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F5DC', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20, paddingTop: 16, gap: 10 },
-  title: { fontFamily: 'BebasNeue', fontSize: 36, color: '#1a1a1a', letterSpacing: 2, textAlign: 'center' },
-  voterLabel: { fontFamily: 'BebasNeue', fontSize: 22, color: '#1a1a1a', letterSpacing: 1 },
-  instruction: { fontFamily: 'SpaceMono', fontSize: 10, color: '#666', letterSpacing: 2, textAlign: 'center' },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20, paddingTop: 16, gap: 10 },
+  title: { fontFamily: 'BebasNeue', fontSize: 36, letterSpacing: 2, textAlign: 'center' },
+  voterLabel: { fontFamily: 'BebasNeue', fontSize: 22, letterSpacing: 1 },
+  instruction: { fontFamily: 'SpaceMono', fontSize: 10, letterSpacing: 2, textAlign: 'center' },
   playerList: { width: '100%', maxHeight: '50%' },
   playerListContent: { gap: 8, paddingBottom: 10 },
-  playerCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 2, borderColor: 'rgba(0,0,0,0.15)', paddingVertical: 14, paddingHorizontal: 20, borderRadius: 10 },
-  playerCardSelected: { backgroundColor: 'rgba(0,0,0,0.12)', borderColor: '#1a1a1a' },
-  playerName: { fontFamily: 'BebasNeue', fontSize: 20, color: '#1a1a1a', letterSpacing: 1 },
-  playerNameSelected: { color: '#000000' },
-  checkMark: { fontFamily: 'BebasNeue', fontSize: 24, color: '#1a1a1a' },
-  confirmBtn: { width: '100%', backgroundColor: '#1a1a1a', paddingVertical: 16, alignItems: 'center', borderRadius: 12, marginTop: 8 },
+  playerCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 2, paddingVertical: 14, paddingHorizontal: 20, borderRadius: 10 },
+  playerCardSelected: {},
+  playerName: { fontFamily: 'BebasNeue', fontSize: 20, letterSpacing: 1 },
+  playerNameSelected: {},
+  checkMark: { fontFamily: 'BebasNeue', fontSize: 24 },
+  confirmBtn: { width: '100%', paddingVertical: 16, alignItems: 'center', borderRadius: 12, marginTop: 8 },
   confirmBtnDisabled: { backgroundColor: 'rgba(26,26,26,0.3)' },
-  confirmBtnText: { fontFamily: 'BebasNeue', fontSize: 22, color: '#F5F5DC', letterSpacing: 2 },
+  confirmBtnText: { fontFamily: 'BebasNeue', fontSize: 22, letterSpacing: 2 },
 });

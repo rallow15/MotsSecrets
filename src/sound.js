@@ -14,7 +14,7 @@ if (!isWeb) {
     createAudioPlayer = audio.createAudioPlayer;
     setAudioModeAsync = audio.setAudioModeAsync;
   } catch (e) {
-    console.log('⚠️ expo-audio non disponible');
+    if (__DEV__) console.log('⚠️ expo-audio non disponible');
   }
 }
 
@@ -73,7 +73,7 @@ if (AppState) {
         isMusicPlaying = true;
       }
     } catch (e) {
-      console.log('Erreur AppState musique:', e);
+      if (__DEV__) console.log('Erreur AppState musique:', e);
     }
   });
 }
@@ -90,6 +90,29 @@ async function playAsset(soundKey, isMusic = false) {
     player.volume = isMusic ? musicVolume : sfxVolume;
     player.loop = isMusic;
     playingSounds[soundKey] = player;
+
+    // Nettoyage auto des SFX one-shot après fin de lecture (évite l'accumulation
+    // de players non-libérés dans playingSounds).
+    if (!isMusic) {
+      let sub = null;
+      try {
+        sub = player.addListener?.('playbackStatusUpdate', (status) => {
+          if (status && (status.didJustFinish || status.isLoaded === false)) {
+            try { player.remove(); } catch (e) {}
+            if (playingSounds[soundKey] === player) delete playingSounds[soundKey];
+            try { sub && sub.remove(); } catch (e) {}
+          }
+        });
+      } catch (e) { /* listener indisponible */ }
+      // Garde de sécurité : nettoyer après 5s quoi qu'il arrive
+      setTimeout(() => {
+        if (playingSounds[soundKey] === player) {
+          try { player.remove(); } catch (e) {}
+          delete playingSounds[soundKey];
+        }
+      }, 5000);
+    }
+
     player.play();
     return true;
   } catch (error) {
@@ -155,7 +178,7 @@ export async function initSounds() {
     });
     isInitialized = true;
   } catch (error) {
-    console.log('Erreur init sons:', error);
+    if (__DEV__) console.log('Erreur init sons:', error);
   }
 }
 
@@ -180,7 +203,7 @@ export async function startBackgroundMusic() {
       isMusicPlaying = true;
     }
   } catch (error) {
-    console.log('Erreur musique ambiance:', error);
+    if (__DEV__) console.log('Erreur musique ambiance:', error);
   } finally {
     isMusicLoading = false;
   }
@@ -198,7 +221,7 @@ export async function stopBackgroundMusic() {
     isMusicPlaying = false;
   } catch (error) {
     if (!error.message?.includes('interrupted')) {
-      console.log('Erreur stop musique:', error);
+      if (__DEV__) console.log('Erreur stop musique:', error);
     }
   }
 }
@@ -215,7 +238,7 @@ export async function toggleMusic(play) {
       isMusicPlaying = false;
     }
   } catch (error) {
-    console.log('Erreur toggle musique:', error);
+    if (__DEV__) console.log('Erreur toggle musique:', error);
   }
 }
 

@@ -3,14 +3,13 @@ import { View, Text, ActivityIndicator, StyleSheet, Platform, NativeModules } fr
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useFonts } from 'expo-font';
+import { isWeb, isExpoGo } from './src/utils/platform';
 
 const Stack = createNativeStackNavigator();
-const isWeb = Platform.OS === 'web';
 
 import MenuScreen        from './src/screens/MenuScreen';
 import PrepScreen        from './src/screens/PrepScreen';
 import RevealScreen      from './src/screens/RevealScreen';
-import BlackScreen       from './src/screens/BlackScreen';
 import ResultScreen      from './src/screens/ResultScreen';
 import SpyfallGameScreen from './src/screens/SpyfallGameScreen';
 import SpyfallGuessScreen from './src/screens/SpyfallGuessScreen';
@@ -19,7 +18,7 @@ import { generateAssignments } from './src/gameLogic';
 import { colors, ThemeProvider, setOnThemeChange } from './src/theme';
 
 // Modules natifs — chargés uniquement sur mobile (pas web)
-let SecureStore, ConsentScreen, StatusBar, Constants;
+let SecureStore, ConsentScreen, StatusBar;
 
 if (!isWeb) {
   try {
@@ -31,12 +30,7 @@ if (!isWeb) {
   try {
     StatusBar = require('expo-status-bar').StatusBar;
   } catch (e) {}
-  try {
-    Constants = require('expo-constants').Constants;
-  } catch (e) {}
 }
-
-const isExpoGo = !isWeb && Constants && Constants.appOwnership === 'expo';
 
 // Vérifier si le module natif AdMob existe AVANT de charger le JS
 const hasAdMobNative = !isWeb && !isExpoGo && !!NativeModules.RNGoogleMobileAdsModule;
@@ -87,6 +81,11 @@ function PrepScreenWrapper({ navigation, route }) {
   const assignments = route.params.assignments
     ?? generateAssignments(numPlayers, _gameMode, _selectedCategory, _customWords, _mimerMode, _numUndercovers, _numMisterWhites, _easyMode, _spyfallUndercover);
 
+  // Sécurité : si SPECIALE sans assez de mots, ne pas continuer
+  if (Array.isArray(assignments) && assignments[0]?.error === 'SPECIALE_NEEDS_MORE_WORDS') {
+    return null;
+  }
+
   return (
     <PrepScreen
       navigation={navigation}
@@ -118,7 +117,10 @@ export default function App() {
   const [adMobLoaded, setAdMobLoaded] = useState(false);
   const [darkTheme, setDarkTheme] = useState(false);
 
-  setOnThemeChange(setDarkTheme);
+  // Register theme change callback in useEffect to avoid side effect during render
+  useEffect(() => {
+    setOnThemeChange(setDarkTheme);
+  }, []);
 
   // Charger le thème depuis SecureStore au démarrage
   useEffect(() => {
@@ -215,7 +217,6 @@ export default function App() {
               <Stack.Screen name="Menu"        component={MenuScreen} options={{ animation: 'fade' }} />
               <Stack.Screen name="Prep"        component={PrepScreenWrapper} options={{ animation: 'slide_from_right' }} />
               <Stack.Screen name="Reveal"      component={RevealScreen} options={{ animation: 'fade_from_bottom' }} />
-              <Stack.Screen name="Black"       component={BlackScreen} options={{ animation: 'fade' }} />
               <Stack.Screen name="Result"      component={ResultScreen} options={{ animation: 'fade_from_bottom' }} />
               <Stack.Screen name="SpyfallGame" component={SpyfallGameScreen} options={{ animation: 'fade_from_bottom' }} />
               <Stack.Screen name="SpyfallGuess" component={SpyfallGuessScreen} options={{ animation: 'slide_from_right' }} />
