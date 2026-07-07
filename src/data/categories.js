@@ -33,7 +33,6 @@ export const CATEGORY_EMOJIS = {
   SPORT: '🏅',
   SPECIALE: '⭐',
   MIMER: '🎭',
-  AGE_OF_EMPIRE_4: '🏰',
 };
 
 export const CATEGORY_NAMES = {
@@ -56,7 +55,6 @@ export const CATEGORY_NAMES = {
     SPORT: 'SPORT',
     SPECIALE: 'SPÉCIALE',
     MIMER: 'MIMER',
-    AGE_OF_EMPIRE_4: 'AGE OF EMPIRE 4',
   },
   en: {
     FOOTBALL: 'FOOTBALL',
@@ -77,6 +75,5 @@ export const CATEGORY_NAMES = {
     SPORT: 'SPORT',
     SPECIALE: 'SPECIAL',
     MIMER: 'MIMER',
-    AGE_OF_EMPIRE_4: 'AGE OF EMPIRE 4',
   },
 };

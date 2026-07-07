@@ -533,8 +533,7 @@ export default function MenuScreen({ navigation }) {
     if (cat === 'MIMER') return false;
     if (cat === 'SPECIALE') return false;
     if ((cat === 'OBJECTS' || cat === 'OBJETS') && !objectsUnlocked) return false;
-    if (gameMode !== 3 && (cat === 'TRAVAIL' || cat === 'JOBS' || cat === 'SPORT')) return false;
-    if (gameMode !== 3 && (cat === 'LIEUX' || cat === 'LOCATIONS')) return false;
+    if (gameMode !== 3 && (cat === 'TRAVAIL' || cat === 'JOBS')) return false;
     return true;
   }), [currentCategories, gameMode, objectsUnlocked]);
 
@@ -952,6 +951,7 @@ export default function MenuScreen({ navigation }) {
                     onPress={() => {
                       playClick();
                       setMimerMode(false);
+                      setSelectedCategories(null);
                       if (numUndercovers === 0) setNumUndercovers(1);
                       setGameMode((numUndercovers === 0 ? 1 : numUndercovers) > 0 && numMisterWhites > 0 ? 2 : numMisterWhites > 0 ? 1 : 0);
                     }}
