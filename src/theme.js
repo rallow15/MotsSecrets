@@ -120,6 +120,11 @@ export const screenThemes = {
     // Variantes alpha pour les cartes de mode (bordure/texte inactif vs actif)
     modeActiveBorder: 'rgba(155,48,255,0.4)',
     modeActiveText: 'rgba(180,77,255,0.7)',
+    // Drawing mode
+    drawCanvasBg: '#0f0f0f',
+    drawCanvasBorder: 'rgba(155,48,255,0.3)',
+    drawToolbarBg: 'rgba(15,10,46,0.9)',
+    drawColorActive: '#e8ff47',
   },
   light: {
     bg: '#E5DFC8',
@@ -181,5 +186,10 @@ export const screenThemes = {
     // Variantes alpha pour les cartes de mode (bordure/texte inactif vs actif)
     modeActiveBorder: 'rgba(0,0,0,0.2)',
     modeActiveText: 'rgba(0,0,0,0.5)',
+    // Drawing mode
+    drawCanvasBg: '#F5F5DC',
+    drawCanvasBorder: 'rgba(0,0,0,0.15)',
+    drawToolbarBg: 'rgba(245,245,220,0.95)',
+    drawColorActive: '#1a1a1a',
   },
 };

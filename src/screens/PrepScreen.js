@@ -65,6 +65,8 @@ export default function PrepScreen({ navigation, route }) {
       selectedCategories: route.params.selectedCategories,
       wordVisible: true,
       darkTheme,
+      drawingMode: route.params.drawingMode ?? false,
+      drawRounds: route.params.drawRounds ?? 3,
     });
   };
 

@@ -70,6 +70,8 @@ export default function MenuScreen({ navigation }) {
   const [showGameSetup, setShowGameSetup] = useState(false);
   const [gameMode, setGameMode] = useState(0); // 0=Normal, 1=MW, 2=MW+Intrus, 3=Spyfall
   const [mimerMode, setMimerMode] = useState(false);
+  const [drawingMode, setDrawingMode] = useState(false);
+  const [drawRounds, setDrawRounds] = useState(3);
   // Toggles pour Intrus et Mister White (mode Normal)
   const [numUndercovers, setNumUndercovers] = useState(1);
   const [numMisterWhites, setNumMisterWhites] = useState(0);
@@ -304,6 +306,8 @@ export default function MenuScreen({ navigation }) {
       setNumSpies(1);
       setEasyMode(false);
       setSpyfallUndercover(false);
+      setDrawingMode(false);
+      setDrawRounds(3);
       setSelectedCategories(null);
 
       // Redémarrer l'animation pulse
@@ -474,6 +478,8 @@ export default function MenuScreen({ navigation }) {
         numMisterWhites,
         easyMode,
         darkTheme,
+        drawingMode,
+        drawRounds,
       });
     });
   };
@@ -1073,6 +1079,38 @@ export default function MenuScreen({ navigation }) {
                     >
                       <Text style={[styles.toggleBtnText, { color: easyMode ? '#fff' : theme.text }]}>{easyMode ? 'ON' : 'OFF'}</Text>
                     </TouchableOpacity>
+                  </View>
+                )}
+
+                {!mimerMode && gameMode !== 3 && (
+                  <View style={[styles.easyModeRow, { backgroundColor: theme.counterBg, borderColor: theme.counterBorder }]}>
+                    <View style={styles.easyModeInfo}>
+                      <Text style={[styles.easyModeLabel, { color: theme.text }]}>{t('menuDrawingMode')}</Text>
+                      <Text style={[styles.easyModeDesc, { color: theme.textMuted }]}>{t('menuDrawingModeDesc')}</Text>
+                    </View>
+                    <TouchableOpacity
+                      style={[styles.toggleBtn, drawingMode && styles.toggleBtnActive, { backgroundColor: drawingMode ? theme.neon : theme.counterBtnBg, borderColor: drawingMode ? theme.neon : theme.counterBtnBorder }]}
+                      onPress={() => { playClick(); setDrawingMode(!drawingMode); }}
+                    >
+                      <Text style={[styles.toggleBtnText, { color: drawingMode ? '#fff' : theme.text }]}>{drawingMode ? 'ON' : 'OFF'}</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {!mimerMode && gameMode !== 3 && drawingMode && (
+                  <View style={[styles.easyModeRow, { backgroundColor: theme.counterBg, borderColor: theme.counterBorder }]}>
+                    <View style={styles.easyModeInfo}>
+                      <Text style={[styles.easyModeLabel, { color: theme.text }]}>{t('menuDrawRounds')}</Text>
+                    </View>
+                    <View style={styles.roleCounterControls}>
+                      <TouchableOpacity style={[styles.roleCounterBtn, { backgroundColor: theme.counterBtnBg, borderColor: theme.counterBtnBorder }]} onPress={() => { playClick(); setDrawRounds(v => Math.max(1, v - 1)); }}>
+                        <Text style={[styles.roleCounterBtnText, { color: theme.text }]}>-</Text>
+                      </TouchableOpacity>
+                      <Text style={[styles.roleCounterVal, { color: theme.neon }]}>{drawRounds}</Text>
+                      <TouchableOpacity style={[styles.roleCounterBtn, drawRounds >= 5 && styles.roleCounterBtnDisabled, { backgroundColor: theme.counterBtnBg, borderColor: theme.counterBtnBorder }]} onPress={() => { playClick(); if (drawRounds < 5) setDrawRounds(v => v + 1); }} disabled={drawRounds >= 5}>
+                        <Text style={[styles.roleCounterBtnText, { color: theme.text }]}>+</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 )}
 

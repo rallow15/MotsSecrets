@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import 'react-native-gesture-handler';
 import { View, Text, ActivityIndicator, StyleSheet, Platform, NativeModules } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -14,6 +15,7 @@ import ResultScreen      from './src/screens/ResultScreen';
 import SpyfallGameScreen from './src/screens/SpyfallGameScreen';
 import SpyfallGuessScreen from './src/screens/SpyfallGuessScreen';
 import SpyfallVoteScreen from './src/screens/SpyfallVoteScreen';
+import DrawScreen        from './src/screens/DrawScreen';
 import { generateAssignments } from './src/gameLogic';
 import { colors, ThemeProvider, setOnThemeChange } from './src/theme';
 
@@ -55,7 +57,7 @@ function loadAdMob() {
 }
 
 function PrepScreenWrapper({ navigation, route }) {
-  const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, selectedCategories, customWords, mimerMode, numUndercovers, numMisterWhites, easyMode, spyfallUndercover, darkTheme } = route.params;
+  const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, selectedCategories, customWords, mimerMode, numUndercovers, numMisterWhites, easyMode, spyfallUndercover, darkTheme, drawingMode, drawRounds } = route.params;
 
   const _gameMode      = gameMode      ?? 0;
   const _currentPlayer = currentPlayer ?? 0;
@@ -69,6 +71,8 @@ function PrepScreenWrapper({ navigation, route }) {
   const _easyMode = easyMode ?? false;
   const _spyfallUndercover = spyfallUndercover ?? false;
   const _darkTheme = darkTheme ?? false;
+  const _drawingMode = drawingMode ?? false;
+  const _drawRounds = drawRounds ?? 3;
 
   // Si multi-sélection de catégories, toujours tirer au sort une nouvelle catégorie
   let _selectedCategory;
@@ -97,6 +101,8 @@ function PrepScreenWrapper({ navigation, route }) {
           customWords: _customWords, mimerMode: _mimerMode,
           numUndercovers: _numUndercovers, numMisterWhites: _numMisterWhites,
           easyMode: _easyMode, spyfallUndercover: _spyfallUndercover, darkTheme: _darkTheme,
+          drawingMode: _drawingMode,
+          drawRounds: _drawRounds,
           assignments, currentPlayer: _currentPlayer, takenNumbers: _takenNumbers,
           playerNumbers: _playerNumbers, playerNames: _playerNames,
         },
@@ -221,6 +227,7 @@ export default function App() {
               <Stack.Screen name="SpyfallGame" component={SpyfallGameScreen} options={{ animation: 'fade_from_bottom' }} />
               <Stack.Screen name="SpyfallGuess" component={SpyfallGuessScreen} options={{ animation: 'slide_from_right' }} />
               <Stack.Screen name="SpyfallVote" component={SpyfallVoteScreen} options={{ animation: 'slide_from_right' }} />
+              <Stack.Screen name="Draw" component={DrawScreen} options={{ animation: 'fade_from_bottom' }} />
             </Stack.Navigator>
           </NavigationContainer>
         </ThemeProvider>

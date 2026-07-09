@@ -19,7 +19,8 @@ export default function ResultScreen({ navigation, route }) {
   // Joueur aléatoire qui commence
   const [starterIdx] = useState(() => Math.floor(Math.random() * numPlayers));
   const [revealed,   setRevealed]  = useState({});
-  const [showRecap,  setShowRecap] = useState(isSpyfall && !spyfallOutcome);
+  const drawingMode = route.params.drawingMode ?? false;
+  const [showRecap,  setShowRecap] = useState((isSpyfall && !spyfallOutcome) || drawingMode);
 
   const scaleAnim   = useRef(new Animated.Value(0.2)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -41,7 +42,7 @@ export default function ResultScreen({ navigation, route }) {
 
   const handleNewGame = () => navigation.navigate('Menu');
 
-  // REJOUER : noms conservés, catégorie conservée, nouveaux assignments générés par PrepScreenWrapper
+  // REJOUER : noms conservés, catégorie conservée, mode dessin conservé
   const handleReplay = () =>
     navigation.navigate('Prep', {
       numPlayers,
@@ -55,6 +56,8 @@ export default function ResultScreen({ navigation, route }) {
       numUndercovers: route.params.numUndercovers ?? 1,
       numMisterWhites: route.params.numMisterWhites ?? 0,
       easyMode: route.params.easyMode ?? false,
+      drawingMode: route.params.drawingMode ?? false, // ← mode dessin conservé
+      drawRounds: route.params.drawRounds ?? 3,
       currentPlayer: 0,
       takenNumbers:  [],
       playerNumbers: new Array(numPlayers).fill(null),

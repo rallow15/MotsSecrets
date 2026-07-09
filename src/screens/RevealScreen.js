@@ -90,6 +90,8 @@ export default function RevealScreen({ navigation, route }) {
       customWords: route.params.customWords || [],
       spyfallUndercover,
       selectedCategories: route.params.selectedCategories,
+      drawingMode: route.params.drawingMode ?? false,
+      drawRounds: route.params.drawRounds ?? 3,
     };
 
     if (next >= numPlayers) {
@@ -99,6 +101,17 @@ export default function RevealScreen({ navigation, route }) {
           numPlayers, assignments, playerNames,
           selectedCategory: route.params.selectedCategory,
           ...nextParams,
+        });
+      } else if (route.params.drawingMode) {
+        // Mode Dessin : vers l'écran Draw
+        navigation.navigate('Draw', {
+          numPlayers, assignments, playerNumbers, playerNames,
+          selectedCategory: route.params.selectedCategory,
+          currentDrawPlayer: 0,
+          currentDrawRound: 1,
+          allStrokes: [],
+          ...nextParams,
+          drawingMode: true,
         });
       } else {
         navigation.navigate('Result', {
@@ -119,6 +132,7 @@ export default function RevealScreen({ navigation, route }) {
         mimerMode: route.params.mimerMode,
         gameMode,
         ...nextParams,
+        drawingMode: route.params.drawingMode ?? false,
       });
     }
   };
