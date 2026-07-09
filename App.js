@@ -1,9 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, Platform, NativeModules } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, Platform, NativeModules, ScrollView } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useFonts } from 'expo-font';
 import { isWeb, isExpoGo } from './src/utils/platform';
+
+// ErrorBoundary pour attraper les erreurs JS au démarrage (écran noir iOS)
+class ErrorBoundary extends React.Component {
+  state = { hasError: false, error: null };
+  static getDerivedStateFromError(error) { return { hasError: true, error }; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={{ flex: 1, backgroundColor: '#0a0a0a', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <Text style={{ color: '#ff4444', fontSize: 18, fontFamily: 'BebasNeue', letterSpacing: 2 }}>ERREUR</Text>
+          <ScrollView style={{ maxHeight: 300, marginTop: 10 }}>
+            <Text style={{ color: '#ccc', fontSize: 11, fontFamily: 'SpaceMono' }}>
+              {this.state.error?.message || 'Unknown error'}{'\n'}{'\n'}
+              {this.state.error?.stack || ''}
+            </Text>
+          </ScrollView>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const Stack = createNativeStackNavigator();
 
@@ -110,7 +132,15 @@ function PrepScreenWrapper({ navigation, route }) {
   );
 }
 
-export default function App() {
+export default function AppWithBoundary() {
+  return (
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  );
+}
+
+function App() {
   const [fontsLoaded] = useFonts({
     BebasNeue: require('./assets/fonts/BebasNeue-Regular.ttf'),
     SpaceMono: require('./assets/fonts/SpaceMono-Regular.ttf'),
