@@ -256,7 +256,7 @@ function App() {
               <Stack.Screen name="SpyfallGame" component={SpyfallGameScreen} options={{ animation: 'fade_from_bottom' }} />
               <Stack.Screen name="SpyfallGuess" component={SpyfallGuessScreen} options={{ animation: 'slide_from_right' }} />
               <Stack.Screen name="SpyfallVote" component={SpyfallVoteScreen} options={{ animation: 'slide_from_right' }} />
-              <Stack.Screen name="Draw" component={DrawScreen} options={{ animation: 'fade_from_bottom' }} />
+              <Stack.Screen name="Draw" component={DrawScreen} options={{ animation: 'fade_from_bottom', gestureEnabled: false }} />
             </Stack.Navigator>
           </NavigationContainer>
         </ThemeProvider>
