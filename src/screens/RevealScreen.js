@@ -108,8 +108,8 @@ export default function RevealScreen({ navigation, route }) {
           numPlayers, assignments, playerNumbers, playerNames,
           selectedCategory: route.params.selectedCategory,
           // Joueur qui commence au dessin : aléatoire
-          currentDrawPlayer: Math.floor(Math.random() * numPlayers),
-          currentDrawRound: 1,
+          drawStartPlayer: Math.floor(Math.random() * numPlayers),
+          currentDrawTurn: 0,
           allStrokes: [],
           ...nextParams,
           drawingMode: true,

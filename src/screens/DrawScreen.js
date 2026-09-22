@@ -27,8 +27,8 @@ export default function DrawScreen({ navigation, route }) {
     easyMode,
     spyfallUndercover,
     drawingMode,
-    currentDrawPlayer = 0,
-    currentDrawRound = 1,
+    drawStartPlayer = 0,
+    currentDrawTurn = 0,
     drawRounds = 3,
     allStrokes = [],
   } = route.params;
@@ -36,13 +36,18 @@ export default function DrawScreen({ navigation, route }) {
   const [phase, setPhase] = useState('pass');
   const [strokes, setStrokes] = useState(allStrokes);
 
+  // Logique par tour absolu : chaque joueur dessine exactement une fois par manche,
+  // quel que soit le joueur de départ (aléatoire).
+  const currentDrawPlayer = (drawStartPlayer + currentDrawTurn) % numPlayers;
+  const currentDrawRound = Math.floor(currentDrawTurn / numPlayers) + 1;
+  const totalTurns = numPlayers * drawRounds;
+
   const playerName = playerNames?.[currentDrawPlayer] || '';
   const playerNum = (playerNumbers?.[currentDrawPlayer] ?? currentDrawPlayer) + 1;
   const playerColor = PLAYER_COLORS[currentDrawPlayer % PLAYER_COLORS.length];
 
-  // Calculer le prochain joueur/tour
-  const isLastPlayer = currentDrawPlayer + 1 >= numPlayers;
-  const isLastRound = currentDrawRound >= drawRounds;
+  // Dernier tour de la partie ?
+  const isLastTurn = currentDrawTurn + 1 >= totalTurns;
 
   const handleDone = () => {
     playClick();
@@ -67,19 +72,16 @@ export default function DrawScreen({ navigation, route }) {
       drawRounds,
     };
 
-    if (isLastPlayer && isLastRound) {
-      // Dernier joueur, dernier tour → revue
+    if (isLastTurn) {
+      // Dernier tour → revue
       playReveal();
       setPhase('review');
     } else {
-      // Prochain joueur ou prochain tour
-      const nextPlayer = isLastPlayer ? 0 : currentDrawPlayer + 1;
-      const nextRound = isLastPlayer ? currentDrawRound + 1 : currentDrawRound;
-
-      navigation.navigate('Draw', {
+      // Tour suivant (replace force le remontage → phase "Passez le téléphone")
+      navigation.replace('Draw', {
         ...commonParams,
-        currentDrawPlayer: nextPlayer,
-        currentDrawRound: nextRound,
+        drawStartPlayer,
+        currentDrawTurn: currentDrawTurn + 1,
         drawRounds,
         allStrokes: strokes,
       });
