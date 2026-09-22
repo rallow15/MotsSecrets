@@ -251,7 +251,7 @@ function App() {
             <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
               <Stack.Screen name="Menu"        component={MenuScreen} options={{ animation: 'fade' }} />
               <Stack.Screen name="Prep"        component={PrepScreenWrapper} options={{ animation: 'slide_from_right' }} />
-              <Stack.Screen name="Reveal"      component={RevealScreen} options={{ animation: 'fade_from_bottom' }} />
+              <Stack.Screen name="Reveal"      component={RevealScreen} options={{ animation: 'fade_from_bottom', gestureEnabled: false }} />
               <Stack.Screen name="Result"      component={ResultScreen} options={{ animation: 'fade_from_bottom' }} />
               <Stack.Screen name="SpyfallGame" component={SpyfallGameScreen} options={{ animation: 'fade_from_bottom' }} />
               <Stack.Screen name="SpyfallGuess" component={SpyfallGuessScreen} options={{ animation: 'slide_from_right' }} />
