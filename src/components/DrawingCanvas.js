@@ -5,8 +5,11 @@ import { screenThemes } from '../theme';
 import { t } from '../i18n';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const CANVAS_WIDTH = SCREEN_WIDTH - 8;
-const CANVAS_HEIGHT = Math.floor(Math.min(SCREEN_HEIGHT * 0.65, SCREEN_WIDTH));
+const CANVAS_WIDTH = SCREEN_WIDTH - 12;
+// Espace vertical réservé autour du canvas : marges de navigation (App.js ~50+50),
+// en-tête du tour, barre d'outils et bouton "Terminé"
+const CANVAS_RESERVED = 300;
+const CANVAS_HEIGHT = Math.max(280, Math.floor(SCREEN_HEIGHT - CANVAS_RESERVED));
 
 // Tailles de pinceau
 const BRUSH_SIZES = [

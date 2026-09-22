@@ -114,6 +114,7 @@ export default function DrawScreen({ navigation, route }) {
     spyfallUndercover,
     selectedCategories,
     drawingMode: true,
+    drawRounds, // ← conservé pour le Rejouer
   };
 
   // Phase "Passez le téléphone"
@@ -300,7 +301,7 @@ const styles = StyleSheet.create({
   },
   // Drawing phase
   drawHeader: {
-    paddingTop: 36,
+    paddingTop: 14,
     paddingBottom: 2,
     paddingHorizontal: 16,
     alignItems: 'center',
@@ -319,7 +320,7 @@ const styles = StyleSheet.create({
   },
   drawTitle: {
     fontFamily: 'BebasNeue',
-    fontSize: 28,
+    fontSize: 22,
     letterSpacing: 2,
   },
   drawInstruction: {
@@ -331,19 +332,19 @@ const styles = StyleSheet.create({
   },
   doneBtnContainer: {
     paddingHorizontal: 16,
-    paddingTop: 4,
-    paddingBottom: 16,
+    paddingTop: 2,
+    paddingBottom: 10,
     alignItems: 'center',
   },
   doneBtn: {
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 44,
     borderRadius: 12,
     borderWidth: 2,
   },
   doneBtnText: {
     fontFamily: 'BebasNeue',
-    fontSize: 22,
+    fontSize: 20,
     letterSpacing: 3,
   },
   // Review phase

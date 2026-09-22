@@ -107,7 +107,8 @@ export default function RevealScreen({ navigation, route }) {
         navigation.navigate('Draw', {
           numPlayers, assignments, playerNumbers, playerNames,
           selectedCategory: route.params.selectedCategory,
-          currentDrawPlayer: 0,
+          // Joueur qui commence au dessin : aléatoire
+          currentDrawPlayer: Math.floor(Math.random() * numPlayers),
           currentDrawRound: 1,
           allStrokes: [],
           ...nextParams,
