@@ -11,7 +11,8 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.tonnom.motssecrets"
+      "bundleIdentifier": "com.tonnom.motssecrets",
+      "deploymentTarget": "16.4"
     },
     "android": {
       "package": "com.tonnom.motssecrets",

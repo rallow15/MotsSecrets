@@ -65,6 +65,7 @@ workflows:
       - name: Build IPA (unsigned with frameworks)
         script: |
           # Build archive
+          # SDK 57 requiert iOS 16.4 minimum — ne PAS forcer IPHONEOS_DEPLOYMENT_TARGET
           xcodebuild -workspace ios/MotsSecrets.xcworkspace \
             -scheme MotsSecrets \
             -configuration Release \
@@ -74,7 +75,6 @@ workflows:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            IPHONEOS_DEPLOYMENT_TARGET=15.1 \
             ENABLE_BITCODE=NO
 
           # Verify the .app exists in the archive
