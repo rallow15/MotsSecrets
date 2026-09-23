@@ -40,7 +40,8 @@ export default function ResultScreen({ navigation, route }) {
     ]).start();
   }, []);
 
-  const handleNewGame = () => navigation.navigate('Menu');
+  // NOUVELLE PARTIE : revenir au Menu d'origine (déjà monté) — éviter de repasser par le chargement
+  const handleNewGame = () => navigation.popToTop();
 
   // REJOUER : noms conservés, catégorie conservée, mode dessin conservé
   const handleReplay = () =>
