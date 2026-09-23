@@ -56,7 +56,7 @@ export default function SpyfallGuessScreen({ navigation, route }) {
   };
 
   return (
-    <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }}>
+    <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
       {!showInput ? (
         // Écran "Passez le téléphone à l'espion/intrus"
         <>

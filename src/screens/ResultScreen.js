@@ -214,7 +214,7 @@ export default function ResultScreen({ navigation, route }) {
   if (isSpyfall && spyfallOutcome) {
     const spyWins = spyfallOutcome === 'spyWinsTie' || spyfallOutcome === 'spyWinsWrongAccusation' || spyfallOutcome === 'spyGuessRight';
     return (
-      <ScreenBackground darkTheme={darkTheme} style={[styles.container, { backgroundColor: theme.bg }]}>
+      <ScreenBackground darkTheme={darkTheme} style={[styles.container, { backgroundColor: theme.bg }]} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
         <Text style={[styles.commenceLabel, { color: spyWins ? theme.danger : theme.text }]}>
           {spyWins ? (spyfallUndercover ? '🥸' : '🕵️') : '🎉'}
         </Text>
@@ -229,7 +229,7 @@ export default function ResultScreen({ navigation, route }) {
   }
 
   return (
-    <ScreenBackground darkTheme={darkTheme} style={[styles.container, { backgroundColor: theme.bg }]}>
+    <ScreenBackground darkTheme={darkTheme} style={[styles.container, { backgroundColor: theme.bg }]} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
       <Text style={[styles.commenceLabel, { color: theme.textMuted }]}>{t('startsFirst')}</Text>
       <Animated.Text style={[styles.winnerName, { transform: [{ scale: scaleAnim }], opacity: opacityAnim, color: theme.text }]}>
         {starterName}

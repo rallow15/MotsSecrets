@@ -102,7 +102,7 @@ export default function SpyfallVoteScreen({ navigation, route }) {
   };
 
   return (
-    <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }}>
+    <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
       <Text style={[styles.title, { color: theme.text }]}>{spyfallUndercover ? t('voteTitleUndercover') : t('voteTitle')}</Text>
       <Text style={[styles.voterLabel, { color: theme.text }]}>{t('playerLabel', currentVoter + 1)}: {voterName}</Text>
       <Text style={[styles.instruction, { color: theme.textMuted }]}>{t('voteInstruction')}</Text>

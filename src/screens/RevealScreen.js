@@ -184,6 +184,7 @@ export default function RevealScreen({ navigation, route }) {
               resizeMode="cover"
             />
             <View style={darkTheme ? styles.bgGradientDark : styles.bgGradientLight} />
+            <View style={[styles.bgScrim, { backgroundColor: darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)' }]} />
           </>
         )}
         <View style={styles.passContainer}>
@@ -208,6 +209,7 @@ export default function RevealScreen({ navigation, route }) {
             resizeMode="cover"
           />
           <View style={darkTheme ? styles.bgGradientDark : styles.bgGradientLight} />
+          <View style={[styles.bgScrim, { backgroundColor: darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)' }]} />
         </>
       )}
       <Animated.View style={[isSpyfallInnocent ? styles.containerSpyfall : styles.container, revealStyle]}>
@@ -310,6 +312,7 @@ const styles = StyleSheet.create({
   bgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   bgGradientDark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.15)' },
   bgGradientLight: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(180,150,80,0.10)' },
+  bgScrim: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   passContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingTop: 16 },
   passPrompt: { fontFamily: 'BebasNeue', fontSize: 64, textAlign: 'center', lineHeight: 60 },
   tapIcon: { fontSize: 52 },

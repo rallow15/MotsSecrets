@@ -93,7 +93,7 @@ export default function PrepScreen({ navigation, route }) {
   };
 
   return (
-    <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }}>
+    <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
       <TouchableOpacity accessibilityLabel={t('touchScreen')} style={[styles.container, fadeInStyle]} activeOpacity={1} onPress={handleTap}>
         <TouchableOpacity accessibilityRole="button" accessibilityLabel="Back" style={[styles.backBtn, { top: insets.top + 55, backgroundColor: theme.backBtnBg, borderColor: theme.backBtnBorder }]} onPress={(e) => { e.stopPropagation(); triggerHaptic('light'); navigation.goBack(); }} activeOpacity={0.7}>
           <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={darkTheme ? '#e8d5ff' : '#1a1a1a'} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">

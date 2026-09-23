@@ -47,7 +47,7 @@ export default function SpyfallGameScreen({ navigation, route }) {
   };
 
   return (
-    <ScreenBackground darkTheme={darkTheme} style={[styles.container, { backgroundColor: theme.bg }]}>
+    <ScreenBackground darkTheme={darkTheme} style={[styles.container, { backgroundColor: theme.bg }]} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
       <Animated.View style={[styles.starterRow, scaleStyle]}>
         <Text style={[styles.starterLabel, { color: theme.textMuted }]}>{t('startsFirst')}</Text>
         <Text style={[styles.starterName, { color: theme.text }]}>{starterName}</Text>
