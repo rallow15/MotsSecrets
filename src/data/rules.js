@@ -66,6 +66,17 @@ export const RULES = {
         "Si le temps est écoulé, l'espion/l'intrus gagne !",
       ],
     },
+    {
+      mode: 'ENCHÈRES',
+      desc: 'Duel à 2 joueurs : 500 millions chacun, enchérissez sur les cartes.',
+      steps: [
+        "Le piocheur tire une carte dans la catégorie choisie (football, mangas, super-héros...).",
+        "On enchérit à voix haute par paliers de 10 millions : l'application suit l'enchère et les budgets.",
+        "Le dernier enchérisseur achète la carte à son prix. Celui qui passe est sorti de l'enchère.",
+        "Personne n'enchérit ? Le piocheur garde la carte gratuitement !",
+        "Après 10 cartes (5 par joueur), votez à voix haute pour la meilleure équipe !",
+      ],
+    },
   ],
   en: [
     {
@@ -128,6 +139,17 @@ export const RULES = {
         'At any time, players can vote to accuse someone. The spy can also guess the word.',
         'If the spy/undercover is caught in a vote, they can try to guess the word to still win.',
         'If time runs out, the spy/undercover wins!',
+      ],
+    },
+    {
+      mode: 'AUCTIONS',
+      desc: '2-player duel: 500 million each, bid on the cards.',
+      steps: [
+        'The drawer draws a card from the chosen category (football, manga, superheroes...).',
+        'Bid out loud in 10 million steps: the app tracks the bid and the budgets.',
+        'The last bidder buys the card at that price. Pass and you are out of the auction.',
+        'Nobody bids? The drawer keeps the card for free!',
+        'After 10 cards (5 each), vote out loud for the best team!',
       ],
     },
   ],

@@ -37,6 +37,8 @@ import SpyfallGameScreen from './src/screens/SpyfallGameScreen';
 import SpyfallGuessScreen from './src/screens/SpyfallGuessScreen';
 import SpyfallVoteScreen from './src/screens/SpyfallVoteScreen';
 import DrawScreen        from './src/screens/DrawScreen';
+import AuctionScreen     from './src/screens/AuctionScreen';
+import AuctionResultScreen from './src/screens/AuctionResultScreen';
 import { generateAssignments } from './src/gameLogic';
 import { colors, ThemeProvider, setOnThemeChange } from './src/theme';
 
@@ -103,8 +105,11 @@ function PrepScreenWrapper({ navigation, route }) {
     _selectedCategory = selectedCategory ?? null;
   }
 
+  // Mode Enchères : pas de rôles ni de mots secrets — pas de generateAssignments
   const assignments = route.params.assignments
-    ?? generateAssignments(numPlayers, _gameMode, _selectedCategory, _customWords, _mimerMode, _numUndercovers, _numMisterWhites, _easyMode, _spyfallUndercover);
+    ?? (_gameMode === 4
+      ? []
+      : generateAssignments(numPlayers, _gameMode, _selectedCategory, _customWords, _mimerMode, _numUndercovers, _numMisterWhites, _easyMode, _spyfallUndercover));
 
   // Sécurité : si SPECIALE sans assez de mots, ne pas continuer
   if (Array.isArray(assignments) && assignments[0]?.error === 'SPECIALE_NEEDS_MORE_WORDS') {
@@ -257,6 +262,8 @@ function App() {
               <Stack.Screen name="SpyfallGuess" component={SpyfallGuessScreen} options={{ animation: 'slide_from_right' }} />
               <Stack.Screen name="SpyfallVote" component={SpyfallVoteScreen} options={{ animation: 'slide_from_right' }} />
               <Stack.Screen name="Draw" component={DrawScreen} options={{ animation: 'fade_from_bottom', gestureEnabled: false }} />
+              <Stack.Screen name="Auction" component={AuctionScreen} options={{ animation: 'fade_from_bottom', gestureEnabled: false }} />
+              <Stack.Screen name="AuctionResult" component={AuctionResultScreen} options={{ animation: 'fade_from_bottom', gestureEnabled: false }} />
             </Stack.Navigator>
           </NavigationContainer>
         </ThemeProvider>

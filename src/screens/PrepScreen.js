@@ -50,6 +50,28 @@ export default function PrepScreen({ navigation, route }) {
       : new Array(numPlayers).fill('');
     newNames[currentPlayer] = name.trim().toUpperCase() || existingName;
 
+    // Mode ENCHÈRES : pas de mot secret ni de Reveal.
+    // Joueur suivant ? On reste sur Prep. Dernier joueur ? On lance l'enchère.
+    if (gameMode === 4) {
+      if (currentPlayer + 1 < numPlayers) {
+        navigation.replace('Prep', {
+          ...route.params,
+          assignments: null,
+          currentPlayer: currentPlayer + 1,
+          playerNames: newNames,
+        });
+      } else {
+        navigation.navigate('Auction', {
+          numPlayers,
+          playerNames: newNames,
+          auctionCategory: selectedCategory,
+          gameMode,
+          darkTheme,
+        });
+      }
+      return;
+    }
+
     navigation.navigate('Reveal', {
       numPlayers, assignments, currentPlayer,
       takenNumbers, playerNumbers,

@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t, getLang, setLang } from '../i18n';
 import { CATEGORIES_FR, CATEGORIES_EN } from '../data/words';
 import { CATEGORY_EMOJIS, CATEGORY_NAMES } from '../data/categories';
+import { AUCTION_CATEGORIES, AUCTION_CATEGORY_KEYS } from '../data/auctionCards';
 import { RULES } from '../data/rules';
 import { MODE_IMAGES, ROLE_UNDERCOVER, ROLE_MISTERWHITE } from '../data/modeAssets';
 import { generateAssignments } from '../gameLogic';
@@ -90,7 +91,7 @@ export default function MenuScreen({ navigation }) {
 
   // Synchroniser gameMode avec les compteurs
   useEffect(() => {
-    if (gameMode !== 3 && !mimerMode) {
+    if (gameMode !== 3 && gameMode !== 4 && !mimerMode) {
       if (numUndercovers > 0 && numMisterWhites > 0) setGameMode(2);
       else if (numMisterWhites > 0) setGameMode(1);
       else setGameMode(0);
@@ -429,16 +430,24 @@ export default function MenuScreen({ navigation }) {
 
     if (gameMode === 2 && numPlayers < 4) { return; }
     // Il faut toujours plus de joueurs normaux que de rôles spéciaux
-    if (gameMode !== 3 && !mimerMode && numUndercovers + numMisterWhites >= numPlayers) {
+    if (gameMode !== 3 && gameMode !== 4 && !mimerMode && numUndercovers + numMisterWhites >= numPlayers) {
       alert(t('menuNeedMorePlayers'));
       return;
     }
 
     // En mode MIMER, la catégorie est automatiquement MIMER
     // En mode SPYFALL, la catégorie est LIEUX selon sélection (défaut LIEUX)
+    // En mode ENCHÈRES, la catégorie est une catégorie mercato (défaut FOOT)
     // Multi-catégories : choisir une catégorie au hasard parmi la sélection
     let finalCategory;
-    if (mimerMode) {
+    if (gameMode === 4) {
+      const mercatoCats = Array.isArray(selectedCategories)
+        ? selectedCategories.filter(c => AUCTION_CATEGORY_KEYS.includes(c))
+        : [];
+      finalCategory = mercatoCats.length > 0
+        ? mercatoCats[Math.floor(Math.random() * mercatoCats.length)]
+        : 'MERCATO_FOOT';
+    } else if (mimerMode) {
       finalCategory = 'MIMER';
     } else if (gameMode === 3) {
       // Spyfall : LIEUX ou TRAVAIL selon sélection (défaut LIEUX)
@@ -467,18 +476,18 @@ export default function MenuScreen({ navigation }) {
       setShowGameSetup(false);
 
       navigation.navigate('Prep', {
-        numPlayers,
+        numPlayers: gameMode === 4 ? 2 : numPlayers,
         gameMode,
         selectedCategory: finalCategory,
         selectedCategories,
         customWords,
-        mimerMode,
-        numUndercovers: gameMode === 3 ? (numUndercovers > 0 ? numUndercovers : numSpies) : numUndercovers,
+        mimerMode: gameMode === 4 ? false : mimerMode,
+        numUndercovers: gameMode === 4 ? 0 : (gameMode === 3 ? (numUndercovers > 0 ? numUndercovers : numSpies) : numUndercovers),
         spyfallUndercover: gameMode === 3 ? (numUndercovers > 0) : false,
-        numMisterWhites,
+        numMisterWhites: gameMode === 4 ? 0 : numMisterWhites,
         easyMode,
         darkTheme,
-        drawingMode,
+        drawingMode: gameMode === 4 ? false : drawingMode,
         drawRounds,
       });
     });
@@ -937,13 +946,21 @@ export default function MenuScreen({ navigation }) {
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styles.setupSection}>
                 <Text style={[styles.setupLabel, { color: theme.text }]}>{t('menuNumPlayers')}</Text>
-                <ModeSlider
-                  value={numPlayers}
-                  onValueChange={setNumPlayers}
-                  min={3}
-                  max={20}
-                  themeColors={theme}
-                />
+                {gameMode === 4 ? (
+                  <View style={[styles.roleCounterRow, { backgroundColor: theme.counterBg, borderColor: theme.counterBorder }]}>
+                    <Text style={styles.modeCardEmoji}>💰</Text>
+                    <Text style={[styles.roleCounterLabel, { color: theme.textMuted }]}>{t('modeEncheres')}</Text>
+                    <Text style={[styles.roleCounterVal, { color: theme.neon, minWidth: 40, textAlign: 'right' }]}>2</Text>
+                  </View>
+                ) : (
+                  <ModeSlider
+                    value={numPlayers}
+                    onValueChange={setNumPlayers}
+                    min={3}
+                    max={20}
+                    themeColors={theme}
+                  />
+                )}
               </View>
 
               <View style={styles.setupSection}>
@@ -953,7 +970,7 @@ export default function MenuScreen({ navigation }) {
                   <TouchableOpacity
                     accessibilityRole="button"
                     accessibilityLabel={`UNDERCOVER — ${t('modeMWIntrusCardDesc')}`}
-                    style={[styles.modeCard, { backgroundColor: 'transparent', borderColor: (!mimerMode && gameMode !== 3) ? (theme.neonDark) : (theme.modeActiveBorder) }]}
+                    style={[styles.modeCard, { backgroundColor: 'transparent', borderColor: (!mimerMode && gameMode !== 3 && gameMode !== 4) ? (theme.neonDark) : (theme.modeActiveBorder) }]}
                     onPress={() => {
                       playClick();
                       setMimerMode(false);
@@ -964,8 +981,8 @@ export default function MenuScreen({ navigation }) {
                     activeOpacity={0.7}
                   >
                     <Image source={ROLE_UNDERCOVER} style={styles.modeCardImage} resizeMode="contain" />
-                    <Text style={[styles.modeCardTitle, { color: (!mimerMode && gameMode !== 3) ? (theme.neon) : theme.text }]}>UNDERCOVER</Text>
-                    <Text style={[styles.modeCardDesc, { color: (!mimerMode && gameMode !== 3) ? (theme.modeActiveText) : theme.textMuted }]}>{t('modeMWIntrusCardDesc')}</Text>
+                    <Text style={[styles.modeCardTitle, { color: (!mimerMode && gameMode !== 3 && gameMode !== 4) ? (theme.neon) : theme.text }]}>UNDERCOVER</Text>
+                    <Text style={[styles.modeCardDesc, { color: (!mimerMode && gameMode !== 3 && gameMode !== 4) ? (theme.modeActiveText) : theme.textMuted }]}>{t('modeMWIntrusCardDesc')}</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -1017,9 +1034,32 @@ export default function MenuScreen({ navigation }) {
                       <Text style={[styles.modeCardDesc, { color: mimerMode ? (theme.modeActiveText) : theme.textMuted }]}>{t('modeMimerDesc')}</Text>
                     </TouchableOpacity>
                   </View>
+
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityLabel={`ENCHÈRES — ${t('modeEncheresDesc')}`}
+                    style={[styles.modeCard, { backgroundColor: 'transparent', borderColor: gameMode === 4 ? (theme.neonDark) : (theme.modeActiveBorder) }]}
+                    onPress={() => {
+                      playClick();
+                      setMimerMode(false);
+                      setDrawingMode(false);
+                      setNumPlayers(2);
+                      setSelectedCategories(['MERCATO_FOOT']);
+                      setNumUndercovers(0);
+                      setNumMisterWhites(0);
+                      setGameMode(4);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.modeCardEmoji}>💰</Text>
+                    <Text style={[styles.modeCardTitle, { color: gameMode === 4 ? (theme.neon) : theme.text }]}>{t('modeEncheres')}</Text>
+                    <Text style={[styles.modeCardDesc, { color: gameMode === 4 ? (theme.modeActiveText) : theme.textMuted }]}>
+                      {t('modeEncheresDesc')}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
 
-                {!mimerMode && !(Array.isArray(selectedCategories) && selectedCategories.includes('SPECIALE')) && (
+                {!mimerMode && gameMode !== 4 && !(Array.isArray(selectedCategories) && selectedCategories.includes('SPECIALE')) && (
                   <View style={styles.roleCounters}>
                     {gameMode === 3 ? (
                       <View>
@@ -1082,7 +1122,7 @@ export default function MenuScreen({ navigation }) {
                   </View>
                 )}
 
-                {!mimerMode && gameMode !== 3 && (
+                {!mimerMode && gameMode !== 3 && gameMode !== 4 && (
                   <View style={[styles.easyModeRow, { backgroundColor: theme.counterBg, borderColor: theme.counterBorder }]}>
                     <View style={styles.easyModeInfo}>
                       <Text style={[styles.easyModeLabel, { color: theme.text }]}>{t('menuDrawingMode')}</Text>
@@ -1097,7 +1137,7 @@ export default function MenuScreen({ navigation }) {
                   </View>
                 )}
 
-                {!mimerMode && gameMode !== 3 && drawingMode && (
+                {!mimerMode && gameMode !== 3 && gameMode !== 4 && drawingMode && (
                   <View style={[styles.easyModeRow, { backgroundColor: theme.counterBg, borderColor: theme.counterBorder }]}>
                     <View style={styles.easyModeInfo}>
                       <Text style={[styles.easyModeLabel, { color: theme.text }]}>{t('menuDrawRounds')}</Text>
@@ -1119,7 +1159,7 @@ export default function MenuScreen({ navigation }) {
                 )}
               </View>
 
-              {!mimerMode && gameMode !== 3 && (
+              {!mimerMode && gameMode !== 3 && gameMode !== 4 && (
                 <View style={styles.setupSection}>
                   <Text style={[styles.setupLabel, { color: theme.text }]}>{t('menuCategory')}</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScrollHorizontal}>
@@ -1221,6 +1261,32 @@ export default function MenuScreen({ navigation }) {
                         {t('catSport')}
                       </Text>
                     </TouchableOpacity>
+                  </ScrollView>
+                </View>
+              )}
+
+              {gameMode === 4 && !mimerMode && (
+                <View style={styles.setupSection}>
+                  <Text style={[styles.setupLabel, { color: theme.text }]}>{t('menuCategory')}</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScrollHorizontal}>
+                    {AUCTION_CATEGORY_KEYS.map(catKey => {
+                      const emoji = AUCTION_CATEGORIES[catKey].emoji;
+                      const isActive = Array.isArray(selectedCategories) && selectedCategories.includes(catKey);
+                      return (
+                        <TouchableOpacity
+                          key={catKey}
+                          accessibilityRole="button"
+                          accessibilityLabel={CATEGORY_NAMES[lang][catKey] || catKey}
+                          style={[styles.categoryChip, isActive ? { backgroundColor: theme.chipActiveBg, borderColor: theme.chipActiveBg } : { backgroundColor: theme.chipBg, borderColor: theme.chipBorder }]}
+                          onPress={() => { playClick(); setSelectedCategories([catKey]); }}
+                        >
+                          <Text style={styles.categoryChipEmoji}>{emoji}</Text>
+                          <Text style={[styles.categoryChipText, isActive ? { color: '#fff' } : { color: theme.text }]}>
+                            {CATEGORY_NAMES[lang][catKey] || catKey}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
                   </ScrollView>
                 </View>
               )}
@@ -1342,6 +1408,7 @@ const styles = StyleSheet.create({
   modeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 6 },
   modeCard: { width: '47%', backgroundColor: 'transparent', borderWidth: 2, borderRadius: 12, paddingVertical: 8, paddingHorizontal: 6, alignItems: 'center', gap: 1 },
   modeCardImage: { width: '85%', height: 40, marginBottom: 2 },
+  modeCardEmoji: { fontSize: 34, height: 40, marginBottom: 2, textAlign: 'center', textAlignVertical: 'center' },
   modeCardTitle: { fontFamily: 'BebasNeue', fontSize: 13, color: '#1a1a1a', letterSpacing: 1, textAlign: 'center' },
   modeCardDesc: { fontFamily: 'SpaceMono', fontSize: 7, color: '#666', textAlign: 'center', lineHeight: 10 },
   modeCardOuter: { width: '47%', position: 'relative' },

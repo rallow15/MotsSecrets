@@ -177,6 +177,38 @@ const T = {
     catLieux:     'LIEUX',
     catTravail:   'TRAVAIL',
     catSport:     'SPORT',
+    // Mode ENCHÈRES (Mercato)
+    modeEncheres:        'ENCHÈRES',
+    modeEncheresDesc:    'Duel à 2 : 500M chacun, enchérissez sur les cartes !',
+    enchRulesTitle:      '⚽ MODE ENCHÈRES',
+    enchRulesDesc:       'Duel à 2 joueurs. Chacun part avec 500 millions.',
+    enchRulesSteps: [
+      'Le joueur tire une carte dans la catégorie choisie.',
+      'On enchérit à voix haute par paliers de 10M — l\'app suit l\'enchère et les budgets.',
+      'Le dernier enchérisseur achète la carte à son prix. Celui qui passe est sorti.',
+      'Personne n\'enchérit ? Le piocheur garde la carte gratuitement !',
+      'Après 10 cartes : votez à voix haute la meilleure équipe !',
+    ],
+    enchDrawTurn:   (n) => `AU TOUR DU JOUEUR ${n} DE PIOCHER`,
+    enchTapToDraw:  'TOUCHE L\'ÉCRAN',
+    enchCardValue:  (v) => `VALEUR INDICATIVE : ${v}M`,
+    enchStartAuction: 'LANCER LES ENCHÈRES',
+    enchCurrentBid: 'ENCHÈRE EN COURS',
+    enchNoBid:      'AUCUNE OFFRE',
+    enchBidTurn:    (n) => `À JOUEUR ${n} DE PARLER`,
+    enchRaise:      (v) => `ENCHÉRIR ${v}M`,
+    enchPass:       'PASSER',
+    enchHeldBy:     (n, v) => `OFFRE DE JOUEUR ${n} : ${v}M`,
+    enchBought:     (n, card, v) => `JOUEUR ${n} ACHÈTE\n${card}\nPOUR ${v}M`,
+    enchKept:       (n, card) => `JOUEUR ${n} GARDE\n${card}\nGRATUITEMENT`,
+    enchDiscarded:  (card) => `PERSONNE NE VEUT ${card}\nCARTE DÉFAUSSÉE`,
+    enchNextCard:   (n, total) => `CARTE SUIVANTE (${n}/${total})`,
+    enchFinalTitle: 'MERCATO TERMINÉ !',
+    enchVotePrompt: '🏆 VOTEZ À VOIX HAUTE\nLA MEILLEURE ÉQUIPE !',
+    enchBudget:     (v) => `${v}M`,
+    enchBudgetLeft: (v) => `RESTE ${v}M`,
+    enchCantBidBudget: 'BUDGET INSUFFISANT',
+    enchCantBidCards:  'ÉQUIPE COMPLÈTE (5 CARTES)',
     // Loading
     loading:          'Chargement...',
   },
@@ -353,13 +385,45 @@ const T = {
     catLieux:     'LOCATIONS',
     catTravail:   'JOBS',
     catSport:     'SPORT',
+    // ENCHÈRES mode (Mercato)
+    modeEncheres:        'AUCTIONS',
+    modeEncheresDesc:    '2-player duel: 500M each, bid on the cards!',
+    enchRulesTitle:      '⚽ AUCTIONS MODE',
+    enchRulesDesc:       '2-player duel. Everyone starts with 500 million.',
+    enchRulesSteps: [
+      'The player draws a card from the chosen category.',
+      'Bid out loud in 10M steps — the app tracks bids and budgets.',
+      'The last bidder buys the card at that price. Pass and you are out.',
+      'Nobody bids? The drawer keeps the card for free!',
+      'After 10 cards: vote out loud for the best team!',
+    ],
+    enchDrawTurn:   (n) => `PLAYER ${n}'S TURN TO DRAW`,
+    enchTapToDraw:  'TOUCH THE SCREEN',
+    enchCardValue:  (v) => `INDICATIVE VALUE: ${v}M`,
+    enchStartAuction: 'START THE AUCTION',
+    enchCurrentBid: 'CURRENT BID',
+    enchNoBid:      'NO BID YET',
+    enchBidTurn:    (n) => `PLAYER ${n}'S TURN TO SPEAK`,
+    enchRaise:      (v) => `BID ${v}M`,
+    enchPass:       'PASS',
+    enchHeldBy:     (n, v) => `PLAYER ${n}'S BID: ${v}M`,
+    enchBought:     (n, card, v) => `PLAYER ${n} BUYS\n${card}\nFOR ${v}M`,
+    enchKept:       (n, card) => `PLAYER ${n} KEEPS\n${card}\nFOR FREE`,
+    enchDiscarded:  (card) => `NOBODY WANTS ${card}\nCARD DISCARDED`,
+    enchNextCard:   (n, total) => `NEXT CARD (${n}/${total})`,
+    enchFinalTitle: 'MERCATO DONE!',
+    enchVotePrompt: '🏆 VOTE OUT LOUD\nFOR THE BEST TEAM!',
+    enchBudget:     (v) => `${v}M`,
+    enchBudgetLeft: (v) => `${v}M LEFT`,
+    enchCantBidBudget: 'NOT ENOUGH BUDGET',
+    enchCantBidCards:  'TEAM FULL (5 CARDS)',
     // Loading
     loading:          'Loading...',
   },
 };
 
-export function t(key, arg) {
+export function t(key, ...args) {
   const val = T[currentLang][key];
-  if (typeof val === 'function') return val(arg);
+  if (typeof val === 'function') return val(...args);
   return val ?? key;
 }

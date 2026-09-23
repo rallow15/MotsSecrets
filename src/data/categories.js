@@ -33,6 +33,12 @@ export const CATEGORY_EMOJIS = {
   SPORT: '🏅',
   SPECIALE: '⭐',
   MIMER: '🎭',
+  // Mode Enchères (Mercato)
+  MERCATO_FOOT: '⚽',
+  MERCATO_DBZ: '🐉',
+  MERCATO_SUPERHEROS: '🦸',
+  MERCATO_ONEPIECE: '🏴‍☠️',
+  MERCATO_NARUTO: '🍥',
 };
 
 export const CATEGORY_NAMES = {
@@ -55,6 +61,12 @@ export const CATEGORY_NAMES = {
     SPORT: 'SPORT',
     SPECIALE: 'SPÉCIALE',
     MIMER: 'MIMER',
+    // Mode Enchères (Mercato)
+    MERCATO_FOOT: 'FOOT',
+    MERCATO_DBZ: 'DRAGON BALL',
+    MERCATO_SUPERHEROS: 'SUPER-HÉROS',
+    MERCATO_ONEPIECE: 'ONE PIECE',
+    MERCATO_NARUTO: 'NARUTO',
   },
   en: {
     FOOTBALL: 'FOOTBALL',
@@ -75,5 +87,11 @@ export const CATEGORY_NAMES = {
     SPORT: 'SPORT',
     SPECIALE: 'SPECIAL',
     MIMER: 'MIMER',
+    // Auctions mode (Mercato)
+    MERCATO_FOOT: 'FOOTBALL',
+    MERCATO_DBZ: 'DRAGON BALL',
+    MERCATO_SUPERHEROS: 'SUPERHEROES',
+    MERCATO_ONEPIECE: 'ONE PIECE',
+    MERCATO_NARUTO: 'NARUTO',
   },
 };
