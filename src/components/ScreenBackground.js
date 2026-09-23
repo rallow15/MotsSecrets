@@ -9,9 +9,11 @@ import { View, Image, StyleSheet } from 'react-native';
  * Props :
  * - darkTheme: boolean — thème sombre ou clair
  * - style: style supplémentaire sur le conteneur racine
+ * - scrim: couleur rgba (string) d'un voile supplémentaire au-dessus de l'image,
+ *   pour les écrans où le fond rend le texte peu lisible
  * - children: contenu de l'écran
  */
-export default function ScreenBackground({ darkTheme, style, children }) {
+export default function ScreenBackground({ darkTheme, style, scrim, children }) {
   return (
     <View style={[styles.root, style]}>
       <Image
@@ -20,6 +22,7 @@ export default function ScreenBackground({ darkTheme, style, children }) {
         resizeMode="cover"
       />
       <View style={darkTheme ? styles.bgGradientDark : styles.bgGradientLight} />
+      {scrim ? <View style={[styles.bgScrim, { backgroundColor: scrim }]} /> : null}
       {children}
     </View>
   );
@@ -30,4 +33,5 @@ const styles = StyleSheet.create({
   bgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   bgGradientDark: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.15)' },
   bgGradientLight: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(180,150,80,0.10)' },
+  bgScrim: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
 });

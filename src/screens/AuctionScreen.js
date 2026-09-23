@@ -23,7 +23,7 @@ export default function AuctionScreen({ navigation, route }) {
   const catEmoji = cat.emoji;
 
   const [deck] = useState(() => getAuctionDeck(auctionCategory));
-  // Premier piocheur aléatoire ; ensuite le gagnant de la carte pioche la suivante
+  // Premier piocheur aléatoire ; ensuite tirage alterné, chacun son tour
   const [drawerIdx, setDrawerIdx] = useState(() => Math.floor(Math.random() * 2));
   const [cardIndex, setCardIndex] = useState(0);
   const [phase, setPhase] = useState('draw'); // 'draw' | 'card' | 'auction' | 'sold'
@@ -91,11 +91,10 @@ export default function AuctionScreen({ navigation, route }) {
     setPhase('sold');
   };
 
-  // Carte suivante : c'est le gagnant de la carte qui pioche
-  // (si personne n'a acheté, l'autre joueur prend le relais).
+  // Carte suivante : tirage alterné, chacun son tour
+  // (peu importe qui a acheté ou gardé la carte).
   const handleNextCard = () => {
-    const winner = soldResult?.type === 'bought' ? soldResult.player : null;
-    setDrawerIdx(winner ?? 1 - drawerIdx);
+    setDrawerIdx(1 - drawerIdx);
     setCardIndex(cardIndex + 1);
     setBuyerIdx(null);
     setPrice(AUCTION_MIN_BID);
@@ -144,7 +143,7 @@ export default function AuctionScreen({ navigation, route }) {
   // ─── Phases ───────────────────────────────────────────────
   if (phase === 'draw') {
     return (
-      <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }}>
+      <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
         <TouchableOpacity style={styles.container} activeOpacity={0.8} onPress={handleDraw}>
           <Text style={styles.emoji}>{catEmoji}</Text>
           <Text style={[styles.title, { color: theme.text }]}>{t('enchDrawTurn', drawerIdx + 1)}</Text>
@@ -164,7 +163,7 @@ export default function AuctionScreen({ navigation, route }) {
     const nameLen = card.nom.length;
     const nameFontSize = nameLen > 16 ? 36 : nameLen > 12 ? 44 : 54;
     return (
-      <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }}>
+      <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
         {renderBackBtn()}
         <View style={styles.container}>
           <Text style={styles.emoji}>{catEmoji}</Text>
@@ -188,7 +187,7 @@ export default function AuctionScreen({ navigation, route }) {
     // Enchère à voix haute : on enregistre juste l'issue sur le téléphone.
     if (buyerIdx === null) {
       return (
-        <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }}>
+        <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
           {renderBackBtn()}
           <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
             <Text style={styles.emojiSmall}>{catEmoji}</Text>
@@ -231,7 +230,7 @@ export default function AuctionScreen({ navigation, route }) {
 
     // Prix payé : réglé à voix haute, on l'entre par paliers de 10M.
     return (
-      <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }}>
+      <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
         {renderBackBtn()}
         <View style={styles.container}>
           <Text style={styles.emojiSmall}>{catEmoji}</Text>
@@ -287,7 +286,7 @@ export default function AuctionScreen({ navigation, route }) {
   const isLastCard = cardIndex + 1 >= totalCards;
 
   return (
-    <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }}>
+    <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
       {renderBackBtn()}
       <View style={styles.container}>
         <Text style={styles.emoji}>{soldResult.type === 'bought' ? '🤑' : soldResult.type === 'kept' ? '🎁' : '🗑️'}</Text>
