@@ -31,9 +31,11 @@ export default function DrawScreen({ navigation, route }) {
     currentDrawTurn = 0,
     drawRounds = 3,
     allStrokes = [],
+    skipPass = false,
   } = route.params;
 
-  const [phase, setPhase] = useState('pass');
+  // "Passez le téléphone" seulement au tout début ; entre deux joueurs on enchaîne directement.
+  const [phase, setPhase] = useState(skipPass ? 'drawing' : 'pass');
   const [strokes, setStrokes] = useState(allStrokes);
 
   // Logique par tour absolu : chaque joueur dessine exactement une fois par manche,
@@ -77,13 +79,14 @@ export default function DrawScreen({ navigation, route }) {
       playReveal();
       setPhase('review');
     } else {
-      // Tour suivant (replace force le remontage → phase "Passez le téléphone")
+      // Tour suivant : on saute l'écran "Passez le téléphone"
       navigation.replace('Draw', {
         ...commonParams,
         drawStartPlayer,
         currentDrawTurn: currentDrawTurn + 1,
         drawRounds,
         allStrokes: strokes,
+        skipPass: true,
       });
     }
   };
