@@ -95,14 +95,10 @@ export default function DrawScreen({ navigation, route }) {
     setStrokes((prev) => [...prev, stroke]);
   }, []);
 
-  const handleUndo = useCallback(() => {
-    setStrokes((prev) => {
-      if (prev.length === 0) return prev;
-      const previousPlayerStrokes = allStrokes.length;
-      if (prev.length <= previousPlayerStrokes) return prev;
-      return prev.slice(0, -1);
-    });
-  }, [allStrokes.length]);
+  // Gomme : suppression par identité d'objet (le trait touché par la gomme)
+  const handleErase = useCallback((stroke) => {
+    setStrokes((prev) => prev.filter((s) => s !== stroke));
+  }, []);
 
   const resultParams = {
     numPlayers,
@@ -180,7 +176,7 @@ export default function DrawScreen({ navigation, route }) {
         <DrawingCanvas
           strokes={strokes}
           onStrokeComplete={handleStrokeComplete}
-          onUndo={handleUndo}
+          onErase={handleErase}
           darkTheme={darkTheme}
           editable={true}
           playerColor={playerColor}
