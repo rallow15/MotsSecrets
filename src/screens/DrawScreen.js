@@ -129,7 +129,6 @@ export default function DrawScreen({ navigation, route }) {
           resizeMode="cover"
         />
         <View style={darkTheme ? styles.bgGradientDark : styles.bgGradientLight} />
-        <View style={[styles.bgScrim, { backgroundColor: darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)' }]} />
         <TouchableOpacity
           style={styles.passContainer}
           activeOpacity={0.8}
@@ -206,7 +205,6 @@ export default function DrawScreen({ navigation, route }) {
         resizeMode="cover"
       />
       <View style={darkTheme ? styles.bgGradientDark : styles.bgGradientLight} />
-      <View style={[styles.bgScrim, { backgroundColor: darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)' }]} />
 
       <View style={styles.reviewContainer}>
         <Text style={[styles.reviewTitle, { color: theme.text }]}>{t('drawReviewTitle')}</Text>
@@ -251,13 +249,6 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.15)',
-  },
-  bgScrim: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
   },
   bgGradientLight: {
     position: 'absolute',
