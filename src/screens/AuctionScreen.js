@@ -132,9 +132,9 @@ export default function AuctionScreen({ navigation, route }) {
 
   const renderBudget = (idx) => (
     <View key={idx} style={[styles.budgetBox, idx === buyerIdx && phase === 'auction' ? { borderColor: theme.neon } : null, { backgroundColor: theme.counterBg, borderColor: theme.counterBorder }]}>
-      <Text style={[styles.budgetName, { color: theme.textMuted }]} numberOfLines={1}>{playerName(idx)}</Text>
+      <Text style={[styles.budgetName, { color: theme.text }]} numberOfLines={1}>{playerName(idx)}</Text>
       <Text style={[styles.budgetValue, { color: theme.neon }]}>{t('enchBudget', budgets[idx])}</Text>
-      <Text style={[styles.budgetCards, { color: theme.textMuted }]}>
+      <Text style={[styles.budgetCards, { color: theme.text }]}>
         📇 {collections[idx].length}/{AUCTION_CARDS_PER_PLAYER}
       </Text>
     </View>
@@ -322,13 +322,13 @@ const styles = StyleSheet.create({
   cardValue: { fontFamily: 'SpaceMono', fontSize: 11, letterSpacing: 2 },
   budgetsRow: { flexDirection: 'row', gap: 10, width: '100%' },
   budgetBox: { flex: 1, borderWidth: 1, borderRadius: 10, alignItems: 'center', paddingVertical: 8, gap: 2 },
-  budgetName: { fontFamily: 'SpaceMono', fontSize: 9, letterSpacing: 1, maxWidth: '100%' },
+  budgetName: { fontFamily: 'SpaceMono', fontSize: 11, letterSpacing: 1, maxWidth: '100%' },
   budgetValue: { fontFamily: 'BebasNeue', fontSize: 22, letterSpacing: 1 },
-  budgetCards: { fontFamily: 'SpaceMono', fontSize: 9 },
+  budgetCards: { fontFamily: 'SpaceMono', fontSize: 10 },
   speakerLabel: { fontFamily: 'BebasNeue', fontSize: 22, letterSpacing: 2, textAlign: 'center' },
   chooserLabel: { fontFamily: 'BebasNeue', fontSize: 26, letterSpacing: 2, textAlign: 'center' },
   buyerBtn: { width: '100%', paddingVertical: 14, alignItems: 'center', borderRadius: 12, gap: 2 },
-  buyerBtnText: { fontFamily: 'BebasNeue', fontSize: 24, letterSpacing: 2, textAlign: 'center', color: '#F5F5DC' },
+  buyerBtnText: { fontFamily: 'BebasNeue', fontSize: 18, letterSpacing: 2, textAlign: 'center', color: '#F5F5DC' },
   buyerBtnSub: { fontFamily: 'SpaceMono', fontSize: 8, color: '#ff4444', letterSpacing: 1 },
   nobodyBtn: { width: '80%', paddingVertical: 10, alignItems: 'center', borderRadius: 10, borderWidth: 1 },
   nobodyBtnText: { fontFamily: 'BebasNeue', fontSize: 16, letterSpacing: 2, textAlign: 'center' },
@@ -339,6 +339,6 @@ const styles = StyleSheet.create({
   priceValue: { fontFamily: 'BebasNeue', fontSize: 56, letterSpacing: 2, minWidth: 130, textAlign: 'center' },
   btnDisabled: { opacity: 0.4 },
   startAuctionBtn: { width: '100%', paddingVertical: 16, alignItems: 'center', borderRadius: 12 },
-  startAuctionBtnText: { fontFamily: 'BebasNeue', fontSize: 22, color: '#F5F5DC', letterSpacing: 2, textAlign: 'center' },
+  startAuctionBtnText: { fontFamily: 'BebasNeue', fontSize: 18, color: '#F5F5DC', letterSpacing: 2, textAlign: 'center' },
   soldTitle: { fontFamily: 'BebasNeue', fontSize: 34, letterSpacing: 2, textAlign: 'center', lineHeight: 44 },
 });

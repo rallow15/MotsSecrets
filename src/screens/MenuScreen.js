@@ -976,6 +976,8 @@ export default function MenuScreen({ navigation }) {
                       setMimerMode(false);
                       setSelectedCategories(null);
                       if (numUndercovers === 0) setNumUndercovers(1);
+                      // Quitter le mode Enchères : minimum 3 joueurs
+                      setNumPlayers(3);
                       setGameMode((numUndercovers === 0 ? 1 : numUndercovers) > 0 && numMisterWhites > 0 ? 2 : numMisterWhites > 0 ? 1 : 0);
                     }}
                     activeOpacity={0.7}
@@ -997,6 +999,8 @@ export default function MenuScreen({ navigation }) {
                       setNumUndercovers(0);
                       setNumMisterWhites(0);
                       setSpyfallUndercover(false);
+                      // Quitter le mode Enchères : minimum 3 joueurs
+                      setNumPlayers(3);
                       setGameMode(3);
                     }}
                     activeOpacity={0.7}
@@ -1021,6 +1025,8 @@ export default function MenuScreen({ navigation }) {
                         }
                         playClick();
                         setMimerMode(!mimerMode);
+                        // Quitter le mode Enchères : minimum 3 joueurs
+                        setNumPlayers(3);
                         if (!mimerMode) {
                           setGameMode(0);
                           setNumUndercovers(1);
