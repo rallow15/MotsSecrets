@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   },
   // Drawing phase
   drawHeader: {
-    paddingTop: 14,
+    paddingTop: 6,
     paddingBottom: 2,
     paddingHorizontal: 16,
     alignItems: 'center',
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   doneBtnContainer: {
     paddingHorizontal: 16,
     paddingTop: 2,
-    paddingBottom: 10,
+    paddingBottom: 6,
     alignItems: 'center',
   },
   doneBtn: {

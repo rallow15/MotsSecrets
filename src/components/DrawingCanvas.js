@@ -8,7 +8,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const CANVAS_WIDTH = SCREEN_WIDTH - 12;
 // Espace vertical réservé autour du canvas : marges de navigation (App.js ~50+50),
 // en-tête du tour, barre d'outils et bouton "Terminé"
-const CANVAS_RESERVED = 300;
+const CANVAS_RESERVED = 330;
 const CANVAS_HEIGHT = Math.max(280, Math.floor(SCREEN_HEIGHT - CANVAS_RESERVED));
 
 // Tailles de pinceau
@@ -499,11 +499,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: 4,
   },
   sizeBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 12,
     borderWidth: 1,
     alignItems: 'center',
@@ -511,24 +511,24 @@ const styles = StyleSheet.create({
   },
   sizeLabel: {
     fontFamily: 'BebasNeue',
-    fontSize: 14,
+    fontSize: 13,
     letterSpacing: 1,
   },
   shapeBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 2,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
     borderRadius: 12,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   shapeLabel: {
-    fontSize: 15,
-    lineHeight: 20,
+    fontSize: 14,
+    lineHeight: 18,
   },
   eraseBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 12,
     borderWidth: 1,
     alignItems: 'center',
@@ -536,7 +536,7 @@ const styles = StyleSheet.create({
   },
   eraseLabel: {
     fontFamily: 'BebasNeue',
-    fontSize: 13,
+    fontSize: 12,
     letterSpacing: 1,
   },
 });
