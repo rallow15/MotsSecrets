@@ -318,6 +318,36 @@ export const AUCTION_CATEGORIES = {
       { nom: 'Rob Lucci', valeur: 160 },
       { nom: 'Magellan', valeur: 130 },
       { nom: 'Perona', valeur: 70 },
+      // — Supernovas —
+      { nom: 'Killer', valeur: 110 },
+      { nom: 'X Drake', valeur: 115 },
+      { nom: 'Basil Hawkins', valeur: 110 },
+      { nom: 'Apoo', valeur: 85 },
+      { nom: 'Capone Bege', valeur: 90 },
+      { nom: 'Urouge', valeur: 70 },
+      // — Équipage de Barbe Noire —
+      { nom: 'Shiryu', valeur: 155 },
+      { nom: 'Van Augur', valeur: 120 },
+      { nom: 'Burgess', valeur: 110 },
+      { nom: 'Catarina Devon', valeur: 130 },
+      // — Trône du Monde —
+      { nom: 'Imu', valeur: 200 },
+      { nom: 'Garling', valeur: 195 },
+      { nom: 'Shamrock', valeur: 180 },
+      // — Les 5 Doyens (Gorosei) —
+      { nom: 'Saturn', valeur: 190 },
+      { nom: 'Mars', valeur: 185 },
+      { nom: 'Warcury', valeur: 185 },
+      { nom: 'Nusjuro', valeur: 190 },
+      { nom: 'Ju Peter', valeur: 180 },
+      // — Elbaf —
+      { nom: 'Loki', valeur: 190 },
+      // — Équipage de Roger —
+      { nom: 'Gaban', valeur: 175 },
+      // — Alliés & autres —
+      { nom: 'Benn Beckman', valeur: 185 },
+      { nom: 'Vista', valeur: 140 },
+      { nom: 'Kaku', valeur: 105 },
     ],
   },
   MERCATO_NARUTO: {
