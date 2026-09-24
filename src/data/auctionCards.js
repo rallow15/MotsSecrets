@@ -265,7 +265,7 @@ export const AUCTION_CATEGORIES = {
       { nom: 'Luffy', valeur: 200 },
       { nom: 'Zoro', valeur: 180 },
       { nom: 'Sanji', valeur: 150 },
-      { nom: 'Jinbei', valeur: 110 },
+      { nom: 'Jimbei', valeur: 110 },
       { nom: 'Franky', valeur: 60 },
       { nom: 'Brook', valeur: 55 },
       { nom: 'Robin', valeur: 90 },
@@ -345,7 +345,7 @@ export const AUCTION_CATEGORIES = {
       // — Équipage de Roger —
       { nom: 'Gaban', valeur: 175 },
       // — Alliés & autres —
-      { nom: 'Benn Beckman', valeur: 185 },
+      { nom: 'Ben Beckman', valeur: 185 },
       { nom: 'Vista', valeur: 140 },
       { nom: 'Kaku', valeur: 105 },
     ],

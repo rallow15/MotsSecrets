@@ -6,7 +6,7 @@ const ONEPIECE_IMAGES = {
   'Luffy': require('../../assets/mercato/onepiece/luffy.png'),
   'Zoro': require('../../assets/mercato/onepiece/zoro.png'),
   'Sanji': require('../../assets/mercato/onepiece/sanji.png'),
-  'Jinbei': require('../../assets/mercato/onepiece/jinbei.png'),
+  'Jimbei': require('../../assets/mercato/onepiece/jinbei.png'),
   'Franky': require('../../assets/mercato/onepiece/franky.png'),
   'Brook': require('../../assets/mercato/onepiece/brook.png'),
   'Robin': require('../../assets/mercato/onepiece/robin.png'),
@@ -74,7 +74,7 @@ const ONEPIECE_IMAGES = {
   'Ju Peter': require('../../assets/mercato/onepiece/ju-peter.png'),
   'Loki': require('../../assets/mercato/onepiece/loki.png'),
   'Gaban': require('../../assets/mercato/onepiece/gaban.png'),
-  'Benn Beckman': require('../../assets/mercato/onepiece/benn-beckman.png'),
+  'Ben Beckman': require('../../assets/mercato/onepiece/benn-beckman.png'),
   'Vista': require('../../assets/mercato/onepiece/vista.png'),
   'Kaku': require('../../assets/mercato/onepiece/kaku.png'),
 };
