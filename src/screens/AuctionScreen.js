@@ -162,7 +162,11 @@ export default function AuctionScreen({ navigation, route }) {
     return (
       <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
         <TouchableOpacity style={styles.container} activeOpacity={0.8} onPress={handleDraw}>
-          <Text style={styles.emoji}>{catEmoji}</Text>
+          {cat.logo ? (
+            <Image source={cat.logo} style={styles.catLogo} resizeMode="contain" />
+          ) : (
+            <Text style={styles.emoji}>{catEmoji}</Text>
+          )}
           <Text style={[styles.title, { color: theme.text }]}>{t('enchDrawTurn', drawerIdx + 1)}</Text>
           <Text style={[styles.playerName, { color: theme.neon }]}>{playerName(drawerIdx)}</Text>
           <Text style={[styles.subtitle, { color: theme.textMuted }]}>{t('enchTapToDraw')}</Text>
@@ -329,6 +333,7 @@ const styles = StyleSheet.create({
   backBtn: { position: 'absolute', left: 20, top: 20, width: 44, height: 44, borderRadius: 22, borderWidth: 2, alignItems: 'center', justifyContent: 'center', zIndex: 10 },
   backBtnText: { fontFamily: 'BebasNeue', fontSize: 20 },
   emoji: { fontSize: 56 },
+  catLogo: { width: 220, height: 120, marginBottom: 4 },
   emojiSmall: { fontSize: 30 },
   title: { fontFamily: 'BebasNeue', fontSize: 38, letterSpacing: 2, textAlign: 'center' },
   playerName: { fontFamily: 'BebasNeue', fontSize: 30, letterSpacing: 2, textAlign: 'center' },

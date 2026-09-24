@@ -117,6 +117,7 @@ export const AUCTION_CATEGORIES = {
   },
   MERCATO_DBZ: {
     emoji: '🐉',
+    logo: require('../../assets/mercato/dbz-logo.png'),
     cards: [
       // — Goku : les transformations —
       { nom: 'Goku Ultra Instinct', valeur: 200 },
