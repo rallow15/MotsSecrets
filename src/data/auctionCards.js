@@ -348,6 +348,34 @@ export const AUCTION_CATEGORIES = {
       { nom: 'Ben Beckman', valeur: 185 },
       { nom: 'Vista', valeur: 140 },
       { nom: 'Kaku', valeur: 105 },
+      // — Révolutionnaires —
+      { nom: 'Dragon', valeur: 200 },
+      // — Équipage de Big Mom —
+      { nom: 'Perospero', valeur: 135 },
+      // — CP9 —
+      { nom: 'Blueno', valeur: 95 },
+      // — Marine & alliés —
+      { nom: 'Cobby', valeur: 120 },
+      { nom: 'Smoker', valeur: 145 },
+      // — Équipage de Shanks —
+      { nom: 'Yasopp', valeur: 170 },
+      { nom: 'Lucky Roux', valeur: 175 },
+      // — Flotte du Chapeau de Paille —
+      { nom: 'Cavendish', valeur: 145 },
+      { nom: 'Bartolomeo', valeur: 125 },
+      { nom: 'Hajrudin', valeur: 140 },
+      // — Géants d'Elbaf —
+      { nom: 'Dorry', valeur: 165 },
+      { nom: 'Brogy', valeur: 165 },
+      { nom: 'Saul', valeur: 130 },
+      // — Légendes —
+      { nom: 'Shiki', valeur: 195 },
+      // — Wano —
+      { nom: 'Momonosuke', valeur: 160 },
+      { nom: 'Kinemon', valeur: 160 },
+      { nom: 'Orochi', valeur: 170 },
+      // — Équipage de Barbe Noire —
+      { nom: "Who's Who", valeur: 120 },
     ],
   },
   MERCATO_NARUTO: {
