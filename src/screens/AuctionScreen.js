@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useKeepAwake } from 'expo-keep-awake';
 import { screenThemes, useDarkTheme } from '../theme';
 import { t } from '../i18n';
@@ -8,6 +8,7 @@ import { triggerHaptic } from '../animations';
 import BouncePress from '../components/BouncePress';
 import ScreenBackground from '../components/ScreenBackground';
 import { AUCTION_BUDGET, AUCTION_CARDS_PER_PLAYER, AUCTION_BID_STEP, AUCTION_MIN_BID, AUCTION_CATEGORIES, getAuctionDeck } from '../data/auctionCards';
+import { getAuctionCardImage } from '../data/auctionImages';
 
 // Machine à états interne (une seule scène, comme SpyfallGuessScreen) :
 // draw → tap pour piocher → card → lancer les enchères → auction (l'enchère
@@ -21,6 +22,22 @@ export default function AuctionScreen({ navigation, route }) {
 
   const cat = AUCTION_CATEGORIES[auctionCategory] || AUCTION_CATEGORIES.MERCATO_FOOT;
   const catEmoji = cat.emoji;
+
+  // Visuel de la carte : image du perso si dispo (One Piece), sinon emoji de la catégorie.
+  // Même taille que l'emoji qu'elle remplace (56 grand / 30 réduit).
+  const renderCardVisual = (nom, size) => {
+    const img = getAuctionCardImage(nom);
+    if (img) {
+      return (
+        <Image
+          source={img}
+          style={{ width: size, height: size, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.85)' }}
+          resizeMode="cover"
+        />
+      );
+    }
+    return <Text style={size >= 56 ? styles.emoji : styles.emojiSmall}>{catEmoji}</Text>;
+  };
 
   const [deck] = useState(() => getAuctionDeck(auctionCategory));
   // Premier piocheur aléatoire ; ensuite tirage alterné, chacun son tour
@@ -166,7 +183,7 @@ export default function AuctionScreen({ navigation, route }) {
       <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
         {renderBackBtn()}
         <View style={styles.container}>
-          <Text style={styles.emoji}>{catEmoji}</Text>
+          {renderCardVisual(card.nom, 56)}
           <Text style={[styles.cardName, { color: theme.text, fontSize: nameFontSize }]}>{card.nom}</Text>
           <Text style={[styles.cardValue, { color: theme.textMuted }]}>{t('enchCardValue', card.valeur)}</Text>
           <View style={styles.budgetsRow}>{[0, 1].map(renderBudget)}</View>
@@ -190,7 +207,7 @@ export default function AuctionScreen({ navigation, route }) {
         <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
           {renderBackBtn()}
           <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-            <Text style={styles.emojiSmall}>{catEmoji}</Text>
+            {renderCardVisual(card.nom, 30)}
             <Text style={[styles.cardNameSmall, { color: theme.text }]} numberOfLines={1}>{card.nom}</Text>
             <Text style={[styles.subtitle, { color: theme.textMuted }]}>{t('enchVerbalHint')}</Text>
 
@@ -233,7 +250,7 @@ export default function AuctionScreen({ navigation, route }) {
       <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
         {renderBackBtn()}
         <View style={styles.container}>
-          <Text style={styles.emojiSmall}>{catEmoji}</Text>
+          {renderCardVisual(card.nom, 30)}
           <Text style={[styles.cardNameSmall, { color: theme.text }]} numberOfLines={1}>{card.nom}</Text>
           <Text style={[styles.speakerLabel, { color: theme.text }]}>{playerName(buyerIdx)}</Text>
           <Text style={[styles.subtitle, { color: theme.textMuted }]}>{t('enchPrice')}</Text>

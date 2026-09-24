@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
 import { useKeepAwake } from 'expo-keep-awake';
 import { screenThemes, useDarkTheme } from '../theme';
 import { t } from '../i18n';
@@ -7,6 +7,7 @@ import { playWin } from '../sound';
 import BouncePress from '../components/BouncePress';
 import ScreenBackground from '../components/ScreenBackground';
 import { AUCTION_BUDGET } from '../data/auctionCards';
+import { getAuctionCardImage } from '../data/auctionImages';
 
 // Récap final du mercato : collections des 2 joueurs + budgets restants
 // + vote à voix haute sur la meilleure équipe (pas d'algorithme : c'est la table qui décide).
@@ -60,7 +61,11 @@ export default function AuctionResultScreen({ navigation, route }) {
         <View style={styles.cardsList}>
           {collections[idx].map((c, i) => (
             <View key={i} style={styles.cardRow}>
-              <Text style={styles.cardEmoji}>{c.emoji}</Text>
+              {getAuctionCardImage(c.nom) ? (
+                <Image source={getAuctionCardImage(c.nom)} style={styles.cardImage} resizeMode="cover" />
+              ) : (
+                <Text style={styles.cardEmoji}>{c.emoji}</Text>
+              )}
               <Text style={[styles.cardNom, { color: theme.text }]} numberOfLines={1}>{c.nom}</Text>
               <Text style={[styles.cardPrix, { color: c.prix > 0 ? theme.neon : theme.textMuted }]}>
                 {c.prix > 0 ? `${c.prix}M` : '🎁'}
@@ -118,6 +123,7 @@ const styles = StyleSheet.create({
   cardsList: { gap: 4 },
   cardRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   cardEmoji: { fontSize: 14, width: 18, textAlign: 'center' },
+  cardImage: { width: 18, height: 18, borderRadius: 4 },
   cardNom: { fontFamily: 'SpaceMono', fontSize: 9, flex: 1 },
   cardPrix: { fontFamily: 'BebasNeue', fontSize: 13, letterSpacing: 1 },
   emptyText: { fontFamily: 'SpaceMono', fontSize: 10, textAlign: 'center' },

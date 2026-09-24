@@ -1,0 +1,62 @@
+// Images des personnages One Piece (mode Enchères).
+// Clé = nom de la carte (nom), valeur = require() statique obligatoire en React Native.
+// Fallback : emoji de la catégorie si la carte n'a pas d'image ici.
+
+const ONEPIECE_IMAGES = {
+  'Luffy Gear 5': require('../../assets/mercato/onepiece/luffy.png'),
+  'Zoro': require('../../assets/mercato/onepiece/zoro.png'),
+  'Sanji': require('../../assets/mercato/onepiece/sanji.png'),
+  'Jinbei': require('../../assets/mercato/onepiece/jinbei.png'),
+  'Franky': require('../../assets/mercato/onepiece/franky.png'),
+  'Brook': require('../../assets/mercato/onepiece/brook.png'),
+  'Robin': require('../../assets/mercato/onepiece/robin.png'),
+  'Nami': require('../../assets/mercato/onepiece/nami.png'),
+  'Usopp': require('../../assets/mercato/onepiece/usopp.png'),
+  'Chopper': require('../../assets/mercato/onepiece/chopper.png'),
+  'Shanks': require('../../assets/mercato/onepiece/shanks.png'),
+  'Barbe Blanche': require('../../assets/mercato/onepiece/barbe-blanche.png'),
+  'Barbe Noire': require('../../assets/mercato/onepiece/barbe-noire.png'),
+  'Kaido': require('../../assets/mercato/onepiece/kaido.png'),
+  'Big Mom': require('../../assets/mercato/onepiece/big-mom.png'),
+  'Marco': require('../../assets/mercato/onepiece/marco.png'),
+  'Katakuri': require('../../assets/mercato/onepiece/katakuri.png'),
+  'King': require('../../assets/mercato/onepiece/king.png'),
+  'Queen': require('../../assets/mercato/onepiece/queen.png'),
+  'Jack': require('../../assets/mercato/onepiece/jack.png'),
+  'Garp': require('../../assets/mercato/onepiece/garp.png'),
+  'Sengoku': require('../../assets/mercato/onepiece/sengoku.png'),
+  'Akainu': require('../../assets/mercato/onepiece/akainu.png'),
+  'Aokiji': require('../../assets/mercato/onepiece/aokiji.png'),
+  'Kizaru': require('../../assets/mercato/onepiece/kizaru.png'),
+  'Fujitora': require('../../assets/mercato/onepiece/fujitora.png'),
+  'Ryokugyu': require('../../assets/mercato/onepiece/ryokugyu.png'),
+  'Mihawk': require('../../assets/mercato/onepiece/mihawk.png'),
+  'Doflamingo': require('../../assets/mercato/onepiece/doflamingo.png'),
+  'Crocodile': require('../../assets/mercato/onepiece/crocodile.png'),
+  'Enel': require('../../assets/mercato/onepiece/enel.png'),
+  'Boa Hancock': require('../../assets/mercato/onepiece/boa-hancock.png'),
+  'Gecko Moria': require('../../assets/mercato/onepiece/gecko-moria.png'),
+  'Kuma': require('../../assets/mercato/onepiece/kuma.png'),
+  'Buggy': require('../../assets/mercato/onepiece/buggy.png'),
+  'Arlong': require('../../assets/mercato/onepiece/arlong.png'),
+  'Law': require('../../assets/mercato/onepiece/law.png'),
+  'Kid': require('../../assets/mercato/onepiece/kid.png'),
+  'Sabo': require('../../assets/mercato/onepiece/sabo.png'),
+  'Ace': require('../../assets/mercato/onepiece/ace.png'),
+  'Ivankov': require('../../assets/mercato/onepiece/ivankov.png'),
+  'Vivi': require('../../assets/mercato/onepiece/vivi.png'),
+  'Shirahoshi': require('../../assets/mercato/onepiece/shirahoshi.png'),
+  'Jewelry Bonney': require('../../assets/mercato/onepiece/jewelry-bonney.png'),
+  'Roger': require('../../assets/mercato/onepiece/roger.png'),
+  'Rayleigh': require('../../assets/mercato/onepiece/rayleigh.png'),
+  'Oden': require('../../assets/mercato/onepiece/oden.png'),
+  'Yamato': require('../../assets/mercato/onepiece/yamato.png'),
+  'Rob Lucci': require('../../assets/mercato/onepiece/rob-lucci.png'),
+  'Magellan': require('../../assets/mercato/onepiece/magellan.png'),
+  'Perona': require('../../assets/mercato/onepiece/perona.png'),
+};
+
+// Renvoie la source d'image de la carte, ou null si elle n'en a pas (fallback emoji)
+export function getAuctionCardImage(nom) {
+  return ONEPIECE_IMAGES[nom] || null;
+}
