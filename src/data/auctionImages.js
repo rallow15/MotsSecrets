@@ -3,7 +3,7 @@
 // Fallback : emoji de la catégorie si la carte n'a pas d'image ici.
 
 const ONEPIECE_IMAGES = {
-  'Luffy Gear 5': require('../../assets/mercato/onepiece/luffy.png'),
+  'Luffy': require('../../assets/mercato/onepiece/luffy.png'),
   'Zoro': require('../../assets/mercato/onepiece/zoro.png'),
   'Sanji': require('../../assets/mercato/onepiece/sanji.png'),
   'Jinbei': require('../../assets/mercato/onepiece/jinbei.png'),

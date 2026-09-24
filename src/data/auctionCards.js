@@ -262,7 +262,7 @@ export const AUCTION_CATEGORIES = {
     emoji: '🏴‍☠️',
     cards: [
       // — L'Équipage du Chapeau de Paille —
-      { nom: 'Luffy Gear 5', valeur: 200 },
+      { nom: 'Luffy', valeur: 200 },
       { nom: 'Zoro', valeur: 180 },
       { nom: 'Sanji', valeur: 150 },
       { nom: 'Jinbei', valeur: 110 },
