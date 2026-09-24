@@ -158,7 +158,8 @@ export const AUCTION_CATEGORIES = {
       { nom: 'Chichi', valeur: 25 },
       // — Villains —
       { nom: 'Freezer', valeur: 130 },
-      { nom: 'Freezer Doré', valeur: 190 },
+      { nom: 'Golden Freezer', valeur: 190 },
+      { nom: 'Black Freezer', valeur: 195 },
       { nom: 'Cooler', valeur: 140 },
       { nom: 'Cell', valeur: 110 },
       { nom: 'Cell Max', valeur: 195 },
@@ -174,6 +175,7 @@ export const AUCTION_CATEGORIES = {
       // — Dieux & DBS —
       { nom: 'Beerus', valeur: 190 },
       { nom: 'Whis', valeur: 200 },
+      { nom: 'Zeno', valeur: 200 },
       { nom: 'Jiren', valeur: 170 },
       { nom: 'Hit', valeur: 175 },
       { nom: 'Kefla', valeur: 160 },

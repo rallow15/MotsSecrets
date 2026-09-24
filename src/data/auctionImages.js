@@ -144,7 +144,7 @@ const DBZ_IMAGES = {
   'Bulma': require('../../assets/mercato/dbz/bulma.png'),
   'Chichi': require('../../assets/mercato/dbz/chichi.png'),
   'Freezer': require('../../assets/mercato/dbz/freezer.png'),
-  'Freezer Doré': require('../../assets/mercato/dbz/golden-freezer.png'),
+  'Golden Freezer': require('../../assets/mercato/dbz/golden-freezer.png'),
   'Cooler': require('../../assets/mercato/dbz/cooler.png'),
   'Cell': require('../../assets/mercato/dbz/cell.png'),
   'Cell Max': require('../../assets/mercato/dbz/cell-max.png'),
