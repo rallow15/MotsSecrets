@@ -183,7 +183,7 @@ export default function AuctionScreen({ navigation, route }) {
       <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
         {renderBackBtn()}
         <View style={styles.container}>
-          {renderCardVisual(card.nom, 56)}
+          {renderCardVisual(card.nom, 72)}
           <Text style={[styles.cardName, { color: theme.text, fontSize: nameFontSize }]}>{card.nom}</Text>
           <Text style={[styles.cardValue, { color: theme.textMuted }]}>{t('enchCardValue', card.valeur)}</Text>
           <View style={styles.budgetsRow}>{[0, 1].map(renderBudget)}</View>
@@ -207,7 +207,7 @@ export default function AuctionScreen({ navigation, route }) {
         <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
           {renderBackBtn()}
           <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-            {renderCardVisual(card.nom, 30)}
+            {renderCardVisual(card.nom, 40)}
             <Text style={[styles.cardNameSmall, { color: theme.text }]} numberOfLines={1}>{card.nom}</Text>
             <Text style={[styles.subtitle, { color: theme.textMuted }]}>{t('enchVerbalHint')}</Text>
 
