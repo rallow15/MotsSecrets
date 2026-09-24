@@ -169,7 +169,89 @@ const DBZ_IMAGES = {
   'Vegetto': require('../../assets/mercato/dbz/vegetto.png'),
 };
 
-// Renvoie la source d'image de la carte, ou null si elle n'en a pas (fallback emoji)
-export function getAuctionCardImage(nom) {
-  return ONEPIECE_IMAGES[nom] || DBZ_IMAGES[nom] || null;
+// Images des super-héros (mode Enchères) — art comics Marvel / DC.
+const SUPERHEROS_IMAGES = {
+  'Superman': require('../../assets/mercato/superheros/superman.png'),
+  'Batman': require('../../assets/mercato/superheros/batman.png'),
+  'Wonder Woman': require('../../assets/mercato/superheros/wonder-woman.png'),
+  'Flash': require('../../assets/mercato/superheros/flash.png'),
+  'Aquaman': require('../../assets/mercato/superheros/aquaman.png'),
+  'Green Lantern': require('../../assets/mercato/superheros/green-lantern.png'),
+  'Cyborg': require('../../assets/mercato/superheros/cyborg.png'),
+  'Shazam': require('../../assets/mercato/superheros/shazam.png'),
+  'Black Adam': require('../../assets/mercato/superheros/black-adam.png'),
+  'Supergirl': require('../../assets/mercato/superheros/supergirl.png'),
+  'Nightwing': require('../../assets/mercato/superheros/nightwing.png'),
+  'Batgirl': require('../../assets/mercato/superheros/batgirl.png'),
+  'Robin': require('../../assets/mercato/superheros/robin.png'),
+  'Catwoman': require('../../assets/mercato/superheros/catwoman.png'),
+  'Joker': require('../../assets/mercato/superheros/joker.png'),
+  'Harley Quinn': require('../../assets/mercato/superheros/harley-quinn.png'),
+  'Lex Luthor': require('../../assets/mercato/superheros/lex-luthor.png'),
+  'Doomsday': require('../../assets/mercato/superheros/doomsday.png'),
+  'Brainiac': require('../../assets/mercato/superheros/brainiac.png'),
+  'General Zod': require('../../assets/mercato/superheros/general-zod.png'),
+  'Bane': require('../../assets/mercato/superheros/bane.png'),
+  'Deathstroke': require('../../assets/mercato/superheros/deathstroke.png'),
+  "Ra's al Ghul": require('../../assets/mercato/superheros/ras-al-ghul.png'),
+  'Riddler': require('../../assets/mercato/superheros/riddler.png'),
+  'Two-Face': require('../../assets/mercato/superheros/two-face.png'),
+  'Poison Ivy': require('../../assets/mercato/superheros/poison-ivy.png'),
+  'Sinestro': require('../../assets/mercato/superheros/sinestro.png'),
+  'Reverse Flash': require('../../assets/mercato/superheros/reverse-flash.png'),
+  'Iron Man': require('../../assets/mercato/superheros/iron-man.png'),
+  'Captain America': require('../../assets/mercato/superheros/captain-america.png'),
+  'Thor': require('../../assets/mercato/superheros/thor.png'),
+  'Hulk': require('../../assets/mercato/superheros/hulk.png'),
+  'Black Panther': require('../../assets/mercato/superheros/black-panther.png'),
+  'Spider-Man': require('../../assets/mercato/superheros/spider-man.png'),
+  'Doctor Strange': require('../../assets/mercato/superheros/doctor-strange.png'),
+  'Scarlet Witch': require('../../assets/mercato/superheros/scarlet-witch.png'),
+  'Captain Marvel': require('../../assets/mercato/superheros/captain-marvel.png'),
+  'Deadpool': require('../../assets/mercato/superheros/deadpool.png'),
+  'Wolverine': require('../../assets/mercato/superheros/wolverine.png'),
+  'Black Widow': require('../../assets/mercato/superheros/black-widow.png'),
+  'Hawkeye': require('../../assets/mercato/superheros/hawkeye.png'),
+  'Ant-Man': require('../../assets/mercato/superheros/ant-man.png'),
+  'Vision': require('../../assets/mercato/superheros/vision.png'),
+  'Star-Lord': require('../../assets/mercato/superheros/star-lord.png'),
+  'Gamora': require('../../assets/mercato/superheros/gamora.png'),
+  'Rocket': require('../../assets/mercato/superheros/rocket.png'),
+  'Groot': require('../../assets/mercato/superheros/groot.png'),
+  'Thanos': require('../../assets/mercato/superheros/thanos.png'),
+  'Loki': require('../../assets/mercato/superheros/loki.png'),
+  'Ultron': require('../../assets/mercato/superheros/ultron.png'),
+  'Doctor Doom': require('../../assets/mercato/superheros/doctor-doom.png'),
+  'Magneto': require('../../assets/mercato/superheros/magneto.png'),
+  'Green Goblin': require('../../assets/mercato/superheros/green-goblin.png'),
+  'Venom': require('../../assets/mercato/superheros/venom.png'),
+  'Carnage': require('../../assets/mercato/superheros/carnage.png'),
+  'Professor X': require('../../assets/mercato/superheros/professor-x.png'),
+  'Storm': require('../../assets/mercato/superheros/storm.png'),
+  'Jean Grey': require('../../assets/mercato/superheros/jean-grey.png'),
+  'Cyclops': require('../../assets/mercato/superheros/cyclops.png'),
+  'Rogue': require('../../assets/mercato/superheros/rogue.png'),
+  'Gambit': require('../../assets/mercato/superheros/gambit.png'),
+  'Nightcrawler': require('../../assets/mercato/superheros/nightcrawler.png'),
+  'Mystique': require('../../assets/mercato/superheros/mystique.png'),
+  'Juggernaut': require('../../assets/mercato/superheros/juggernaut.png'),
+  'Apocalypse': require('../../assets/mercato/superheros/apocalypse.png'),
+};
+
+// Maps par catégorie : on regarde d'abord la map de la catégorie courante
+// (certains noms existent dans plusieurs univers, ex. Loki en One Piece ET Marvel).
+const IMAGES_BY_CATEGORY = {
+  MERCATO_ONEPIECE: ONEPIECE_IMAGES,
+  MERCATO_DBZ: DBZ_IMAGES,
+  MERCATO_SUPERHEROS: SUPERHEROS_IMAGES,
+};
+
+// Renvoie la source d'image de la carte, ou null si elle n'en a pas (fallback emoji).
+// catKey (optionnel) : clé AUCTION_CATEGORIES pour prioriser le bon univers.
+export function getAuctionCardImage(nom, catKey) {
+  if (catKey && IMAGES_BY_CATEGORY[catKey]) {
+    const img = IMAGES_BY_CATEGORY[catKey][nom];
+    if (img) return img;
+  }
+  return SUPERHEROS_IMAGES[nom] || ONEPIECE_IMAGES[nom] || DBZ_IMAGES[nom] || null;
 }

@@ -26,7 +26,7 @@ export default function AuctionScreen({ navigation, route }) {
   // Visuel de la carte : image du perso si dispo (One Piece, recadrée sur la tête),
   // sinon emoji de la catégorie.
   const renderCardVisual = (nom, size) => {
-    const img = getAuctionCardImage(nom);
+    const img = getAuctionCardImage(nom, auctionCategory);
     if (img) {
       return (
         <Image
