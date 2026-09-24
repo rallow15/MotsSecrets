@@ -11,6 +11,7 @@ export const AUCTION_MIN_BID = 10;      // première enchère minimum
 export const AUCTION_CATEGORIES = {
   MERCATO_FOOT: {
     emoji: '⚽',
+    logo: require('../../assets/mercato/foot-logo.png'),
     cards: [
       { nom: 'Mbappé', valeur: 180 },
       { nom: 'Bellingham', valeur: 150 },
@@ -186,6 +187,7 @@ export const AUCTION_CATEGORIES = {
   },
   MERCATO_SUPERHEROS: {
     emoji: '🦸',
+    logo: require('../../assets/mercato/superheros-logo.png'),
     cards: [
       // — DC : héros —
       { nom: 'Superman', valeur: 200 },
@@ -261,6 +263,7 @@ export const AUCTION_CATEGORIES = {
   },
   MERCATO_ONEPIECE: {
     emoji: '🏴‍☠️',
+    logo: require('../../assets/mercato/onepiece-logo.png'),
     cards: [
       // — L'Équipage du Chapeau de Paille —
       { nom: 'Luffy', valeur: 200 },
@@ -396,6 +399,7 @@ export const AUCTION_CATEGORIES = {
   },
   MERCATO_NARUTO: {
     emoji: '🍥',
+    logo: require('../../assets/mercato/naruto-logo.png'),
     cards: [
       // — Team 7 & Konoha —
       { nom: 'Naruto', valeur: 170 },
