@@ -376,6 +376,21 @@ export const AUCTION_CATEGORIES = {
       { nom: 'Orochi', valeur: 170 },
       // — Équipage de Barbe Noire —
       { nom: "Who's Who", valeur: 120 },
+      // — Rocks & légendes —
+      { nom: 'Rocks D. Xebec', valeur: 200 },
+      { nom: 'Harald', valeur: 185 },
+      { nom: 'Weeble', valeur: 165 },
+      { nom: 'Wapol', valeur: 75 },
+      // — Minks —
+      { nom: 'Carrot', valeur: 100 },
+      { nom: 'Pedro', valeur: 115 },
+      { nom: 'Inuarashi', valeur: 155 },
+      { nom: 'Nekomamushi', valeur: 155 },
+      // — Équipage de Barbe Noire —
+      { nom: 'Avalo Pizarro', valeur: 130 },
+      // — Tobi Roppo —
+      { nom: 'Page One', valeur: 110 },
+      { nom: 'Black Maria', valeur: 140 },
     ],
   },
   MERCATO_NARUTO: {

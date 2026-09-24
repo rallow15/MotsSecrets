@@ -95,6 +95,17 @@ const ONEPIECE_IMAGES = {
   'Kinemon': require('../../assets/mercato/onepiece/kinemon.png'),
   'Orochi': require('../../assets/mercato/onepiece/orochi.png'),
   "Who's Who": require('../../assets/mercato/onepiece/whos-who.png'),
+  'Rocks D. Xebec': require('../../assets/mercato/onepiece/rocks.png'),
+  'Harald': require('../../assets/mercato/onepiece/harald.png'),
+  'Weeble': require('../../assets/mercato/onepiece/weeble.png'),
+  'Wapol': require('../../assets/mercato/onepiece/wapol.png'),
+  'Carrot': require('../../assets/mercato/onepiece/carrot.png'),
+  'Pedro': require('../../assets/mercato/onepiece/pedro.png'),
+  'Inuarashi': require('../../assets/mercato/onepiece/inuarashi.png'),
+  'Nekomamushi': require('../../assets/mercato/onepiece/nekomamushi.png'),
+  'Avalo Pizarro': require('../../assets/mercato/onepiece/avalo-pizarro.png'),
+  'Page One': require('../../assets/mercato/onepiece/page-one.png'),
+  'Black Maria': require('../../assets/mercato/onepiece/black-maria.png'),
 };
 
 // Renvoie la source d'image de la carte, ou null si elle n'en a pas (fallback emoji)
