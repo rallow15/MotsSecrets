@@ -165,6 +165,8 @@ const DBZ_IMAGES = {
   'Hit': require('../../assets/mercato/dbz/hit.png'),
   'Kefla': require('../../assets/mercato/dbz/kefla.png'),
   'Toppo': require('../../assets/mercato/dbz/toppo.png'),
+  'Granolah': require('../../assets/mercato/dbz/granolah.png'),
+  'Gas': require('../../assets/mercato/dbz/gas.png'),
   'Black Goku': require('../../assets/mercato/dbz/black-goku.png'),
   'Zamasu Fusionné': require('../../assets/mercato/dbz/zamasu-fusion.png'),
   'Gogeta': require('../../assets/mercato/dbz/gogeta.png'),

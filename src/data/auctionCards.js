@@ -180,6 +180,8 @@ export const AUCTION_CATEGORIES = {
       { nom: 'Hit', valeur: 175 },
       { nom: 'Kefla', valeur: 160 },
       { nom: 'Toppo', valeur: 180 },
+      { nom: 'Granolah', valeur: 185 },
+      { nom: 'Gas', valeur: 190 },
       { nom: 'Black Goku', valeur: 150 },
       { nom: 'Zamasu Fusionné', valeur: 155 },
       // — Fusions —
