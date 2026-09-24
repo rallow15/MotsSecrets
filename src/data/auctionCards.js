@@ -140,7 +140,7 @@ export const AUCTION_CATEGORIES = {
       { nom: 'Vegeta (normal)', valeur: 85 },
       // — Famille & alliés —
       { nom: 'Gohan Beast', valeur: 160 },
-      { nom: 'Gohan Ultimate', valeur: 130 },
+      { nom: 'Gohan Ultime', valeur: 130 },
       { nom: 'Gohan Super Saiyan', valeur: 100 },
       { nom: 'Piccolo Orange', valeur: 140 },
       { nom: 'Piccolo (normal)', valeur: 75 },
@@ -158,7 +158,7 @@ export const AUCTION_CATEGORIES = {
       { nom: 'Chichi', valeur: 25 },
       // — Villains —
       { nom: 'Freezer', valeur: 130 },
-      { nom: 'Golden Freezer', valeur: 190 },
+      { nom: 'Freezer Doré', valeur: 190 },
       { nom: 'Cooler', valeur: 140 },
       { nom: 'Cell', valeur: 110 },
       { nom: 'Cell Max', valeur: 195 },
@@ -179,7 +179,7 @@ export const AUCTION_CATEGORIES = {
       { nom: 'Kefla', valeur: 160 },
       { nom: 'Toppo', valeur: 180 },
       { nom: 'Black Goku', valeur: 150 },
-      { nom: 'Zamasu Fusion', valeur: 155 },
+      { nom: 'Zamasu Fusionné', valeur: 155 },
       // — Fusions —
       { nom: 'Gogeta', valeur: 200 },
       { nom: 'Vegetto', valeur: 190 },
