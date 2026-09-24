@@ -457,6 +457,7 @@ export const AUCTION_CATEGORIES = {
   },
   MERCATO_POKEMON: {
     emoji: '⚡',
+    logo: require('../../assets/mercato/pokemon-logo.png'),
     cards: [
       // — Légendaires & rares —
       { nom: 'Mewtwo', valeur: 200 },
@@ -522,6 +523,7 @@ export const AUCTION_CATEGORIES = {
   },
   MERCATO_ANIMAUX: {
     emoji: '🦁',
+    logo: require('../../assets/mercato/animaux-logo.png'),
     cards: [
       // — Géants & prédateurs ultimes —
       { nom: 'T-Rex', valeur: 200 },
