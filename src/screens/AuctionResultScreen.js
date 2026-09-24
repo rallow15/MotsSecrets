@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   cardsList: { gap: 4 },
   cardRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   cardEmoji: { fontSize: 14, width: 18, textAlign: 'center' },
-  cardImage: { width: 24, height: 24, borderRadius: 4 },
+  cardImage: { width: 30, height: 30, borderRadius: 4 },
   cardNom: { fontFamily: 'SpaceMono', fontSize: 9, flex: 1 },
   cardPrix: { fontFamily: 'BebasNeue', fontSize: 13, letterSpacing: 1 },
   emptyText: { fontFamily: 'SpaceMono', fontSize: 10, textAlign: 'center' },
