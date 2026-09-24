@@ -373,21 +373,12 @@ export const AUCTION_CATEGORIES = {
   MERCATO_NARUTO: {
     emoji: '🍥',
     cards: [
-      // — Naruto : les transformations —
-      { nom: 'Naruto Baryon', valeur: 200 },
-      { nom: 'Naruto Six Paths', valeur: 190 },
-      { nom: 'Naruto Mode Kurama', valeur: 170 },
-      { nom: 'Naruto Mode Kyubi', valeur: 150 },
-      { nom: 'Naruto (normal)', valeur: 70 },
-      // — Sasuke : les transformations —
-      { nom: 'Sasuke Rinnegan', valeur: 190 },
-      { nom: 'Sasuke Susanoo', valeur: 165 },
-      { nom: 'Sasuke Marque Maudite', valeur: 120 },
-      { nom: 'Sasuke (normal)', valeur: 95 },
       // — Team 7 & Konoha —
+      { nom: 'Naruto', valeur: 170 },
+      { nom: 'Sasuke', valeur: 165 },
       { nom: 'Sakura', valeur: 60 },
       { nom: 'Kakashi', valeur: 130 },
-      { nom: 'Guy (8 portes)', valeur: 165 },
+      { nom: 'Guy', valeur: 165 },
       { nom: 'Rock Lee', valeur: 80 },
       { nom: 'Neji', valeur: 65 },
       { nom: 'Hinata', valeur: 65 },
@@ -405,10 +396,8 @@ export const AUCTION_CATEGORIES = {
       { nom: 'Shisui', valeur: 150 },
       // — Akatsuki —
       { nom: 'Itachi', valeur: 160 },
-      { nom: 'Obito', valeur: 170 },
-      { nom: 'Obito Jinchuriki', valeur: 195 },
-      { nom: 'Madara', valeur: 195 },
-      { nom: 'Madara Juubi', valeur: 200 },
+      { nom: 'Obito', valeur: 175 },
+      { nom: 'Madara', valeur: 200 },
       { nom: 'Nagato', valeur: 145 },
       { nom: 'Pain', valeur: 140 },
       { nom: 'Konan', valeur: 85 },
@@ -424,7 +413,7 @@ export const AUCTION_CATEGORIES = {
       { nom: 'Killer Bee', valeur: 155 },
       { nom: 'A (Raikage)', valeur: 150 },
       { nom: 'Kaguya', valeur: 200 },
-      { nom: 'Hagoromo (Rikudo)', valeur: 200 },
+      { nom: 'Hagoromo', valeur: 200 },
       // — Démons à queues —
       { nom: 'Kurama', valeur: 190 },
       { nom: 'Shukaku', valeur: 110 },
