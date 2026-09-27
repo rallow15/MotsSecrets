@@ -80,7 +80,7 @@ function loadAdMob() {
 }
 
 function PrepScreenWrapper({ navigation, route }) {
-  const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, selectedCategories, customWords, mimerMode, numUndercovers, numMisterWhites, easyMode, spyfallUndercover, darkTheme, drawingMode, drawRounds } = route.params;
+  const { numPlayers, gameMode, currentPlayer, takenNumbers, playerNumbers, playerNames, selectedCategory, selectedCategories, customWords, mimerMode, auctionVariant, numUndercovers, numMisterWhites, easyMode, spyfallUndercover, darkTheme, drawingMode, drawRounds } = route.params;
 
   const _gameMode      = gameMode      ?? 0;
   const _currentPlayer = currentPlayer ?? 0;
@@ -125,6 +125,7 @@ function PrepScreenWrapper({ navigation, route }) {
           numPlayers, gameMode: _gameMode, selectedCategory: _selectedCategory,
           selectedCategories,
           customWords: _customWords, mimerMode: _mimerMode,
+          auctionVariant,
           numUndercovers: _numUndercovers, numMisterWhites: _numMisterWhites,
           easyMode: _easyMode, spyfallUndercover: _spyfallUndercover, darkTheme: _darkTheme,
           drawingMode: _drawingMode,

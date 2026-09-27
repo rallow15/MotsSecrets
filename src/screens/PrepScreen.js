@@ -15,7 +15,19 @@ export default function PrepScreen({ navigation, route }) {
   const theme = darkTheme ? screenThemes.dark : screenThemes.light;
   const insets = useSafeAreaInsets();
 
-  const existingName = Array.isArray(playerNames) ? (playerNames[currentPlayer] || '') : '';
+  // Mode Enchères (duel) : les 2 noms sont saisis ici, compteur de tour piloté
+  // en state local (pas de navigation.replace) — aucun param ne peut se perdre
+  // entre les 2 écrans de nom, et le duel fait toujours exactement 2 joueurs.
+  // Exception : variante CLASSEMENT = mode solo, un seul nom demandé.
+  const auctionVariant = route.params.auctionVariant ?? 'enchere';
+  const totalPlayers = gameMode === 4 ? (auctionVariant === 'classement' ? 1 : 2) : numPlayers;
+  const [duelNames, setDuelNames] = useState(Array.isArray(playerNames) ? playerNames : ['', '']);
+  const [duelStep, setDuelStep] = useState(0);
+  const current = gameMode === 4 ? duelStep : currentPlayer;
+
+  const existingName = gameMode === 4
+    ? (duelNames[current] || '')
+    : (Array.isArray(playerNames) ? (playerNames[currentPlayer] || '') : '');
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const { animatedStyle: fadeInStyle, start: startFadeIn } = useFadeIn(300);
@@ -24,7 +36,9 @@ export default function PrepScreen({ navigation, route }) {
 
   useEffect(() => {
     startFadeIn();
-    const n = Array.isArray(playerNames) ? (playerNames[currentPlayer] || '') : '';
+    const n = gameMode === 4
+      ? (duelNames[current] || '')
+      : (Array.isArray(playerNames) ? (playerNames[currentPlayer] || '') : '');
     setName(n);
 
     const pulse = Animated.loop(
@@ -41,36 +55,37 @@ export default function PrepScreen({ navigation, route }) {
     }
 
     return () => { pulse.stop(); };
-  }, [currentPlayer]);
+  }, [current, gameMode]);
 
   const handleTap = () => {
     Keyboard.dismiss();
-    const newNames = Array.isArray(playerNames)
-      ? [...playerNames]
-      : new Array(numPlayers).fill('');
-    newNames[currentPlayer] = name.trim().toUpperCase() || existingName;
 
     // Mode ENCHÈRES : pas de mot secret ni de Reveal.
-    // Joueur suivant ? On reste sur Prep. Dernier joueur ? On lance l'enchère.
+    // Duel 2 joueurs (solo pour CLASSEMENT) : les noms vivent dans un state local,
+    // on avance le compteur nous-mêmes, puis on lance (aucun navigation.replace).
     if (gameMode === 4) {
-      if (currentPlayer + 1 < numPlayers) {
-        navigation.replace('Prep', {
-          ...route.params,
-          assignments: null,
-          currentPlayer: currentPlayer + 1,
-          playerNames: newNames,
-        });
+      const names = [...duelNames];
+      names[current] = name.trim().toUpperCase() || existingName;
+      setDuelNames(names);
+      if (current + 1 < totalPlayers) {
+        setDuelStep(current + 1);
       } else {
         navigation.navigate('Auction', {
-          numPlayers,
-          playerNames: newNames,
+          numPlayers: totalPlayers,
+          playerNames: names,
           auctionCategory: selectedCategory,
           gameMode,
+          auctionVariant,
           darkTheme,
         });
       }
       return;
     }
+
+    const newNames = Array.isArray(playerNames)
+      ? [...playerNames]
+      : new Array(numPlayers).fill('');
+    newNames[currentPlayer] = name.trim().toUpperCase() || existingName;
 
     navigation.navigate('Reveal', {
       numPlayers, assignments, currentPlayer,
@@ -101,7 +116,7 @@ export default function PrepScreen({ navigation, route }) {
           </Svg>
         </TouchableOpacity>
 
-        <Text style={[styles.playerBadge, { color: theme.textMuted }]}>{t('playerLabel', currentPlayer + 1)}</Text>
+        <Text style={[styles.playerBadge, { color: theme.textMuted }]}>{t('playerLabel', current + 1)}</Text>
 
         <View style={styles.nameWrap}>
           <TextInput
@@ -122,12 +137,12 @@ export default function PrepScreen({ navigation, route }) {
         <Text style={[styles.prompt, { color: theme.text }]}>{t('touchScreen')}</Text>
 
         <View style={styles.dotsRow}>
-          {Array.from({ length: numPlayers }, (_, i) => (
+          {Array.from({ length: totalPlayers }, (_, i) => (
             <View key={i} style={[
               styles.dot,
-              i < currentPlayer  ? { backgroundColor: theme.dotDone } : null,
-              i === currentPlayer ? { backgroundColor: theme.dotCurrent } : null,
-              i > currentPlayer ? { backgroundColor: theme.border } : null,
+              i < current  ? { backgroundColor: theme.dotDone } : null,
+              i === current ? { backgroundColor: theme.dotCurrent } : null,
+              i > current ? { backgroundColor: theme.border } : null,
             ]} />
           ))}
         </View>

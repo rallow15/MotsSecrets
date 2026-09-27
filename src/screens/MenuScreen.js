@@ -73,6 +73,8 @@ export default function MenuScreen({ navigation }) {
   const [mimerMode, setMimerMode] = useState(false);
   const [drawingMode, setDrawingMode] = useState(false);
   const [drawRounds, setDrawRounds] = useState(3);
+  // Variante du mode Enchères : 'enchere' (avec argent) ou 'pioche' (draft sans argent)
+  const [auctionVariant, setAuctionVariant] = useState('enchere');
   // Toggles pour Intrus et Mister White (mode Normal)
   const [numUndercovers, setNumUndercovers] = useState(1);
   const [numMisterWhites, setNumMisterWhites] = useState(0);
@@ -482,6 +484,7 @@ export default function MenuScreen({ navigation }) {
         selectedCategories,
         customWords,
         mimerMode: gameMode === 4 ? false : mimerMode,
+        auctionVariant,
         numUndercovers: gameMode === 4 ? 0 : (gameMode === 3 ? (numUndercovers > 0 ? numUndercovers : numSpies) : numUndercovers),
         spyfallUndercover: gameMode === 3 ? (numUndercovers > 0) : false,
         numMisterWhites: gameMode === 4 ? 0 : numMisterWhites,
@@ -1053,6 +1056,9 @@ export default function MenuScreen({ navigation }) {
                       setSelectedCategories(['MERCATO_FOOT']);
                       setNumUndercovers(0);
                       setNumMisterWhites(0);
+                      // Ne réinitialiser la variante que si on revient d'un autre mode :
+                      // sinon un re-tap sur la carte effacerait le chip PIOCHE/CLASSEMENT choisi.
+                      if (gameMode !== 4) setAuctionVariant('enchere');
                       setGameMode(4);
                     }}
                     activeOpacity={0.7}
@@ -1060,7 +1066,7 @@ export default function MenuScreen({ navigation }) {
                     <Text style={styles.modeCardEmoji}>💰</Text>
                     <Text style={[styles.modeCardTitle, { color: gameMode === 4 ? (theme.neon) : theme.text }]}>{t('modeEncheres')}</Text>
                     <Text style={[styles.modeCardDesc, { color: gameMode === 4 ? (theme.modeActiveText) : theme.textMuted }]}>
-                      {t('modeEncheresDesc')}
+                      {gameMode === 4 && auctionVariant === 'pioche' ? t('modePiocheDesc') : gameMode === 4 && auctionVariant === 'classement' ? t('modeClassementDesc') : t('modeEncheresDesc')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -1273,6 +1279,47 @@ export default function MenuScreen({ navigation }) {
 
               {gameMode === 4 && !mimerMode && (
                 <View style={styles.setupSection}>
+                  <Text style={[styles.setupLabel, { color: theme.text }]}>{t('menuGameMode')}</Text>
+                  <View style={[styles.variantRow, { backgroundColor: theme.counterBg, borderColor: theme.counterBorder }]}>
+                    <TouchableOpacity
+                      accessibilityRole="button"
+                      accessibilityLabel={t('modeEncheres')}
+                      style={[styles.variantChip, auctionVariant === 'enchere' ? { backgroundColor: theme.chipActiveBg, borderColor: theme.chipActiveBg } : { backgroundColor: theme.chipBg, borderColor: theme.chipBorder }]}
+                      onPress={() => { playClick(); setAuctionVariant('enchere'); }}
+                    >
+                      <Text style={styles.categoryChipEmoji}>💰</Text>
+                      <Text style={[styles.categoryChipText, auctionVariant === 'enchere' ? { color: '#fff' } : { color: theme.text }]}>
+                        {t('modeEncheres')}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      accessibilityRole="button"
+                      accessibilityLabel={t('modePioche')}
+                      style={[styles.variantChip, auctionVariant === 'pioche' ? { backgroundColor: theme.chipActiveBg, borderColor: theme.chipActiveBg } : { backgroundColor: theme.chipBg, borderColor: theme.chipBorder }]}
+                      onPress={() => { playClick(); setAuctionVariant('pioche'); }}
+                    >
+                      <Text style={styles.categoryChipEmoji}>🎴</Text>
+                      <Text style={[styles.categoryChipText, auctionVariant === 'pioche' ? { color: '#fff' } : { color: theme.text }]}>
+                        {t('modePioche')}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      accessibilityRole="button"
+                      accessibilityLabel={t('modeClassement')}
+                      style={[styles.variantChip, auctionVariant === 'classement' ? { backgroundColor: theme.chipActiveBg, borderColor: theme.chipActiveBg } : { backgroundColor: theme.chipBg, borderColor: theme.chipBorder }]}
+                      onPress={() => { playClick(); setAuctionVariant('classement'); }}
+                    >
+                      <Text style={styles.categoryChipEmoji}>🏆</Text>
+                      <Text style={[styles.categoryChipText, auctionVariant === 'classement' ? { color: '#fff' } : { color: theme.text }]}>
+                        {t('modeClassement')}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
+              {gameMode === 4 && !mimerMode && (
+                <View style={styles.setupSection}>
                   <Text style={[styles.setupLabel, { color: theme.text }]}>{t('menuCategory')}</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScrollHorizontal}>
                     {AUCTION_CATEGORY_KEYS.map(catKey => {
@@ -1436,6 +1483,11 @@ const styles = StyleSheet.create({
   categoryChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 25, shadowColor: '#b44dff', shadowOffset: { width: 0, height: 0 }, shadowRadius: 8, shadowOpacity: 0.3, elevation: 4 },
   categoryChipEmoji: { fontSize: 16 },
   categoryChipText: { fontFamily: 'BebasNeue', fontSize: 14, letterSpacing: 1 },
+  // Toggle de variante du mode Enchères (ENCHÈRES / PIOCHE / CLASSEMENT)
+  // flexWrap : si les 3 chips ne tiennent pas sur une ligne, la 3e passe à la
+  // ligne — tout reste visible sans avoir à scroller.
+  variantRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, borderWidth: 1, borderRadius: 14, padding: 10, justifyContent: 'center' },
+  variantChip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 25, borderWidth: 1 },
   categoryWrapper: { alignItems: 'center' },
   adRewardIconSmall: { width: 32, height: 16, marginBottom: 2, alignSelf: 'center' },
   wordInput: { flex: 1, backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: 10, paddingHorizontal: 15, paddingVertical: 10, fontFamily: 'SpaceMono', fontSize: 14, color: '#1a1a1a', borderWidth: 1, borderColor: 'rgba(0,0,0,0.1)' },

@@ -6,13 +6,15 @@ import { t } from '../i18n';
 import { playWin } from '../sound';
 import BouncePress from '../components/BouncePress';
 import ScreenBackground from '../components/ScreenBackground';
-import { AUCTION_BUDGET } from '../data/auctionCards';
+import { AUCTION_BUDGET, AUCTION_CARDS_PER_PLAYER, AUCTION_CATEGORIES } from '../data/auctionCards';
 import { getAuctionCardImage } from '../data/auctionImages';
 
 // Récap final du mercato : collections des 2 joueurs + budgets restants
 // + vote à voix haute sur la meilleure équipe (pas d'algorithme : c'est la table qui décide).
 export default function AuctionResultScreen({ navigation, route }) {
-  const { playerNames, budgets, collections, auctionCategory, gameMode } = route.params;
+  const { playerNames, budgets, collections, ranking, auctionCategory, gameMode, auctionVariant = 'enchere' } = route.params;
+  const isPioche = auctionVariant === 'pioche';
+  const isClassement = auctionVariant === 'classement';
   useKeepAwake();
   const darkTheme = useDarkTheme();
   const theme = darkTheme ? screenThemes.dark : screenThemes.light;
@@ -43,6 +45,7 @@ export default function AuctionResultScreen({ navigation, route }) {
       assignments: null,
       drawingMode: false,
       drawRounds: 3,
+      auctionVariant,
     });
   };
 
@@ -50,11 +53,31 @@ export default function AuctionResultScreen({ navigation, route }) {
     navigation.popToTop();
   };
 
+  // Mode CLASSEMENT : une seule liste commune, du 1er au 10e
+  const catEmoji = (AUCTION_CATEGORIES[auctionCategory] || AUCTION_CATEGORIES.MERCATO_FOOT).emoji;
+  const renderRankedRow = (nom, pos) => (
+    <View key={pos} style={[styles.rankRow, { backgroundColor: theme.cardBg, borderColor: theme.cardBorder }]}>
+      <Text style={[styles.rankBadge, { color: theme.neon }]}>
+        {pos === 0 ? '🥇' : pos === 1 ? '🥈' : pos === 2 ? '🥉' : `${pos + 1}.`}
+      </Text>
+      {getAuctionCardImage(nom, auctionCategory) ? (
+        <Image source={getAuctionCardImage(nom, auctionCategory)} style={styles.rankImg} resizeMode="cover" />
+      ) : (
+        <Text style={styles.rankEmoji}>{catEmoji}</Text>
+      )}
+      <Text style={[styles.rankNom, { color: theme.text }]} numberOfLines={1}>{nom}</Text>
+    </View>
+  );
+
   const renderPlayer = (idx) => (
     <View key={idx} style={[styles.playerBox, { backgroundColor: theme.cardBg, borderColor: theme.cardBorder }]}>
       <View style={styles.playerHeader}>
         <Text style={[styles.playerName, { color: theme.text }]} numberOfLines={1}>{playerName(idx)}</Text>
-        <Text style={[styles.playerBudget, { color: theme.neon }]}>{t('enchBudgetLeft', budgets[idx] ?? AUCTION_BUDGET)}</Text>
+        {isPioche ? (
+          <Text style={[styles.playerBudget, { color: theme.neon }]}>📇 {collections[idx]?.length ?? 0}/{AUCTION_CARDS_PER_PLAYER}</Text>
+        ) : (
+          <Text style={[styles.playerBudget, { color: theme.neon }]}>{t('enchBudgetLeft', budgets[idx] ?? AUCTION_BUDGET)}</Text>
+        )}
       </View>
 
       {collections[idx]?.length > 0 ? (
@@ -67,9 +90,11 @@ export default function AuctionResultScreen({ navigation, route }) {
                 <Text style={styles.cardEmoji}>{c.emoji}</Text>
               )}
               <Text style={[styles.cardNom, { color: theme.text }]} numberOfLines={1}>{c.nom}</Text>
-              <Text style={[styles.cardPrix, { color: c.prix > 0 ? theme.neon : theme.textMuted }]}>
-                {c.prix > 0 ? `${c.prix}M` : '🎁'}
-              </Text>
+              {!isPioche && (
+                <Text style={[styles.cardPrix, { color: c.prix > 0 ? theme.neon : theme.textMuted }]}>
+                  {c.prix > 0 ? `${c.prix}M` : '🎁'}
+                </Text>
+              )}
             </View>
           ))}
         </View>
@@ -82,13 +107,23 @@ export default function AuctionResultScreen({ navigation, route }) {
   return (
     <ScreenBackground darkTheme={darkTheme} style={{ backgroundColor: theme.bg }} scrim={darkTheme ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)'}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <Text style={[styles.finalTitle, { color: theme.neon }]}>{t('enchFinalTitle')}</Text>
-        <Text style={[styles.votePrompt, { color: theme.text }]}>{t('enchVotePrompt')}</Text>
+        <Text style={[styles.finalTitle, { color: theme.neon }]}>
+          {isClassement ? t('enchClassementFinal') : t('enchFinalTitle')}
+        </Text>
+        {!isClassement && (
+          <Text style={[styles.votePrompt, { color: theme.text }]}>{t('enchVotePrompt')}</Text>
+        )}
 
-        <View style={styles.playersRow}>
-          {renderPlayer(0)}
-          {renderPlayer(1)}
-        </View>
+        {isClassement ? (
+          <View style={styles.rankList}>
+            {ranking?.filter(Boolean).map((nom, pos) => renderRankedRow(nom, pos))}
+          </View>
+        ) : (
+          <View style={styles.playersRow}>
+            {renderPlayer(0)}
+            {renderPlayer(1)}
+          </View>
+        )}
 
         <BouncePress
           accessibilityRole="button"
@@ -116,6 +151,13 @@ const styles = StyleSheet.create({
   finalTitle: { fontFamily: 'BebasNeue', fontSize: 42, letterSpacing: 2, textAlign: 'center', lineHeight: 50 },
   votePrompt: { fontFamily: 'BebasNeue', fontSize: 26, letterSpacing: 2, textAlign: 'center', lineHeight: 34 },
   playersRow: { flexDirection: 'row', gap: 10, width: '100%' },
+  // Variante CLASSEMENT
+  rankList: { width: '100%', gap: 5 },
+  rankRow: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1.5, borderRadius: 10, paddingVertical: 6, paddingHorizontal: 12 },
+  rankBadge: { fontFamily: 'BebasNeue', fontSize: 20, width: 34, textAlign: 'center' },
+  rankImg: { width: 32, height: 32, borderRadius: 5 },
+  rankEmoji: { fontSize: 16, width: 32, textAlign: 'center' },
+  rankNom: { fontFamily: 'SpaceMono', fontSize: 12, flex: 1 },
   playerBox: { flex: 1, borderWidth: 1.5, borderRadius: 12, padding: 10, gap: 6 },
   playerHeader: { alignItems: 'center', gap: 2 },
   playerName: { fontFamily: 'BebasNeue', fontSize: 20, letterSpacing: 1 },
